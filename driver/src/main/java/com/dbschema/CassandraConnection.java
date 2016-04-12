@@ -1,4 +1,4 @@
-package com.dbs;
+package com.dbschema;
 
 
 import com.datastax.driver.core.Session;

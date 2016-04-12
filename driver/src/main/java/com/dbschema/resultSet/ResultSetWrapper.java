@@ -1,8 +1,9 @@
-package com.dbs.resultSet;
+package com.dbschema.resultSet;
 
 import com.datastax.driver.core.ColumnDefinitions;
 import com.datastax.driver.core.Row;
-import com.dbs.CassandraResultSetMetaData;
+import com.dbschema.CassandraMetaData;
+import com.dbschema.CassandraResultSetMetaData;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -13,11 +14,9 @@ import java.util.Calendar;
 import java.util.Iterator;
 import java.util.Map;
 
-public class DxResultSet implements ResultSet
+public class ResultSetWrapper implements ResultSet
 {
 
-    public static final int TYPE_MAP = 4999544;
-    public static final int TYPE_LIST = 4999545;
 
 	private boolean isClosed = false;
 
@@ -26,7 +25,7 @@ public class DxResultSet implements ResultSet
     private final Iterator<Row> iterator;
     private Row currentRow;
 
-	public DxResultSet( Statement statement, com.datastax.driver.core.ResultSet dsResultSet )
+	public ResultSetWrapper(Statement statement, com.datastax.driver.core.ResultSet dsResultSet)
 	{
         this.statement = statement;
 		this.dsResultSet = dsResultSet;
@@ -71,7 +70,7 @@ public class DxResultSet implements ResultSet
 	public String getString(int columnIndex) throws SQLException {
         checkClosed();
         if ( currentRow != null ){
-            return currentRow.getString( columnIndex );
+            return currentRow.getString( columnIndex-1 );
         }
         throw new SQLException("Exhausted ResultSet.");
 	}
@@ -79,7 +78,7 @@ public class DxResultSet implements ResultSet
 	public boolean getBoolean(int columnIndex) throws SQLException{
         checkClosed();
         if ( currentRow != null ){
-            return currentRow.getBool(columnIndex);
+            return currentRow.getBool(columnIndex-1);
         }
         throw new SQLException("Exhausted ResultSet.");
 	}
@@ -87,7 +86,7 @@ public class DxResultSet implements ResultSet
 	public byte getByte(int columnIndex) throws SQLException {
         checkClosed();
         if ( currentRow != null ){
-            return currentRow.getByte(columnIndex);
+            return currentRow.getByte(columnIndex-1);
         }
         throw new SQLException("Exhausted ResultSet.");
 	}
@@ -98,7 +97,7 @@ public class DxResultSet implements ResultSet
 	public short getShort(int columnIndex) throws SQLException {
         checkClosed();
         if ( currentRow != null ){
-            return currentRow.getShort(columnIndex);
+            return currentRow.getShort(columnIndex-1);
         }
         throw new SQLException("Exhausted ResultSet.");
 	}
@@ -109,7 +108,7 @@ public class DxResultSet implements ResultSet
 	public int getInt(int columnIndex) throws SQLException {
         checkClosed();
         if ( currentRow != null ){
-            return currentRow.getInt(columnIndex);
+            return currentRow.getInt(columnIndex-1);
         }
         throw new SQLException("Exhausted ResultSet.");
 	}
@@ -120,7 +119,7 @@ public class DxResultSet implements ResultSet
 	public long getLong(int columnIndex) throws SQLException {
         checkClosed();
         if ( currentRow != null ){
-            return currentRow.getLong(columnIndex);
+            return currentRow.getLong(columnIndex-1);
         }
         throw new SQLException("Exhausted ResultSet.");
 	}
@@ -131,7 +130,7 @@ public class DxResultSet implements ResultSet
 	public float getFloat(int columnIndex) throws SQLException {
         checkClosed();
         if ( currentRow != null ){
-            return currentRow.getFloat(columnIndex);
+            return currentRow.getFloat(columnIndex-1);
         }
         throw new SQLException("Exhausted ResultSet.");
 	}
@@ -142,7 +141,7 @@ public class DxResultSet implements ResultSet
 	public double getDouble(int columnIndex) throws SQLException {
         checkClosed();
         if ( currentRow != null ){
-            return currentRow.getDouble(columnIndex);
+            return currentRow.getDouble(columnIndex-1);
         }
         throw new SQLException("Exhausted ResultSet.");
 	}
@@ -150,7 +149,7 @@ public class DxResultSet implements ResultSet
 	public BigDecimal getBigDecimal(int columnIndex, int scale) throws SQLException	{
         checkClosed();
         if ( currentRow != null ){
-            return currentRow.getDecimal(columnIndex);
+            return currentRow.getDecimal(columnIndex-1);
         }
         throw new SQLException("Exhausted ResultSet.");
 	}
@@ -158,7 +157,7 @@ public class DxResultSet implements ResultSet
 	public byte[] getBytes(int columnIndex) throws SQLException	{
         checkClosed();
         if ( currentRow != null ){
-            return currentRow.getBytes( columnIndex ).array();
+            return currentRow.getBytes( columnIndex-1 ).array();
         }
         throw new SQLException("Exhausted ResultSet.");
 	}
@@ -166,7 +165,7 @@ public class DxResultSet implements ResultSet
 	public Date getDate(int columnIndex) throws SQLException {
         checkClosed();
         if ( currentRow != null ){
-            return new Date( currentRow.getDate( columnIndex ).getMillisSinceEpoch() );
+            return new Date( currentRow.getDate( columnIndex-1 ).getMillisSinceEpoch() );
         }
         throw new SQLException("Exhausted ResultSet.");
 	}
@@ -174,7 +173,7 @@ public class DxResultSet implements ResultSet
 	public Time getTime(int columnIndex) throws SQLException {
         checkClosed();
         if ( currentRow != null ){
-            return new Time( currentRow.getDate( columnIndex ).getMillisSinceEpoch() );
+            return new Time( currentRow.getDate( columnIndex-1 ).getMillisSinceEpoch() );
         }
         throw new SQLException("Exhausted ResultSet.");
 	}
@@ -182,7 +181,7 @@ public class DxResultSet implements ResultSet
 	public Timestamp getTimestamp(int columnIndex) throws SQLException {
         checkClosed();
         if ( currentRow != null ){
-            return new Timestamp( currentRow.getDate( columnIndex ).getMillisSinceEpoch() );
+            return new Timestamp( currentRow.getDate( columnIndex-1 ).getMillisSinceEpoch() );
         }
         throw new SQLException("Exhausted ResultSet.");
 	}
@@ -308,27 +307,8 @@ public class DxResultSet implements ResultSet
         int i = 0;
         for ( ColumnDefinitions.Definition def : dsResultSet.getColumnDefinitions() ){
             columnNames[i] = def.getName();
-            int type = Types.VARCHAR;
             String typeName = def.getType().getName().name();
-            if ( "ascii".equalsIgnoreCase( typeName ))type = Types.VARCHAR;
-            else if ( "bigint".equalsIgnoreCase( typeName ))type = Types.BIGINT;
-            else if ( "blob".equalsIgnoreCase( typeName ))type = Types.BLOB;
-            else if ( "boolean".equalsIgnoreCase( typeName ))type = Types.BOOLEAN;
-            else if ( "counter".equalsIgnoreCase( typeName ))type = Types.NUMERIC;
-            else if ( "decimal".equalsIgnoreCase( typeName ))type = Types.DECIMAL;
-            else if ( "double".equalsIgnoreCase( typeName ))type = Types.DOUBLE;
-            else if ( "float".equalsIgnoreCase( typeName ))type = Types.FLOAT;
-            else if ( "inet".equalsIgnoreCase( typeName ))type = Types.VARCHAR;
-            else if ( "int".equalsIgnoreCase( typeName ))type = Types.INTEGER;
-            else if ( "list".equalsIgnoreCase( typeName ))type = TYPE_LIST;
-            else if ( "map".equalsIgnoreCase( typeName ))type = TYPE_MAP;
-            else if ( "set".equalsIgnoreCase( typeName ))type = Types.STRUCT;
-            else if ( "text".equalsIgnoreCase( typeName ))type = Types.VARCHAR;
-            else if ( "timestamp".equalsIgnoreCase( typeName ))type = Types.TIMESTAMP;
-            else if ( "uuid".equalsIgnoreCase( typeName ))type = Types.ROWID;
-            else if ( "timesuuid".equalsIgnoreCase( typeName ))type = Types.ROWID;
-            else if ( "varchar".equalsIgnoreCase( typeName ))type = Types.VARCHAR;
-            else if ( "varint".equalsIgnoreCase( typeName ))type = Types.INTEGER;
+            int type = CassandraMetaData.getJavaTypeByName(typeName);
 
             columnDisplaySizes[i] = 100;
             columnJavaTypes[i] = type;
@@ -339,7 +319,8 @@ public class DxResultSet implements ResultSet
 		return new CassandraResultSetMetaData(tableName, columnNames, columnJavaTypes, columnDisplaySizes);
 	}
 
-	public Object getObject(int columnIndex) throws SQLException
+
+    public Object getObject(int columnIndex) throws SQLException
 	{
 
 		return null;

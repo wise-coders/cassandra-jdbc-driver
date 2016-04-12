@@ -1,4 +1,4 @@
-package com.dbs;
+package com.dbschema;
 
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;

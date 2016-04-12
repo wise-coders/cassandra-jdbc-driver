@@ -1,10 +1,8 @@
 
-package com.dbs;
+package com.dbschema;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
-import com.datastax.driver.core.policies.ConstantReconnectionPolicy;
-import com.datastax.driver.core.policies.DowngradingConsistencyRetryPolicy;
 
 import java.net.UnknownHostException;
 import java.sql.*;
@@ -27,15 +25,11 @@ public class CassandraDriver implements Driver {
      */
     public Connection connect(String url, Properties info) throws SQLException {
         if ( url != null && acceptsURL( url )){
+            CassandraClientURI clientURI = new CassandraClientURI( url );
             try	{
-                Cluster cluster = Cluster.builder()
-                        .addContactPoint("localhost")
-                        .withPort(9042)
-                        .withRetryPolicy(DowngradingConsistencyRetryPolicy.INSTANCE)
-                        .withReconnectionPolicy(new ConstantReconnectionPolicy(100L))
-                        .withCredentials("cassandra", "cassandra")
-                        .build();
-                Session session = cluster.connect("Dragos");
+
+                Cluster cluster = clientURI.createBuilder();
+                Session session = cluster.connect( clientURI.getDatabase() );
 
                 return new CassandraConnection(session);
             } catch (UnknownHostException e) {

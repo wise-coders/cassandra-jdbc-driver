@@ -1,6 +1,6 @@
-package com.dbs.resultSet;
+package com.dbschema.resultSet;
 
-import com.dbs.CassandraResultSetMetaData;
+import com.dbschema.CassandraResultSetMetaData;
 
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;

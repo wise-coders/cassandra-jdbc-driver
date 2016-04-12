@@ -1,13 +1,15 @@
 
-package com.dbs;
+package com.dbschema;
 
-import com.dbs.resultSet.DxResultSet;
+import com.datastax.driver.core.BoundStatement;
+import com.dbschema.resultSet.ResultSetWrapper;
 
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Calendar;
 
 public class CassandraPreparedStatement implements PreparedStatement {
@@ -17,18 +19,16 @@ public class CassandraPreparedStatement implements PreparedStatement {
     private boolean isClosed = false;
     private int maxRows = -1;
     private final String sql;
-    private com.datastax.driver.core.PreparedStatement dsPreparedStatement;
+    private ArrayList<Object> params;
 
     public CassandraPreparedStatement(final CassandraConnection connection) {
         this.connection = connection;
         this.sql = null;
-        this.dsPreparedStatement = null;
     }
 
     public CassandraPreparedStatement(final CassandraConnection connection, String sql) {
         this.connection = connection;
         this.sql = sql;
-        this.dsPreparedStatement = connection.session.prepare(sql);
     }
 
     @Override
@@ -50,9 +50,22 @@ public class CassandraPreparedStatement implements PreparedStatement {
         if ( sql == null ){
             throw new SQLException("Null statement.");
         }
-        return new DxResultSet( this, connection.session.execute( sql ) );
+        ResultSet rs;
+        if ( params != null ){
+            com.datastax.driver.core.PreparedStatement dsps = connection.session.prepare( sql );
+            BoundStatement boundStatement = new BoundStatement(dsps);
+            rs = new ResultSetWrapper( this, connection.session.execute( boundStatement.bind( params.toArray(new Object[params.size()]) )));
+            params.clear();
+        } else {
+            rs = new ResultSetWrapper( this, connection.session.execute( sql ) );
+        }
+        return rs;
     }
 
+    @Override
+    public ResultSet executeQuery() throws SQLException {
+        return executeQuery( sql );
+    }
 
     @Override
     public boolean execute(final String sql) throws SQLException {
@@ -61,7 +74,15 @@ public class CassandraPreparedStatement implements PreparedStatement {
     }
 
     @Override
-    public void setObject(int parameterIndex, Object x) throws SQLException {
+    public void setObject(int parameterIndex, Object value) throws SQLException {
+        if ( params == null ){
+            params = new ArrayList<Object>();
+        }
+        int idx = parameterIndex-1;
+        for ( int i = params.size(); i < idx; i++){
+            params.add( i, null );
+        }
+        params.add(idx, value);
     }
 
     @Override
@@ -71,7 +92,8 @@ public class CassandraPreparedStatement implements PreparedStatement {
 
     @Override
     public int executeUpdate( String sql) throws SQLException	{
-        throw new SQLException( "Not implemented" );
+        executeQuery(sql);
+        return 1;
     }
 
     @Override
@@ -285,94 +307,92 @@ public class CassandraPreparedStatement implements PreparedStatement {
     }
 
     @Override
-    public ResultSet executeQuery() throws SQLException {
-        execute( sql );
-        return lastResultSet;
-    }
-
-    @Override
     public void setNull(int parameterIndex, int sqlType) throws SQLException {
-
     }
 
     @Override
     public void setBoolean(int parameterIndex, boolean x) throws SQLException {
-
+        setObject( parameterIndex, x );
     }
 
     @Override
     public void setByte(int parameterIndex, byte x) throws SQLException {
-
+        setObject( parameterIndex, x );
     }
 
     @Override
     public void setShort(int parameterIndex, short x) throws SQLException {
-
+        setObject( parameterIndex, x );
     }
 
     @Override
     public void setInt(int parameterIndex, int x) throws SQLException {
-
+        setObject( parameterIndex, x );
     }
 
     @Override
     public void setLong(int parameterIndex, long x) throws SQLException {
-
+        setObject( parameterIndex, x );
     }
 
     @Override
     public void setFloat(int parameterIndex, float x) throws SQLException {
-
+        setObject( parameterIndex, x );
     }
 
     @Override
     public void setDouble(int parameterIndex, double x) throws SQLException {
-
+        setObject( parameterIndex, x );
     }
 
     @Override
     public void setBigDecimal(int parameterIndex, BigDecimal x) throws SQLException {
-
+        setObject( parameterIndex, x );
     }
 
     @Override
     public void setString(int parameterIndex, String x) throws SQLException {
-
+        setObject( parameterIndex, x );
     }
 
     @Override
     public void setBytes(int parameterIndex, byte[] x) throws SQLException {
-
+        setObject( parameterIndex, x );
     }
 
     @Override
     public void setDate(int parameterIndex, Date x) throws SQLException {
-
+        setObject( parameterIndex, x );
     }
 
     @Override
     public void setTime(int parameterIndex, Time x) throws SQLException {
-
+        setObject( parameterIndex, x );
     }
 
     @Override
     public void setTimestamp(int parameterIndex, Timestamp x) throws SQLException {
+        setObject( parameterIndex, x );
     }
 
     @Override
     public void setAsciiStream(int parameterIndex, InputStream x, int length) throws SQLException {
+        setObject( parameterIndex, x );
     }
 
     @Override
     public void setUnicodeStream(int parameterIndex, InputStream x, int length) throws SQLException {
+        setObject( parameterIndex, x );
     }
 
     @Override
     public void setBinaryStream(int parameterIndex, InputStream x, int length) throws SQLException {
+        setObject( parameterIndex, x );
     }
 
     @Override
     public void clearParameters() throws SQLException {
+        params = null;
     }
 
     @Override
@@ -392,27 +412,23 @@ public class CassandraPreparedStatement implements PreparedStatement {
 
     @Override
     public void setCharacterStream(int parameterIndex, Reader reader, int length) throws SQLException {
-
     }
 
     @Override
     public void setRef(int parameterIndex, Ref x) throws SQLException {
-
     }
 
     @Override
     public void setBlob(int parameterIndex, Blob x) throws SQLException {
-
     }
 
     @Override
     public void setClob(int parameterIndex, Clob x) throws SQLException {
-
     }
 
     @Override
     public void setArray(int parameterIndex, Array x) throws SQLException {
-
+        setObject( parameterIndex, x );
     }
 
     @Override
@@ -422,17 +438,17 @@ public class CassandraPreparedStatement implements PreparedStatement {
 
     @Override
     public void setDate(int parameterIndex, Date x, Calendar cal) throws SQLException {
-
+        setObject( parameterIndex, x );
     }
 
     @Override
     public void setTime(int parameterIndex, Time x, Calendar cal) throws SQLException {
-
+        setObject( parameterIndex, x );
     }
 
     @Override
     public void setTimestamp(int parameterIndex, Timestamp x, Calendar cal) throws SQLException {
-
+        setObject( parameterIndex, x );
     }
 
     @Override
@@ -492,7 +508,7 @@ public class CassandraPreparedStatement implements PreparedStatement {
 
     @Override
     public void setObject(int parameterIndex, Object x, int targetSqlType, int scaleOrLength) throws SQLException {
-
+        setObject( parameterIndex, x );
     }
 
     @Override

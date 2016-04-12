@@ -1,18 +1,23 @@
-package com.dbs;
+package com.dbschema;
 
 import com.datastax.driver.core.*;
-import com.dbs.resultSet.NoSqlArrayResultSet;
+import com.dbschema.resultSet.NoSqlArrayResultSet;
 
 import java.sql.Connection;
 import java.sql.*;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Mongo databases are equivalent to catalogs for this driver. Schemas aren't used. Mongo collections are
  * equivalent to tables, in that each collection is a table.
  */
-public class CassandraMetaData implements DatabaseMetaData
-{
+public class CassandraMetaData implements DatabaseMetaData {
+
+    public static final int TYPE_MAP = 4999544;
+    public static final int TYPE_LIST = 4999545;
+
     private final CassandraConnection con;
 
     private final static NoSqlArrayResultSet EMPTY_RESULT_SET = new NoSqlArrayResultSet();
@@ -121,18 +126,19 @@ public class CassandraMetaData implements DatabaseMetaData
         return result;
     }
 
-    private void exportColumnsRecursive( TableMetadata tableMetadata, NoSqlArrayResultSet result, ColumnMetadata field) {
-        result.addRow(new String[] { tableMetadata.getKeyspace().getName(), // "TABLE_CAT",
+    private void exportColumnsRecursive( TableMetadata tableMetadata, NoSqlArrayResultSet result, ColumnMetadata columnMetadata) {
+        result.addRow(new String[] {
+                tableMetadata.getKeyspace().getName(), // "TABLE_CAT",
                 null, // "TABLE_SCHEMA",
                 tableMetadata.getName(), // "TABLE_NAME", (i.e. MongoDB Collection Name)
-                field.getName(), // "COLUMN_NAME",
-                "" + field.getType().getName(), // "DATA_TYPE",
-                "" +field.getType().getName(), // "TYPE_NAME",
+                columnMetadata.getName(), // "COLUMN_NAME",
+                "" + CassandraMetaData.getJavaTypeByName( "" + columnMetadata.getType().getName() ), // "DATA_TYPE",
+                "" + columnMetadata.getType().getName(), // "TYPE_NAME",
                 "800", // "COLUMN_SIZE",
                 "0", // "BUFFER_LENGTH", (not used)
                 "0", // "DECIMAL_DIGITS",
                 "10", // "NUM_PREC_RADIX",
-                "" + false, // "NULLABLE",
+                "0", // "NULLABLE", // I RETREIVE HERE IF IS FROZEN ( MANDATORY ) OR NOT ( NULLABLE )
                 "", // "REMARKS",
                 "", // "COLUMN_DEF",
                 "0", // "SQL_DATA_TYPE", (not used)
@@ -172,15 +178,15 @@ public class CassandraMetaData implements DatabaseMetaData
         final KeyspaceMetadata metadata = con.session.getCluster().getMetadata().getKeyspace( catalogName );
         if ( metadata != null ){
             final TableMetadata tableMetadata = metadata.getTable( tableNamePattern );
-            for ( IndexMetadata indexMetadata : tableMetadata.getIndexes() ){
-                if ( indexMetadata.getKind() == IndexMetadata.Kind.KEYS ){
-                    result.addRow( new String[] {
+            if ( tableMetadata != null ){
+                for ( ColumnMetadata columnMetadata : tableMetadata.getPrimaryKey() ){
+                    result.addRow(new String[]{
                             metadata.getName(), // "TABLE_CAT",
                             null, // "TABLE_SCHEMA",
-                            indexMetadata.getTable().getName(), // "TABLE_NAME", (i.e. MongoDB Collection Name)
-                            indexMetadata.asCQLQuery(), // "COLUMN_NAME",
-                            "0"  , // "ORDINAL_POSITION"
-                            indexMetadata.getName() // "INDEX_NAME",
+                            tableMetadata.getName(), // "TABLE_NAME", (i.e. MongoDB Collection Name)
+                            columnMetadata.getName(), // "COLUMN_NAME",
+                            "0", // "ORDINAL_POSITION"
+                            "Pk_" + tableMetadata.getName() // "INDEX_NAME",
                     });
 
                 }
@@ -188,7 +194,6 @@ public class CassandraMetaData implements DatabaseMetaData
         }
         return result;
     }
-
 
     /**
      * @see java.sql.DatabaseMetaData#getIndexInfo(java.lang.String, java.lang.String, java.lang.String,
@@ -241,27 +246,46 @@ public class CassandraMetaData implements DatabaseMetaData
         final KeyspaceMetadata metadata = con.session.getCluster().getMetadata().getKeyspace( catalogName );
         if ( metadata != null ){
             final TableMetadata tableMetadata = metadata.getTable( tableNamePattern );
-            for ( IndexMetadata indexMetadata : tableMetadata.getIndexes() ){
-                if ( indexMetadata.getKind() == IndexMetadata.Kind.KEYS ){
-                    result.addRow(new String[] { metadata.getName(), // "TABLE_CAT",
-                            null, // "TABLE_SCHEMA",
-                            tableMetadata.getName(), // "TABLE_NAME", (i.e. MongoDB Collection Name)
-                            "YES", // "NON-UNIQUE",
-                            metadata.getName(), // "INDEX QUALIFIER",
-                            indexMetadata.getName(), // "INDEX_NAME",
-                            "0", // "TYPE",
-                            "0" , // "ORDINAL_POSITION"
-                            indexMetadata.asCQLQuery(), // "COLUMN_NAME",
-                            "A", // "ASC_OR_DESC",
-                            "0", // "CARDINALITY",
-                            "0", // "PAGES",
-                            "" // "FILTER_CONDITION",
-                    });
-
+            if ( tableMetadata != null ){
+                for ( IndexMetadata indexMetadata : tableMetadata.getIndexes() ){
+                    for ( String colName : listColumnNames(indexMetadata.asCQLQuery())){
+                        result.addRow(new String[] {
+                                metadata.getName(), // "TABLE_CAT",
+                                null, // "TABLE_SCHEMA",
+                                tableMetadata.getName(), // "TABLE_NAME", (i.e. MongoDB Collection Name)
+                                "TRUE", // "NON-UNIQUE",
+                                metadata.getName(), // "INDEX QUALIFIER",
+                                indexMetadata.getName(), // "INDEX_NAME",
+                                "0", // "TYPE",
+                                "0" , // "ORDINAL_POSITION"
+                                colName, // "COLUMN_NAME",
+                                "A", // "ASC_OR_DESC",
+                                "0", // "CARDINALITY",
+                                "0", // "PAGES",
+                                "" // "FILTER_CONDITION",
+                        });
+                    }
                 }
             }
         }
         return result;
+    }
+
+    private List<String> listColumnNames( String query ){
+        final List<String> ret = new ArrayList<String>();
+        if ( query != null ){
+            int idx = query.indexOf("(");
+            if ( idx > 0 ) query = query.substring( idx+1 );
+            query = query.replaceAll("\\(" , "," );
+            query = query.replaceAll("\\)" , "," );
+            for ( String term : query.split(",")){
+                term = term.trim();
+                if ( term.length() > 0 ){
+                    ret.add( term );
+                }
+            }
+        }
+        return ret;
     }
 
     /**
@@ -1536,4 +1560,30 @@ public class CassandraMetaData implements DatabaseMetaData
     public boolean generatedKeyAlwaysReturned() throws SQLException {
         return false;
     }
+
+
+    public static int getJavaTypeByName(String typeName) {
+        int type = Types.VARCHAR;
+        if ( "ascii".equalsIgnoreCase( typeName ))type = Types.VARCHAR;
+        else if ( "bigint".equalsIgnoreCase( typeName ))type = Types.BIGINT;
+        else if ( "blob".equalsIgnoreCase( typeName ))type = Types.BLOB;
+        else if ( "boolean".equalsIgnoreCase( typeName ))type = Types.BOOLEAN;
+        else if ( "counter".equalsIgnoreCase( typeName ))type = Types.NUMERIC;
+        else if ( "decimal".equalsIgnoreCase( typeName ))type = Types.DECIMAL;
+        else if ( "double".equalsIgnoreCase( typeName ))type = Types.DOUBLE;
+        else if ( "float".equalsIgnoreCase( typeName ))type = Types.FLOAT;
+        else if ( "inet".equalsIgnoreCase( typeName ))type = Types.VARCHAR;
+        else if ( "int".equalsIgnoreCase( typeName ))type = Types.INTEGER;
+        else if ( "list".equalsIgnoreCase( typeName ))type = TYPE_LIST;
+        else if ( "map".equalsIgnoreCase( typeName ))type = TYPE_MAP;
+        else if ( "set".equalsIgnoreCase( typeName ))type = Types.STRUCT;
+        else if ( "text".equalsIgnoreCase( typeName ))type = Types.VARCHAR;
+        else if ( "timestamp".equalsIgnoreCase( typeName ))type = Types.TIMESTAMP;
+        else if ( "uuid".equalsIgnoreCase( typeName ))type = Types.ROWID;
+        else if ( "timesuuid".equalsIgnoreCase( typeName ))type = Types.ROWID;
+        else if ( "varchar".equalsIgnoreCase( typeName ))type = Types.VARCHAR;
+        else if ( "varint".equalsIgnoreCase( typeName ))type = Types.INTEGER;
+        return type;
+    }
+
 }
