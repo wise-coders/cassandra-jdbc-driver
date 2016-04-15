@@ -6,9 +6,9 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 
-public class NoSqlOkResultSet extends NoSqlIteratorResultSet {
+public class OkResultSet extends ResultSetIterator {
 
-    public NoSqlOkResultSet(){
+    public OkResultSet(){
     }
 
     @Override

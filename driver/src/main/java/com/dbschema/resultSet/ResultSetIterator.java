@@ -12,21 +12,21 @@ import java.util.Iterator;
 import java.util.Map;
 
 
-public class NoSqlIteratorResultSet implements ResultSet {
+public class ResultSetIterator implements ResultSet {
 
     private final Iterator iterator;
     protected Object actual;
 
-    public NoSqlIteratorResultSet(){
+    public ResultSetIterator(){
         this.iterator = null;
     }
 
-    public NoSqlIteratorResultSet(Iterable iterable){
+    public ResultSetIterator(Iterable iterable){
         iterator = (iterable != null ? iterable.iterator() : null);
     }
 
 
-    public NoSqlIteratorResultSet(Iterator iterator){
+    public ResultSetIterator(Iterator iterator){
         this.iterator = iterator;
     }
 

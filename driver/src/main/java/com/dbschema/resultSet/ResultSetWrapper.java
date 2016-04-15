@@ -203,7 +203,7 @@ public class ResultSetWrapper implements ResultSet
         if ( currentRow != null ){
             return currentRow.getString(columnLabel);
         }
-        throw new SQLException("Column '" + columnLabel + "' not found.");
+        throw new SQLException("Result exhausted.");
 	}
 
 	public boolean getBoolean(String columnLabel) throws SQLException {
@@ -320,16 +320,20 @@ public class ResultSetWrapper implements ResultSet
 	}
 
 
-    public Object getObject(int columnIndex) throws SQLException
-	{
-
-		return null;
+    public Object getObject(int columnIndex) throws SQLException {
+        checkClosed();
+        if ( currentRow != null ){
+            return currentRow.getObject(columnIndex-1);
+        }
+        throw new SQLException("Result exhausted.");
 	}
 
-	public Object getObject(String columnLabel) throws SQLException
-	{
-
-		return null;
+	public Object getObject(String columnLabel) throws SQLException	{
+        checkClosed();
+        if ( currentRow != null ){
+            return currentRow.getObject(columnLabel);
+        }
+        throw new SQLException("Result exhausted.");
 	}
 
 	public int findColumn(String columnLabel) throws SQLException

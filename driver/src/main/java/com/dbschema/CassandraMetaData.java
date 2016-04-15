@@ -1,7 +1,7 @@
 package com.dbschema;
 
 import com.datastax.driver.core.*;
-import com.dbschema.resultSet.NoSqlArrayResultSet;
+import com.dbschema.resultSet.ArrayResultSet;
 
 import java.sql.Connection;
 import java.sql.*;
@@ -20,7 +20,7 @@ public class CassandraMetaData implements DatabaseMetaData {
 
     private final CassandraConnection con;
 
-    private final static NoSqlArrayResultSet EMPTY_RESULT_SET = new NoSqlArrayResultSet();
+    private final static ArrayResultSet EMPTY_RESULT_SET = new ArrayResultSet();
     public final static String OBJECT_ID_TYPE_NAME = "OBJECT_ID";
     public final static String DOCUMENT_TYPE_NAME = "DOCUMENT";
 
@@ -37,7 +37,7 @@ public class CassandraMetaData implements DatabaseMetaData {
     @Override
     public ResultSet getSchemas() throws SQLException
     {
-        NoSqlArrayResultSet retVal = new NoSqlArrayResultSet();
+        ArrayResultSet retVal = new ArrayResultSet();
         retVal.setColumnNames(new String[] { "TABLE_SCHEMA", "TABLE_CATALOG" });
         return retVal;
     }
@@ -48,7 +48,7 @@ public class CassandraMetaData implements DatabaseMetaData {
     @Override
     public ResultSet getCatalogs() throws SQLException
     {
-        NoSqlArrayResultSet retVal = new NoSqlArrayResultSet();
+        ArrayResultSet retVal = new ArrayResultSet();
         retVal.setColumnNames(new String[]{"TABLE_CAT"});
         for ( KeyspaceMetadata kmd : con.session.getCluster().getMetadata().getKeyspaces() ){
             retVal.addRow(new String[] { kmd.getName() });
@@ -66,7 +66,7 @@ public class CassandraMetaData implements DatabaseMetaData {
     public ResultSet getTables(String catalogName, String schemaPattern, String tableNamePattern, String[] types)
             throws SQLException
     {
-        NoSqlArrayResultSet resultSet = new NoSqlArrayResultSet();
+        ArrayResultSet resultSet = new ArrayResultSet();
         resultSet.setColumnNames(new String[]{"TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME",
                 "TABLE_TYPE", "REMARKS", "TYPE_CAT", "TYPE_SCHEM", "TYPE_NAME", "SELF_REFERENCING_COL_NAME",
                 "REF_GENERATION"});
@@ -107,7 +107,7 @@ public class CassandraMetaData implements DatabaseMetaData {
     public ResultSet getColumns(String catalogName, String schemaName, String tableNamePattern, String columnNamePattern) throws SQLException
     {
 
-        final NoSqlArrayResultSet result = new NoSqlArrayResultSet();
+        final ArrayResultSet result = new ArrayResultSet();
         result.setColumnNames(new String[] { "TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME", "COLUMN_NAME",
                 "DATA_TYPE", "TYPE_NAME", "COLUMN_SIZE", "BUFFER_LENGTH", "DECIMAL_DIGITS", "NUM_PREC_RADIX",
                 "NULLABLE", "REMARKS", "COLUMN_DEF", "SQL_DATA_TYPE", "SQL_DATETIME_SUB", "CHAR_OCTET_LENGTH",
@@ -126,7 +126,7 @@ public class CassandraMetaData implements DatabaseMetaData {
         return result;
     }
 
-    private void exportColumnsRecursive( TableMetadata tableMetadata, NoSqlArrayResultSet result, ColumnMetadata columnMetadata) {
+    private void exportColumnsRecursive( TableMetadata tableMetadata, ArrayResultSet result, ColumnMetadata columnMetadata) {
         result.addRow(new String[] {
                 tableMetadata.getKeyspace().getName(), // "TABLE_CAT",
                 null, // "TABLE_SCHEMA",
@@ -172,7 +172,7 @@ public class CassandraMetaData implements DatabaseMetaData {
         *
         */
 
-        final NoSqlArrayResultSet result = new NoSqlArrayResultSet();
+        final ArrayResultSet result = new ArrayResultSet();
         result.setColumnNames(new String[] { "TABLE_CAT", "TABLE_SCHEMA", "TABLE_NAME", "COLUMN_NAME", "KEY_SEQ", "PK_NAME" });
 
         final KeyspaceMetadata metadata = con.session.getCluster().getMetadata().getKeyspace( catalogName );
@@ -238,7 +238,7 @@ public class CassandraMetaData implements DatabaseMetaData {
             *      (may be <code>null</code>)
             *  </OL>
         */
-        final NoSqlArrayResultSet result = new NoSqlArrayResultSet();
+        final ArrayResultSet result = new ArrayResultSet();
         result.setColumnNames(new String[]{"TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME", "NON_UNIQUE",
                 "INDEX_QUALIFIER", "INDEX_NAME", "TYPE", "ORDINAL_POSITION", "COLUMN_NAME", "ASC_OR_DESC",
                 "CARDINALITY", "PAGES", "FILTER_CONDITION"});
@@ -332,7 +332,7 @@ public class CassandraMetaData implements DatabaseMetaData {
             *	<LI><B>NUM_PREC_RADIX</B> int => usually 2 or 10
             *  </OL>
         */
-        NoSqlArrayResultSet retVal = new NoSqlArrayResultSet();
+        ArrayResultSet retVal = new ArrayResultSet();
         retVal.setColumnNames(new String[] { "TYPE_NAME", "DATA_TYPE", "PRECISION", "LITERAL_PREFIX",
                 "LITERAL_SUFFIX", "CREATE_PARAMS", "NULLABLE", "CASE_SENSITIVE", "SEARCHABLE",
                 "UNSIGNED_ATTRIBUTE", "FIXED_PREC_SCALE", "AUTO_INCREMENT", "LOCAL_TYPE_NAME", "MINIMUM_SCALE",
@@ -1181,7 +1181,7 @@ public class CassandraMetaData implements DatabaseMetaData {
     public ResultSet getProcedures(String catalogName, String schemaPattern, String procedureNamePattern)
             throws SQLException
     {
-        NoSqlArrayResultSet retVal = new NoSqlArrayResultSet();
+        ArrayResultSet retVal = new ArrayResultSet();
         retVal.setColumnNames(new String[] { "PROCEDURE_CAT", "PROCEDURE_SCHEMA", "PROCEDURE_NAME", "REMARKS",
                 "PROCEDURE_TYPE", "SPECIFIC_NAME" });
         return retVal;
@@ -1204,7 +1204,7 @@ public class CassandraMetaData implements DatabaseMetaData {
     @Override
     public ResultSet getTableTypes() throws SQLException
     {
-        NoSqlArrayResultSet result = new NoSqlArrayResultSet();
+        ArrayResultSet result = new ArrayResultSet();
         result.addRow(new String[] { "COLLECTION" });
         return result;
     }
@@ -1245,7 +1245,7 @@ public class CassandraMetaData implements DatabaseMetaData {
 
     @Override
     public ResultSet getExportedKeys(String catalogName, String schemaName, String tableNamePattern) throws SQLException {
-        final NoSqlArrayResultSet result = new NoSqlArrayResultSet();
+        final ArrayResultSet result = new ArrayResultSet();
         result.setColumnNames(new String[]{"PKTABLE_CAT", "PKTABLE_SCHEMA", "PKTABLE_NAME", "PKCOLUMN_NAME", "FKTABLE_CAT", "FKTABLE_SCHEM",
                 "FKTABLE_NAME", "FKCOLUMN_NAME", "KEY_SEQ", "UPDATE_RULE", "DELETE_RULE", "FK_NAME", "PK_NAME", "DEFERRABILITY"});
         return result;
@@ -1257,7 +1257,7 @@ public class CassandraMetaData implements DatabaseMetaData {
     @Override
     public ResultSet getImportedKeys(String catalogName, String schemaName, String tableNamePattern ) throws SQLException
     {
-        NoSqlArrayResultSet result = new NoSqlArrayResultSet();
+        ArrayResultSet result = new ArrayResultSet();
         result.setColumnNames(new String[]{"PKTABLE_CAT", "PKTABLE_SCHEM", "PKTABLE_NAME", "PKCOLUMN_NAME", "FKTABLE_CAT", "FKTABLE_SCHEM",
                 "FKTABLE_NAME", "FKCOLUMN_NAME", "KEY_SEQ", "UPDATE_RULE", "DELETE_RULE", "FK_NAME", "PK_NAME", "DEFERRABILITY"});
 
@@ -1351,7 +1351,7 @@ public class CassandraMetaData implements DatabaseMetaData {
     @Override
     public ResultSet getUDTs(String catalogName, String schemaPattern, String typeNamePattern, int[] types)
             throws SQLException	{
-        NoSqlArrayResultSet retVal = new NoSqlArrayResultSet();
+        ArrayResultSet retVal = new ArrayResultSet();
         retVal.setColumnNames(new String[] { "TYPE_CAT", "TYPE_SCHEM", "TYPE_NAME", "CLASS_NAME", "DATA_TYPE",
                 "REMARKS", "BASE_TYPE", });
         return retVal;
@@ -1401,7 +1401,7 @@ public class CassandraMetaData implements DatabaseMetaData {
     public ResultSet getSuperTypes(String catalogName, String schemaPattern, String typeNamePattern)
             throws SQLException
     {
-        NoSqlArrayResultSet retVal = new NoSqlArrayResultSet();
+        ArrayResultSet retVal = new ArrayResultSet();
         retVal.setColumnNames(new String[] { "TYPE_CAT", "TYPE_SCHEM", "TYPE_NAME", "SUPERTYPE_CAT",
                 "SUPERTYPE_SCHEM", "SUPERTYPE_NAME" });
         return retVal;
@@ -1414,7 +1414,7 @@ public class CassandraMetaData implements DatabaseMetaData {
     public ResultSet getSuperTables(String catalogName, String schemaPattern, String tableNamePattern)
             throws SQLException
     {
-        NoSqlArrayResultSet retVal = new NoSqlArrayResultSet();
+        ArrayResultSet retVal = new ArrayResultSet();
         retVal.setColumnNames(new String[] { "TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME", "SUPERTABLE_NAME" });
         return retVal;
     }
@@ -1426,7 +1426,7 @@ public class CassandraMetaData implements DatabaseMetaData {
     @Override
     public ResultSet getAttributes(String catalogName, String schemaPattern, String typeNamePattern,
                                    String attributeNamePattern) throws SQLException {
-        NoSqlArrayResultSet retVal = new NoSqlArrayResultSet();
+        ArrayResultSet retVal = new ArrayResultSet();
         retVal.setColumnNames(new String[] { "TYPE_CAT", "TYPE_SCHEM", "TYPE_NAME", "ATTR_NAME", "DATA_TYPE",
                 "ATTR_TYPE_NAME", "ATTR_SIZE", "DECIMAL_DIGITS", "NUM_PREC_RADIX", "NULLABLE", "REMARKS",
                 "ATTR_DEF", "SQL_DATA_TYPE", "SQL_DATETIME_SUB", "CHAR_OCTET_LENGTH", "ORDINAL_POSITION",
@@ -1516,7 +1516,7 @@ public class CassandraMetaData implements DatabaseMetaData {
      */
     @Override
     public ResultSet getSchemas(String catalogName, String schemaPattern) throws SQLException {
-        NoSqlArrayResultSet retVal = new NoSqlArrayResultSet();
+        ArrayResultSet retVal = new ArrayResultSet();
         retVal.setColumnNames(new String[] { "TABLE_SCHEM", "TABLE_CATALOG" });
         return retVal;
     }

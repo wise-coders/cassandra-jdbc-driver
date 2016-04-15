@@ -44,12 +44,8 @@
     </target>
 
     <target name="DeployLocal" depends="Compile">
-        <delete>
-            <fileset dir="/work/dbs/dbs-app/src/main/pack/drivers/Cassandra">
-                <include name="*.jar"/>
-            </fileset>
-        </delete>
-        <copy todir="/work/dbs/dbs-app/src/main/pack/drivers/Cassandra">
+        <mkdir dir="${user.home}/.DbSchema/drivers/Cassandra"/>
+        <copy todir="${user.home}/.DbSchema/drivers/Cassandra">
             <fileset file="target/dist/cassandrajdbc${driver.version}.jar"/>
             <fileset dir="driver/src/main/lib/">
                 <include name="**/*"/>
@@ -57,6 +53,17 @@
         </copy>
     </target>
 
+    <target name="DeployWebSite" depends="Compile">
+        <delete file="target/dist/CassandraJdbcDriver.zip"/>
+        <zip destfile="target/dist/CassandraJdbcDriver.zip">
+            <zipfileset file="target/dist/cassandrajdbc${driver.version}.jar" />
+            <zipfileset dir="driver/src/main/lib/" prefix=""/>
+        </zip>
+        <scp todir="${dbs.deploy.url}" trust="true" sftp="true">
+            <!-- 'PASSIVE' FLAG HELPS TO GO EASIER THROUGH WINDOWS FIREWALL -->
+            <fileset file="target/dist/CassandraJdbcDriver.zip"/>
+        </scp>
+    </target>
 
 
 </project>

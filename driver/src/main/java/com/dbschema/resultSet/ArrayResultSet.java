@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Map;
 
-public class NoSqlArrayResultSet implements ResultSet
+public class ArrayResultSet implements ResultSet
 {
 	private Object[][] data = null;
 
@@ -26,9 +26,9 @@ public class NoSqlArrayResultSet implements ResultSet
 	
 	private CassandraPreparedStatement statement = null;
 	
-	public NoSqlArrayResultSet()	{}
+	public ArrayResultSet()	{}
 
-	public NoSqlArrayResultSet(String[][] data, String[] columnNames)
+	public ArrayResultSet(Object[][] data, String[] columnNames)
 	{
 		if (data != null && data.length > 0 && data[0] != null)
 		{
@@ -56,34 +56,26 @@ public class NoSqlArrayResultSet implements ResultSet
 		this.statement = statement;
 	}
 	
-	public void addResultSet(NoSqlArrayResultSet toCopy)
+	public void addResultSet(ArrayResultSet toCopy)
 	{
-		if (toCopy.data == null || toCopy.data.length < 0)
-		{
+		if ( toCopy.data == null || toCopy.data.length < 0 ) {
 			return;
 		}
-		if (data == null)
-		{
-			data = new String[toCopy.data.length][toCopy.data[0].length];
-			for (int i = 0; i < toCopy.data.length; i++)
-			{
+		if ( data == null )	{
+			data = new Object[toCopy.data.length][toCopy.data[0].length];
+			for (int i = 0; i < toCopy.data.length; i++ ) {
 				data[i] = Arrays.copyOf(toCopy.data[i], toCopy.data[i].length);
 			}
-		}
-		else
-		{
-			if (toCopy.data[0].length != data[0].length)
-			{
+		} else {
+			if (toCopy.data[0].length != data[0].length) {
 				throw new IllegalArgumentException("Array toCopy column length (" + toCopy.data[0].length
 					+ ") is not " + " the same as this result sets column length (" + toCopy.data[0].length + ")");
 			}
 			Object[][] newdata = new String[data.length + toCopy.data.length][data[0].length];
-			for (int i = 0; i < data.length; i++)
-			{
+			for (int i = 0; i < data.length; i++) {
 				newdata[i] = Arrays.copyOf(data[i], data[i].length);
 			}
-			for (int i = 0; i < toCopy.data.length; i++)
-			{
+			for (int i = 0; i < toCopy.data.length; i++) {
 				newdata[data.length+i] = Arrays.copyOf(toCopy.data[i], toCopy.data[i].length);
 			}
 			data = newdata;
@@ -92,13 +84,10 @@ public class NoSqlArrayResultSet implements ResultSet
 
 	public void addRow(Object[] columnValues)
 	{
-		if (data == null)
-		{
+		if (data == null) {
 			data = new String[1][columnValues.length];
 			data[0] = Arrays.copyOf(columnValues, columnValues.length);
-		}
-		else
-		{
+		} else {
 			int numRows = data.length;
 			Object[][] newdata = new String[numRows + 1][data[0].length];
 			for (int i = 0; i < numRows; i++)
@@ -117,9 +106,7 @@ public class NoSqlArrayResultSet implements ResultSet
 		return data.length;
 	}
 
-	public <T> T unwrap(Class<T> iface) throws SQLException
-	{
-		
+	public <T> T unwrap(Class<T> iface) throws SQLException	{
 		return null;
 	}
 
@@ -144,51 +131,42 @@ public class NoSqlArrayResultSet implements ResultSet
 	/**
 	 * @see java.sql.ResultSet#close()
 	 */
-	public void close() throws SQLException
-	{
+	public void close() throws SQLException	{
 		this.isClosed = true;
 	}
 
 	/**
 	 * @see java.sql.ResultSet#wasNull()
 	 */
-	public boolean wasNull() throws SQLException
-	{
+	public boolean wasNull() throws SQLException {
 		
 		return false;
 	}
 
-	public String getString(int columnIndex) throws SQLException
-	{
-		if (currentRow >= data.length)
-		{
+	public String getString(int columnIndex) throws SQLException {
+		if (currentRow >= data.length) {
 			throw new SQLException("ResultSet exhausted, request currentRow = " + currentRow);
 		}
 		int adjustedColumnIndex = columnIndex - 1;
-		if (adjustedColumnIndex >= data[currentRow].length)
-		{
+		if (adjustedColumnIndex >= data[currentRow].length)	{
 			throw new SQLException("Column index does not exist: " + columnIndex);
 		}
         final Object val = data[currentRow][adjustedColumnIndex];
         return val != null ? val.toString() : null;
 	}
 
-	public boolean getBoolean(int columnIndex) throws SQLException
-	{
+	public boolean getBoolean(int columnIndex) throws SQLException {
 		return Boolean.parseBoolean(getString(columnIndex));
 	}
 
-	public byte getByte(int columnIndex) throws SQLException
-	{
-		
+	public byte getByte(int columnIndex) throws SQLException {
 		return 0;
 	}
 
 	/**
 	 * @see java.sql.ResultSet#getShort(int)
 	 */
-	public short getShort(int columnIndex) throws SQLException
-	{
+	public short getShort(int columnIndex) throws SQLException {
 		checkClosed();
 		return Short.parseShort(getString(columnIndex));
 	}
@@ -425,10 +403,18 @@ public class NoSqlArrayResultSet implements ResultSet
 		return new CassandraResultSetMetaData(tableName, columnNames, columnJavaTypes, columnDisplaySizes);
 	}
 
-	public Object getObject(int columnIndex) throws SQLException
-	{
-		
-		return null;
+	public Object getObject(int columnIndex) throws SQLException {
+        System.out.println("---- GET OBJECT " + columnIndex );
+        if (currentRow >= data.length)
+        {
+            throw new SQLException("ResultSet exhausted, request currentRow = " + currentRow);
+        }
+        int adjustedColumnIndex = columnIndex - 1;
+        if (adjustedColumnIndex >= data[currentRow].length)
+        {
+            throw new SQLException("Column index does not exist: " + columnIndex);
+        }
+        return data[currentRow][adjustedColumnIndex];
 	}
 
 	public Object getObject(String columnLabel) throws SQLException

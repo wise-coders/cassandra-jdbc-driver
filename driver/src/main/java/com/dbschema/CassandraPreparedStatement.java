@@ -46,20 +46,20 @@ public class CassandraPreparedStatement implements PreparedStatement {
         checkClosed();
         if (lastResultSet != null ) {
             lastResultSet.close();
+            lastResultSet = null;
         }
         if ( sql == null ){
             throw new SQLException("Null statement.");
         }
-        ResultSet rs;
         if ( params != null ){
             com.datastax.driver.core.PreparedStatement dsps = connection.session.prepare( sql );
             BoundStatement boundStatement = new BoundStatement(dsps);
-            rs = new ResultSetWrapper( this, connection.session.execute( boundStatement.bind( params.toArray(new Object[params.size()]) )));
+            lastResultSet = new ResultSetWrapper( this, connection.session.execute( boundStatement.bind( params.toArray(new Object[params.size()]) )));
             params.clear();
         } else {
-            rs = new ResultSetWrapper( this, connection.session.execute( sql ) );
+            lastResultSet = new ResultSetWrapper( this, connection.session.execute( sql ) );
         }
-        return rs;
+        return lastResultSet;
     }
 
     @Override
@@ -100,6 +100,7 @@ public class CassandraPreparedStatement implements PreparedStatement {
     public void close() throws SQLException	{
         if (lastResultSet != null) {
             lastResultSet.close();
+            lastResultSet = null;
         }
         this.isClosed = true;
     }

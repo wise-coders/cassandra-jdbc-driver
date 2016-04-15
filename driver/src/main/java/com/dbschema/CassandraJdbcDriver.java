@@ -10,10 +10,18 @@ import java.util.Properties;
 import java.util.logging.Logger;
 
 
-public class CassandraDriver implements Driver {
+/**
+ * Minimal implementation of the JDBC standards for the Cassandra database.
+ * This is customized for DbSchema database designer.
+ * Connect to the database using a URL like :
+ * jdbc:cassandra://host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[keyspace][?options]]
+ * The URL excepting the jdbc: prefix is passed as it is to the MongoDb native Java driver.
+ */
+
+public class CassandraJdbcDriver implements Driver {
     static {
         try {
-            DriverManager.registerDriver( new CassandraDriver());
+            DriverManager.registerDriver( new CassandraJdbcDriver());
         } catch ( SQLException ex ){
             ex.printStackTrace();
         }
@@ -21,7 +29,9 @@ public class CassandraDriver implements Driver {
 
 
     /**
-     * @see java.sql.Driver#connect(java.lang.String, java.util.Properties)
+     * Connect to the database using a URL like :
+     * jdbc:cassandra://host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[keyspace][?options]]
+     * The URL excepting the jdbc: prefix is passed as it is to the MongoDb native Java driver.
      */
     public Connection connect(String url, Properties info) throws SQLException {
         if ( url != null && acceptsURL( url )){
@@ -41,7 +51,7 @@ public class CassandraDriver implements Driver {
 
 
     /**
-     * URLs accepted are of the form: jdbc:mongodb://<server>[:27017]/<db-name>
+     * URLs accepted are of the form: jdbc:cassandra://host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[keyspace][?options]]
      *
      * @see java.sql.Driver#acceptsURL(java.lang.String)
      */
