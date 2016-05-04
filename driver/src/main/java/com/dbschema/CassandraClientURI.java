@@ -121,6 +121,7 @@ public class CassandraClientURI {
                 .withReconnectionPolicy(new ConstantReconnectionPolicy(100L));
         if ( userName != null ){
             builder.withCredentials(userName, String.valueOf(password));
+            System.out.println("Using authentication as user '" + userName + "'");
         }
         return builder.build();
     }
