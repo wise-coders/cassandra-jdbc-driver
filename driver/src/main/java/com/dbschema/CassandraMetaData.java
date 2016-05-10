@@ -116,10 +116,20 @@ public class CassandraMetaData implements DatabaseMetaData {
 
         final KeyspaceMetadata metadata = con.session.getCluster().getMetadata().getKeyspace( catalogName );
         if ( metadata != null ){
-            final TableMetadata tableMetadata = metadata.getTable( tableNamePattern );
-            for ( ColumnMetadata field : tableMetadata.getColumns() ){
-                if ( columnNamePattern == null || columnNamePattern.equals( field.getName())){
-                    exportColumnsRecursive( tableMetadata, result, field);
+            if ( tableNamePattern == null ){
+                for ( TableMetadata tableMetadata : metadata.getTables()){
+                    for ( ColumnMetadata field : tableMetadata.getColumns() ){
+                        if ( columnNamePattern == null || columnNamePattern.equals( field.getName())){
+                            exportColumnsRecursive( tableMetadata, result, field);
+                        }
+                    }
+                }
+            } else {
+                final TableMetadata tableMetadata = metadata.getTable( tableNamePattern );
+                for ( ColumnMetadata field : tableMetadata.getColumns() ){
+                    if ( columnNamePattern == null || columnNamePattern.equals( field.getName())){
+                        exportColumnsRecursive( tableMetadata, result, field);
+                    }
                 }
             }
         }
