@@ -34,7 +34,7 @@ public class ArrayResultSet implements ResultSet
 		{
 			int numRows = data.length;
 			int numColumns = data[0].length;
-			this.data = new String[numRows][numColumns];
+			this.data = new Object[numRows][numColumns];
 			for (int i = 0; i < numRows; i++)
 			{
 				this.data[i] = Arrays.copyOf(data[i], data[i].length);
@@ -85,11 +85,11 @@ public class ArrayResultSet implements ResultSet
 	public void addRow(Object[] columnValues)
 	{
 		if (data == null) {
-			data = new String[1][columnValues.length];
+			data = new Object[1][columnValues.length];
 			data[0] = Arrays.copyOf(columnValues, columnValues.length);
 		} else {
 			int numRows = data.length;
-			Object[][] newdata = new String[numRows + 1][data[0].length];
+			Object[][] newdata = new Object[numRows + 1][data[0].length];
 			for (int i = 0; i < numRows; i++)
 			{
 				newdata[i] = Arrays.copyOf(data[i], data[i].length);
@@ -404,7 +404,6 @@ public class ArrayResultSet implements ResultSet
 	}
 
 	public Object getObject(int columnIndex) throws SQLException {
-        System.out.println("---- GET OBJECT " + columnIndex );
         if (currentRow >= data.length)
         {
             throw new SQLException("ResultSet exhausted, request currentRow = " + currentRow);

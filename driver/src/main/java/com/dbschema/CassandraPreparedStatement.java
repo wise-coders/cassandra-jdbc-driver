@@ -1,7 +1,9 @@
 
 package com.dbschema;
 
-import com.datastax.driver.core.BoundStatement;
+import com.datastax.driver.core.*;
+import com.datastax.driver.mapping.annotations.Query;
+import com.dbschema.resultSet.ArrayResultSet;
 import com.dbschema.resultSet.ResultSetWrapper;
 
 import java.io.InputStream;
@@ -9,8 +11,13 @@ import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Calendar;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CassandraPreparedStatement implements PreparedStatement {
 
@@ -41,6 +48,8 @@ public class CassandraPreparedStatement implements PreparedStatement {
         return false;
     }
 
+    private static final Pattern PATTERN_EXPLAIN_PLAN = Pattern.compile("EXPLAIN\\s*PLAN\\s*FOR\\s*(.*)\\s*", Pattern.CASE_INSENSITIVE );
+
     @Override
     public ResultSet executeQuery(String sql) throws SQLException	{
         checkClosed();
@@ -51,7 +60,11 @@ public class CassandraPreparedStatement implements PreparedStatement {
         if ( sql == null ){
             throw new SQLException("Null statement.");
         }
-        if ( params != null ){
+
+        Matcher matcherExplainPlan = PATTERN_EXPLAIN_PLAN.matcher( sql );
+        if ( matcherExplainPlan.matches() ){
+            lastResultSet = explainPlan( matcherExplainPlan.group(1));
+        } else if ( params != null ){
             com.datastax.driver.core.PreparedStatement dsps = connection.session.prepare( sql );
             BoundStatement boundStatement = new BoundStatement(dsps);
             lastResultSet = new ResultSetWrapper( this, connection.session.execute( boundStatement.bind( params.toArray(new Object[params.size()]) )));
@@ -60,6 +73,35 @@ public class CassandraPreparedStatement implements PreparedStatement {
             lastResultSet = new ResultSetWrapper( this, connection.session.execute( sql ) );
         }
         return lastResultSet;
+    }
+
+    public static final SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+
+    private ArrayResultSet explainPlan( String query ){
+        final ArrayResultSet rs = new ArrayResultSet();
+        try {
+            SimpleStatement scan = new SimpleStatement(query);
+            final ExecutionInfo executionInfo = connection.session.execute( scan.enableTracing() ).getExecutionInfo();
+            final String hostQueried = executionInfo.getQueriedHost().toString();
+            final StringBuilder hostTried = new StringBuilder();
+            for (Host host : executionInfo.getTriedHosts()) {
+                hostTried.append(host).append(", ");
+            }
+            QueryTrace queryTrace = executionInfo.getQueryTrace();
+            if ( queryTrace != null ){
+                final String traceId = String.valueOf(queryTrace.getTraceId());
+                rs.setColumnNames(new String[]{"TraceId", "Host(queried)", "Host(tried)",  "Activity", "Timestamp", "Source", "ElapsedMilli"});
+                for (QueryTrace.Event event : queryTrace.getEvents()) {
+                    rs.addRow(new Object[]{ traceId, hostQueried, hostTried, event.getDescription(), timeFormat.format(new Timestamp(event.getTimestamp())), event.getSource(), event.getSourceElapsedMicros()});
+                }
+            }
+            if ( rs.getRowCount() == 0 ){
+                rs.addRow(new Object[]{ null, hostQueried, hostTried, null, null, null, null});
+            }
+        } catch ( Throwable ex ){
+            ex.printStackTrace();
+        }
+        return rs;
     }
 
     @Override

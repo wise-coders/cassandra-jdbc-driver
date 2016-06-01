@@ -236,7 +236,6 @@ public class ResultSetWrapper implements ResultSet
 
 	public BigDecimal getBigDecimal(String columnLabel, int scale) throws SQLException
 	{
-
 		return null;
 	}
 
@@ -247,25 +246,21 @@ public class ResultSetWrapper implements ResultSet
 
 	public Date getDate(String columnLabel) throws SQLException
 	{
-
 		return null;
 	}
 
 	public Time getTime(String columnLabel) throws SQLException
 	{
-
 		return null;
 	}
 
 	public Timestamp getTimestamp(String columnLabel) throws SQLException
 	{
-
 		return null;
 	}
 
 	public InputStream getAsciiStream(String columnLabel) throws SQLException
 	{
-
 		return null;
 	}
 
@@ -278,18 +273,17 @@ public class ResultSetWrapper implements ResultSet
 	}
 
 	public SQLWarning getWarnings() throws SQLException {
-		return null;
+        // SUGGESTED BY CRISTI TO SHOW EXECUTION WARNINGS
+        StringBuilder sb = new StringBuilder();
+        for ( String warning : dsResultSet.getExecutionInfo().getWarnings() ){
+            sb.append( warning).append( " ");
+        }
+		return sb.length() > 0 ? new SQLWarning( sb.toString()) : null;
 	}
 
-	public void clearWarnings() throws SQLException
-	{
+	public void clearWarnings() throws SQLException {}
 
-
-	}
-
-	public String getCursorName() throws SQLException
-	{
-
+	public String getCursorName() throws SQLException {
 		return null;
 	}
 
