@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.*;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -74,24 +75,24 @@ public class CassandraMetaData implements DatabaseMetaData {
         if ( catalogName == null ){
             for ( KeyspaceMetadata keyspaceMetadata : metadata.getKeyspaces() )
                 for ( TableMetadata tableMetadata : keyspaceMetadata.getTables() ) {
-                    resultSet.addRow( createTableRow( catalogName, tableMetadata.getName() ) );
+                    resultSet.addRow( createTableRow( catalogName, tableMetadata.getName(), tableMetadata.getOptions().getComment(), tableMetadata.getOptions() ) );
                 }
         } else {
             for ( TableMetadata tableMetadata : metadata.getKeyspace( catalogName ).getTables() ) {
-                resultSet.addRow( createTableRow( catalogName, tableMetadata.getName() ) );
+                resultSet.addRow( createTableRow( catalogName, tableMetadata.getName(), tableMetadata.getOptions().getComment(), tableMetadata.getOptions() ) );
             }
         }
         return resultSet;
 
     }
 
-    private String[] createTableRow( String catalogName, String tableName ){
+    private String[] createTableRow( String catalogName, String tableName, String comment, TableOptionsMetadata options ){
         String[] data = new String[10];
         data[0] = catalogName; // TABLE_CAT
-        data[1] = ""; // TABLE_SCHEM
+        data[1] = ""; // TABLE_SCHEMA
         data[2] = tableName; // TABLE_NAME
         data[3] = "TABLE"; // TABLE_TYPE
-        data[4] = ""; // REMARKS
+        data[4] = comment; // REMARKS
         data[5] = ""; // TYPE_CAT
         data[6] = ""; // TYPE_SCHEM
         data[7] = ""; // TYPE_NAME
@@ -112,7 +113,7 @@ public class CassandraMetaData implements DatabaseMetaData {
                 "DATA_TYPE", "TYPE_NAME", "COLUMN_SIZE", "BUFFER_LENGTH", "DECIMAL_DIGITS", "NUM_PREC_RADIX",
                 "NULLABLE", "REMARKS", "COLUMN_DEF", "SQL_DATA_TYPE", "SQL_DATETIME_SUB", "CHAR_OCTET_LENGTH",
                 "ORDINAL_POSITION", "IS_NULLABLE", "SCOPE_CATLOG", "SCOPE_SCHEMA", "SCOPE_TABLE",
-                "SOURCE_DATA_TYPE", "IS_AUTOINCREMENT" });
+                "SOURCE_DATA_TYPE", "IS_AUTOINCREMENT", "OPTIONS" });
 
         final KeyspaceMetadata metadata = con.session.getCluster().getMetadata().getKeyspace( catalogName );
         if ( metadata != null ){
@@ -137,6 +138,24 @@ public class CassandraMetaData implements DatabaseMetaData {
     }
 
     private void exportColumnsRecursive( TableMetadata tableMetadata, ArrayResultSet result, ColumnMetadata columnMetadata) {
+        StringBuilder sb = new StringBuilder();
+        TableOptionsMetadata options = tableMetadata.getOptions();
+        if( options != null ){
+            sb.append("bloom_filter_fp_chance = " ).append(options.getBloomFilterFalsePositiveChance() ).
+                    append("\n AND caching = '").append( options.getCaching()).append("'").
+                    append("\n  AND comment = '").append( options.getComment()).append("'").
+                    append("\n  AND compaction = ").append( options.getCompaction()).
+                    append("\n  AND compression = ").append( options.getCompression()).
+                    append("\n  AND dclocal_read_repair_chance = " ).append(options.getLocalReadRepairChance() ).
+                    append("\n  AND default_time_to_live = " ).append(options.getDefaultTimeToLive() ).
+                    append("\n  AND gc_grace_seconds = " ).append(options.getGcGraceInSeconds() ).
+                    append("\n  AND max_index_interval = " ).append(options.getMaxIndexInterval() ).
+                    append("\n  AND memtable_flush_period_in_ms = " ).append(options.getMemtableFlushPeriodInMs() ).
+                    append("\n  AND min_index_interval = " ).append(options.getMinIndexInterval() ).
+                    append("\n  AND read_repair_chance = " ).append(options.getReadRepairChance() ).
+                    append("\n  AND speculative_retry = '").append(options.getSpeculativeRetry() ).append("'");
+        }
+
         result.addRow(new String[] {
                 tableMetadata.getKeyspace().getName(), // "TABLE_CAT",
                 null, // "TABLE_SCHEMA",
@@ -160,7 +179,8 @@ public class CassandraMetaData implements DatabaseMetaData {
                 null, // "SCOPE_SCHEMA", (not a REF type)
                 null, // "SCOPE_TABLE", (not a REF type)
                 null, // "SOURCE_DATA_TYPE", (not a DISTINCT or REF type)
-                "NO" // "IS_AUTOINCREMENT" (can be auto-generated, but can also be specified)
+                "NO", // "IS_AUTOINCREMENT" (can be auto-generated, but can also be specified)
+                sb.toString() // TABLE_OPTIONS
         });
     }
 
@@ -189,16 +209,16 @@ public class CassandraMetaData implements DatabaseMetaData {
         if ( metadata != null ){
             final TableMetadata tableMetadata = metadata.getTable( tableNamePattern );
             if ( tableMetadata != null ){
-                for ( ColumnMetadata columnMetadata : tableMetadata.getPrimaryKey() ){
+                int seq = 0;
+                for ( ColumnMetadata columnMetadata : tableMetadata.getPartitionKey() ){
                     result.addRow(new String[]{
                             metadata.getName(), // "TABLE_CAT",
                             null, // "TABLE_SCHEMA",
                             tableMetadata.getName(), // "TABLE_NAME", (i.e. MongoDB Collection Name)
                             columnMetadata.getName(), // "COLUMN_NAME",
-                            "0", // "ORDINAL_POSITION"
-                            "Pk_" + tableMetadata.getName() // "INDEX_NAME",
+                            "" + seq++, // "ORDINAL_POSITION"
+                            "PARTITION KEY" // "PK_NAME"
                     });
-
                 }
             }
         }
@@ -249,7 +269,7 @@ public class CassandraMetaData implements DatabaseMetaData {
             *  </OL>
         */
         final ArrayResultSet result = new ArrayResultSet();
-        result.setColumnNames(new String[]{"TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME", "NON_UNIQUE",
+        result.setColumnNames(new String[]{"TABLE_CAT", "TABLE_SCHEMA", "TABLE_NAME", "NON_UNIQUE",
                 "INDEX_QUALIFIER", "INDEX_NAME", "TYPE", "ORDINAL_POSITION", "COLUMN_NAME", "ASC_OR_DESC",
                 "CARDINALITY", "PAGES", "FILTER_CONDITION"});
 
@@ -257,7 +277,30 @@ public class CassandraMetaData implements DatabaseMetaData {
         if ( metadata != null ){
             final TableMetadata tableMetadata = metadata.getTable( tableNamePattern );
             if ( tableMetadata != null ){
+
+                final Iterator<ColumnMetadata> itrColMeta = tableMetadata.getClusteringColumns().iterator();
+                final Iterator<ClusteringOrder> itrColOrder = tableMetadata.getClusteringOrder().iterator();
+                int seq = 0;
+                for ( ; itrColMeta.hasNext() && itrColOrder.hasNext(); ){
+                    result.addRow(new String[]{
+                            metadata.getName(), // "TABLE_CAT",
+                            null, // "TABLE_SCHEMA",
+                            tableMetadata.getName(), // "TABLE_NAME", (i.e. MongoDB Collection Name)
+                            "FALSE", // "NON-UNIQUE",
+                            metadata.getName(), // "INDEX QUALIFIER",
+                            "CLUSTER KEY", // "INDEX_NAME",
+                            "0", // "TYPE",
+                            "" + seq++ , // "ORDINAL_POSITION"
+                            itrColMeta.next().getName(), // "COLUMN_NAME",
+                            itrColOrder.next()== ClusteringOrder.ASC ? "A" : "D", // "ASC_OR_DESC",
+                            "0", // "CARDINALITY",
+                            "0", // "PAGES",
+                            "" // "FILTER_CONDITION",
+                    });
+                }
+
                 for ( IndexMetadata indexMetadata : tableMetadata.getIndexes() ){
+                    seq = 0;
                     for ( String colName : listColumnNames(indexMetadata.asCQLQuery())){
                         result.addRow(new String[] {
                                 metadata.getName(), // "TABLE_CAT",
@@ -267,7 +310,7 @@ public class CassandraMetaData implements DatabaseMetaData {
                                 metadata.getName(), // "INDEX QUALIFIER",
                                 indexMetadata.getName(), // "INDEX_NAME",
                                 "0", // "TYPE",
-                                "0" , // "ORDINAL_POSITION"
+                                "" + seq++ , // "ORDINAL_POSITION"
                                 colName, // "COLUMN_NAME",
                                 "A", // "ASC_OR_DESC",
                                 "0", // "CARDINALITY",
