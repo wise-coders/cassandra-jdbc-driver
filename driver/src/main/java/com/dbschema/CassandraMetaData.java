@@ -11,7 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Mongo databases are equivalent to catalogs for this driver. Schemas aren't used. Mongo collections are
+ * Cassandra databases are equivalent to catalogs for this driver. Schemas aren't used. Cassandra collections are
  * equivalent to tables, in that each collection is a table.
  */
 public class CassandraMetaData implements DatabaseMetaData {
@@ -159,7 +159,7 @@ public class CassandraMetaData implements DatabaseMetaData {
         result.addRow(new String[] {
                 tableMetadata.getKeyspace().getName(), // "TABLE_CAT",
                 null, // "TABLE_SCHEMA",
-                tableMetadata.getName(), // "TABLE_NAME", (i.e. MongoDB Collection Name)
+                tableMetadata.getName(), // "TABLE_NAME", (i.e. Cassandra Collection Name)
                 columnMetadata.getName(), // "COLUMN_NAME",
                 "" + CassandraMetaData.getJavaTypeByName( "" + columnMetadata.getType().getName() ), // "DATA_TYPE",
                 "" + columnMetadata.getType().getName(), // "TYPE_NAME",
@@ -214,7 +214,7 @@ public class CassandraMetaData implements DatabaseMetaData {
                     result.addRow(new String[]{
                             metadata.getName(), // "TABLE_CAT",
                             null, // "TABLE_SCHEMA",
-                            tableMetadata.getName(), // "TABLE_NAME", (i.e. MongoDB Collection Name)
+                            tableMetadata.getName(), // "TABLE_NAME", (i.e. Cassandra Collection Name)
                             columnMetadata.getName(), // "COLUMN_NAME",
                             "" + seq++, // "ORDINAL_POSITION"
                             "PARTITION KEY" // "PK_NAME"
@@ -285,7 +285,7 @@ public class CassandraMetaData implements DatabaseMetaData {
                     result.addRow(new String[]{
                             metadata.getName(), // "TABLE_CAT",
                             null, // "TABLE_SCHEMA",
-                            tableMetadata.getName(), // "TABLE_NAME", (i.e. MongoDB Collection Name)
+                            tableMetadata.getName(), // "TABLE_NAME", (i.e. Cassandra Collection Name)
                             "FALSE", // "NON-UNIQUE",
                             metadata.getName(), // "INDEX QUALIFIER",
                             "CLUSTER KEY", // "INDEX_NAME",
@@ -305,7 +305,7 @@ public class CassandraMetaData implements DatabaseMetaData {
                         result.addRow(new String[] {
                                 metadata.getName(), // "TABLE_CAT",
                                 null, // "TABLE_SCHEMA",
-                                tableMetadata.getName(), // "TABLE_NAME", (i.e. MongoDB Collection Name)
+                                tableMetadata.getName(), // "TABLE_NAME", (i.e. Cassandra Collection Name)
                                 "TRUE", // "NON-UNIQUE",
                                 metadata.getName(), // "INDEX QUALIFIER",
                                 indexMetadata.getName(), // "INDEX_NAME",
@@ -492,7 +492,7 @@ public class CassandraMetaData implements DatabaseMetaData {
      * @see java.sql.DatabaseMetaData#getDatabaseProductName()
      */
     public String getDatabaseProductName() throws SQLException {
-        return "Mongo DB";
+        return "Cassandra";
     }
 
     /**
@@ -1166,7 +1166,7 @@ public class CassandraMetaData implements DatabaseMetaData {
      */
     public int getMaxTablesInSelect() throws SQLException
     {
-        // MongoDB collections are represented as SQL tables in this driver. Mongo doesn't support joins.
+        // Cassandra collections are represented as SQL tables in this driver. Cassandra doesn't support joins.
         return 1;
     }
 
@@ -1185,7 +1185,7 @@ public class CassandraMetaData implements DatabaseMetaData {
     }
 
     /**
-     * MongoDB doesn't support transactions, but document updates are atomic.
+     * Cassandra doesn't support transactions, but document updates are atomic.
      *
      * @see java.sql.DatabaseMetaData#supportsTransactions()
      */

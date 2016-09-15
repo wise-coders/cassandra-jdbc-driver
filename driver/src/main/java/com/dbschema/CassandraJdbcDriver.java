@@ -15,7 +15,7 @@ import java.util.logging.Logger;
  * This is customized for DbSchema database designer.
  * Connect to the database using a URL like :
  * jdbc:cassandra://host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[keyspace][?options]]
- * The URL excepting the jdbc: prefix is passed as it is to the MongoDb native Java driver.
+ * The URL excepting the jdbc: prefix is passed as it is to the Cassandra native Java driver.
  */
 
 public class CassandraJdbcDriver implements Driver {
@@ -31,11 +31,11 @@ public class CassandraJdbcDriver implements Driver {
     /**
      * Connect to the database using a URL like :
      * jdbc:cassandra://host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[keyspace][?options]]
-     * The URL excepting the jdbc: prefix is passed as it is to the MongoDb native Java driver.
+     * The URL excepting the jdbc: prefix is passed as it is to the Cassandra native Java driver.
      */
     public Connection connect(String url, Properties info) throws SQLException {
         if ( url != null && acceptsURL( url )){
-            CassandraClientURI clientURI = new CassandraClientURI( url );
+            CassandraClientURI clientURI = new CassandraClientURI( url, info );
             try	{
 
                 Cluster cluster = clientURI.createBuilder();

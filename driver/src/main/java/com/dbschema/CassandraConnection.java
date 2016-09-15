@@ -81,7 +81,7 @@ public class CassandraConnection implements Connection
     @Override
 	public String nativeSQL(String sql) throws SQLException	{
 		checkClosed();
-		throw new UnsupportedOperationException("MongoDB does not support SQL natively.");
+		throw new UnsupportedOperationException("Cassandra does not support SQL natively.");
 	}
 
 	/**
@@ -155,7 +155,7 @@ public class CassandraConnection implements Connection
 		checkClosed();
 		// Since the only valid value for MongDB is Connection.TRANSACTION_NONE, and the javadoc for this method
 		// indicates that this is not a valid value for level here, throw unsupported operation exception.
-		throw new UnsupportedOperationException("MongoDB provides no support for transactions.");
+		throw new UnsupportedOperationException("Cassandra provides no support for transactions.");
 	}
 
 	/**
@@ -292,7 +292,7 @@ public class CassandraConnection implements Connection
     @Override
 	public void setClientInfo(String name, String value) throws SQLClientInfoException
 	{
-		/* MongoDB does not support setting client information in the database. */
+		/* Cassandra does not support setting client information in the database. */
 	}
 
 	/**
@@ -301,7 +301,7 @@ public class CassandraConnection implements Connection
     @Override
 	public void setClientInfo(Properties properties) throws SQLClientInfoException
 	{
-		/* MongoDB does not support setting client information in the database. */
+		/* Cassandra does not support setting client information in the database. */
 	}
 
 	/**

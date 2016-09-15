@@ -13,93 +13,78 @@ import java.util.*;
 public class CassandraClientURI {
 
     private static final String PREFIX = "jdbc:cassandra://";
-    private static final String UTF_8 = "UTF-8";
 
     private final List<String> hosts;
     private final String database;
     private final String collection;
     private final String uri;
-    private String userName;
-    private char[] password;
+    private final String userName;
+    private final String password;
 
-    public CassandraClientURI( String uri ){
-        try {
-            this.uri = uri;
-            if (!uri.startsWith(PREFIX))
-                throw new IllegalArgumentException("uri needs to start with " + PREFIX);
+    public CassandraClientURI( String uri, Properties info ){
+        this.uri = uri;
+        this.userName = ( info != null ? (String)info.get("user") : null );
+        this.password = ( info != null ? (String)info.get("password") : null );
 
-            uri = uri.substring(PREFIX.length());
+        if (!uri.startsWith(PREFIX))
+            throw new IllegalArgumentException("URI needs to start with " + PREFIX);
 
-            String serverPart;
-            String nsPart;
-            String optionsPart;
+        uri = uri.substring(PREFIX.length());
 
-            {
-                int idx = uri.lastIndexOf("/");
-                if (idx < 0) {
-                    if (uri.contains("?")) {
-                        throw new IllegalArgumentException("URI contains options without trailing slash");
-                    }
-                    serverPart = uri;
-                    nsPart = null;
-                    optionsPart = "";
-                } else {
-                    serverPart = uri.substring(0, idx);
-                    nsPart = uri.substring(idx + 1);
 
-                    idx = nsPart.indexOf("?");
-                    if (idx >= 0) {
-                        optionsPart = nsPart.substring(idx + 1);
-                        nsPart = nsPart.substring(0, idx);
-                    } else {
-                        optionsPart = "";
-                    }
+        String serverPart;
+        String nsPart;
+        String optionsPart;
 
+
+        {
+            int idx = uri.lastIndexOf("/");
+            if (idx < 0) {
+                if (uri.contains("?")) {
+                    throw new IllegalArgumentException("URI contains options without trailing slash");
                 }
-            }
-
-            { // userName,password,hosts
-                List<String> all = new LinkedList<String>();
-
-                int idx = serverPart.indexOf("@");
-
-                if (idx > 0) {
-                    String authPart = serverPart.substring(0, idx);
-                    serverPart = serverPart.substring(idx + 1);
-
-                    idx = authPart.indexOf(":");
-                    if (idx == -1) {
-                        userName = URLDecoder.decode(authPart, UTF_8);
-                    } else {
-                        userName = URLDecoder.decode(authPart.substring(0, idx), UTF_8);
-                        password = URLDecoder.decode(authPart.substring(idx + 1), UTF_8).toCharArray();
-                    }
-                }
-
-                Collections.addAll(all, serverPart.split(","));
-
-                hosts = Collections.unmodifiableList(all);
-            }
-
-            if (nsPart != null && nsPart.length() != 0) { // database,_collection
-                int idx = nsPart.indexOf(".");
-                if (idx < 0) {
-                    database = nsPart;
-                    collection = null;
-                } else {
-                    database = nsPart.substring(0, idx);
-                    collection = nsPart.substring(idx + 1);
-                }
+                serverPart = uri;
+                nsPart = null;
+                optionsPart = "";
             } else {
-                database = null;
-                collection = null;
-            }
+                serverPart = uri.substring(0, idx);
+                nsPart = uri.substring(idx + 1);
 
-            Map<String, List<String>> optionsMap = parseOptions(optionsPart);
-            warnOnUnsupportedOptions(optionsMap);
-        } catch (UnsupportedEncodingException e) {
-            throw new InvalidParameterException("This should not happen: " + e);
+                idx = nsPart.indexOf("?");
+                if (idx >= 0) {
+                    optionsPart = nsPart.substring(idx + 1);
+                    nsPart = nsPart.substring(0, idx);
+                } else {
+                    optionsPart = "";
+                }
+
+            }
         }
+
+        { // userName,password,hosts
+            List<String> all = new LinkedList<String>();
+
+            Collections.addAll(all, serverPart.split(","));
+
+            hosts = Collections.unmodifiableList(all);
+        }
+
+        if (nsPart != null && nsPart.length() != 0) { // database,_collection
+            int idx = nsPart.indexOf(".");
+            if (idx < 0) {
+                database = nsPart;
+                collection = null;
+            } else {
+                database = nsPart.substring(0, idx);
+                collection = nsPart.substring(idx + 1);
+            }
+        } else {
+            database = null;
+            collection = null;
+        }
+
+        Map<String, List<String>> optionsMap = parseOptions(optionsPart);
+        warnOnUnsupportedOptions(optionsMap);
     }
 
     public Cluster createBuilder() throws java.net.UnknownHostException{
@@ -120,7 +105,7 @@ public class CassandraClientURI {
         builder.withRetryPolicy(DowngradingConsistencyRetryPolicy.INSTANCE)
                 .withReconnectionPolicy(new ConstantReconnectionPolicy(100L));
         if ( userName != null ){
-            builder.withCredentials(userName, String.valueOf(password));
+            builder.withCredentials(userName, password);
             System.out.println("Using authentication as user '" + userName + "'");
         }
         return builder.build();
@@ -195,7 +180,7 @@ public class CassandraClientURI {
      * @return the password
      */
     public char[] getPassword() {
-        return password;
+        return password!= null ? password.toCharArray() : null;
     }
 
     /**
