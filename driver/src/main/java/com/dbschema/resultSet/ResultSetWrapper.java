@@ -1,6 +1,7 @@
 package com.dbschema.resultSet;
 
 import com.datastax.driver.core.ColumnDefinitions;
+import com.datastax.driver.core.DataType;
 import com.datastax.driver.core.Row;
 import com.dbschema.CassandraMetaData;
 import com.dbschema.CassandraResultSetMetaData;
@@ -20,24 +21,25 @@ public class ResultSetWrapper implements ResultSet
 
 	private boolean isClosed = false;
 
-    private final Statement statement;
-    public final com.datastax.driver.core.ResultSet dsResultSet;
-    private final Iterator<Row> iterator;
-    private Row currentRow;
+	private final Statement statement;
+	public final com.datastax.driver.core.ResultSet dsResultSet;
+	private final Iterator<Row> iterator;
+	private Row currentRow;
 
 	public ResultSetWrapper(Statement statement, com.datastax.driver.core.ResultSet dsResultSet)
 	{
-        this.statement = statement;
+		this.statement = statement;
 		this.dsResultSet = dsResultSet;
-        this.iterator = dsResultSet.iterator();
+		this.iterator = dsResultSet.iterator();
 	}
 
 
-
+	@Override
 	public <T> T unwrap(Class<T> iface) throws SQLException {
 		return null;
 	}
 
+	@Override
 	public boolean isWrapperFor(Class<?> iface) throws SQLException	{
 		return false;
 	}
@@ -45,244 +47,297 @@ public class ResultSetWrapper implements ResultSet
 	/**
 	 * @see java.sql.ResultSet#next()
 	 */
+	@Override
 	public boolean next() throws SQLException {
-        if ( iterator.hasNext() ) {
-            currentRow = iterator.next();
-            return true;
-        }
+		if ( iterator.hasNext() ) {
+			currentRow = iterator.next();
+			return true;
+		}
 		return false;
 	}
 
 	/**
 	 * @see java.sql.ResultSet#close()
 	 */
+	@Override
 	public void close() throws SQLException {
-        isClosed = true;
+		isClosed = true;
 	}
 
 	/**
 	 * @see java.sql.ResultSet#wasNull()
 	 */
+	@Override
 	public boolean wasNull() throws SQLException {
 		return false;
 	}
 
+	@Override
 	public String getString(int columnIndex) throws SQLException {
-        checkClosed();
-        if ( currentRow != null ){
-            return currentRow.getString( columnIndex-1 );
-        }
-        throw new SQLException("Exhausted ResultSet.");
+		checkClosed();
+		if ( currentRow != null ){
+			return currentRow.getString( columnIndex-1 );
+		}
+		throw new SQLException("Exhausted ResultSet.");
 	}
 
+	@Override
 	public boolean getBoolean(int columnIndex) throws SQLException{
-        checkClosed();
-        if ( currentRow != null ){
-            return currentRow.getBool(columnIndex-1);
-        }
-        throw new SQLException("Exhausted ResultSet.");
+		checkClosed();
+		if ( currentRow != null ){
+			return currentRow.getBool(columnIndex-1);
+		}
+		throw new SQLException("Exhausted ResultSet.");
 	}
 
+	@Override
 	public byte getByte(int columnIndex) throws SQLException {
-        checkClosed();
-        if ( currentRow != null ){
-            return currentRow.getByte(columnIndex-1);
-        }
-        throw new SQLException("Exhausted ResultSet.");
+		checkClosed();
+		if ( currentRow != null ){
+			return currentRow.getByte(columnIndex-1);
+		}
+		throw new SQLException("Exhausted ResultSet.");
 	}
 
 	/**
 	 * @see java.sql.ResultSet#getShort(int)
 	 */
+	@Override
 	public short getShort(int columnIndex) throws SQLException {
-        checkClosed();
-        if ( currentRow != null ){
-            return currentRow.getShort(columnIndex-1);
-        }
-        throw new SQLException("Exhausted ResultSet.");
+		checkClosed();
+		if ( currentRow != null ){
+			return currentRow.getShort(columnIndex-1);
+		}
+		throw new SQLException("Exhausted ResultSet.");
 	}
 
 	/**
 	 * @see java.sql.ResultSet#getInt(int)
 	 */
+	@Override
 	public int getInt(int columnIndex) throws SQLException {
-        checkClosed();
-        if ( currentRow != null ){
-            return currentRow.getInt(columnIndex-1);
-        }
-        throw new SQLException("Exhausted ResultSet.");
+		checkClosed();
+		if ( currentRow != null ){
+			return currentRow.getInt(columnIndex-1);
+		}
+		throw new SQLException("Exhausted ResultSet.");
 	}
 
 	/**
 	 * @see java.sql.ResultSet#getLong(int)
 	 */
+	@Override
 	public long getLong(int columnIndex) throws SQLException {
-        checkClosed();
-        if ( currentRow != null ){
-            return currentRow.getLong(columnIndex-1);
-        }
-        throw new SQLException("Exhausted ResultSet.");
+		checkClosed();
+		if ( currentRow != null ){
+			return currentRow.getLong(columnIndex-1);
+		}
+		throw new SQLException("Exhausted ResultSet.");
 	}
 
 	/**
 	 * @see java.sql.ResultSet#getFloat(int)
 	 */
+	@Override
 	public float getFloat(int columnIndex) throws SQLException {
-        checkClosed();
-        if ( currentRow != null ){
-            return currentRow.getFloat(columnIndex-1);
-        }
-        throw new SQLException("Exhausted ResultSet.");
+		checkClosed();
+		if ( currentRow != null ){
+			return currentRow.getFloat(columnIndex-1);
+		}
+		throw new SQLException("Exhausted ResultSet.");
 	}
 
 	/**
 	 * @see java.sql.ResultSet#getDouble(int)
 	 */
+	@Override
 	public double getDouble(int columnIndex) throws SQLException {
-        checkClosed();
-        if ( currentRow != null ){
-            return currentRow.getDouble(columnIndex-1);
-        }
-        throw new SQLException("Exhausted ResultSet.");
+		checkClosed();
+		if ( currentRow != null ){
+			return currentRow.getDouble(columnIndex-1);
+		}
+		throw new SQLException("Exhausted ResultSet.");
 	}
 
+	@Override
 	public BigDecimal getBigDecimal(int columnIndex, int scale) throws SQLException	{
-        checkClosed();
-        if ( currentRow != null ){
-            return currentRow.getDecimal(columnIndex-1);
-        }
-        throw new SQLException("Exhausted ResultSet.");
+		checkClosed();
+		if ( currentRow != null ){
+			return currentRow.getDecimal(columnIndex-1);
+		}
+		throw new SQLException("Exhausted ResultSet.");
 	}
 
+	@Override
 	public byte[] getBytes(int columnIndex) throws SQLException	{
-        checkClosed();
-        if ( currentRow != null ){
-            return currentRow.getBytes( columnIndex-1 ).array();
-        }
-        throw new SQLException("Exhausted ResultSet.");
+		checkClosed();
+		if ( currentRow != null ){
+			return currentRow.getBytes( columnIndex-1 ).array();
+		}
+		throw new SQLException("Exhausted ResultSet.");
 	}
 
+	@Override
 	public Date getDate(int columnIndex) throws SQLException {
-        checkClosed();
-        if ( currentRow != null ){
-            return new Date( currentRow.getDate( columnIndex-1 ).getMillisSinceEpoch() );
-        }
-        throw new SQLException("Exhausted ResultSet.");
+		checkClosed();
+		if ( currentRow != null ){
+			DataType type = currentRow.getColumnDefinitions().getType( columnIndex - 1 );
+			if (DataType.timestamp().equals(type)) {
+				return new Date( currentRow.getTimestamp( columnIndex-1 ).getTime() );
+			} else {
+				return new Date( currentRow.getDate( columnIndex-1 ).getMillisSinceEpoch() );
+			}
+		}
+		throw new SQLException("Exhausted ResultSet.");
 	}
 
+	@Override
 	public Time getTime(int columnIndex) throws SQLException {
-        checkClosed();
-        if ( currentRow != null ){
-            return new Time( currentRow.getDate( columnIndex-1 ).getMillisSinceEpoch() );
-        }
-        throw new SQLException("Exhausted ResultSet.");
+		checkClosed();
+		if ( currentRow != null ){
+			DataType type = currentRow.getColumnDefinitions().getType( columnIndex - 1 );
+			if (DataType.timestamp().equals(type)) {
+				return new Time( currentRow.getTimestamp( columnIndex-1 ).getTime() );
+			} else {
+				return new Time( currentRow.getDate( columnIndex-1 ).getMillisSinceEpoch() );
+			}
+		}
+		throw new SQLException("Exhausted ResultSet.");
 	}
 
+	@Override
 	public Timestamp getTimestamp(int columnIndex) throws SQLException {
-        checkClosed();
-        if ( currentRow != null ){
-            return new Timestamp( currentRow.getDate( columnIndex-1 ).getMillisSinceEpoch() );
-        }
-        throw new SQLException("Exhausted ResultSet.");
+		checkClosed();
+		if ( currentRow != null ){
+			DataType type = currentRow.getColumnDefinitions().getType( columnIndex - 1 );
+			if (DataType.timestamp().equals(type)) {
+				return new Timestamp( currentRow.getTimestamp( columnIndex-1 ).getTime() );
+			} else {
+				return new Timestamp( currentRow.getDate( columnIndex-1 ).getMillisSinceEpoch() );
+			}
+		}
+		throw new SQLException("Exhausted ResultSet.");
 	}
 
+	@Override
 	public InputStream getAsciiStream(int columnIndex) throws SQLException	{
-        return null;
+		return null;
 	}
 
+	@Override
 	public InputStream getUnicodeStream(int columnIndex) throws SQLException {
 		return null;
 	}
 
+	@Override
 	public InputStream getBinaryStream(int columnIndex) throws SQLException	{
 		return null;
 	}
 
+	@Override
 	public String getString(String columnLabel) throws SQLException	{
-        checkClosed();
-        if ( currentRow != null ){
-            return currentRow.getString(columnLabel);
-        }
-        throw new SQLException("Result exhausted.");
+		checkClosed();
+		if ( currentRow != null ){
+			return currentRow.getString(columnLabel);
+		}
+		throw new SQLException("Result exhausted.");
 	}
 
+	@Override
 	public boolean getBoolean(String columnLabel) throws SQLException {
-        return false;
+		return false;
 	}
 
+	@Override
 	public byte getByte(String columnLabel) throws SQLException	{
 		return 0;
 	}
 
+	@Override
 	public short getShort(String columnLabel) throws SQLException{
 		return 0;
 	}
 
+	@Override
 	public int getInt(String columnLabel) throws SQLException {
 		return 0;
 	}
 
+	@Override
 	public long getLong(String columnLabel) throws SQLException	{
 		return 0;
 	}
 
+	@Override
 	public float getFloat(String columnLabel) throws SQLException {
 		return 0;
 	}
 
+	@Override
 	public double getDouble(String columnLabel) throws SQLException	{
 		return Double.parseDouble(getString(columnLabel));
 	}
 
+	@Override
 	public BigDecimal getBigDecimal(String columnLabel, int scale) throws SQLException
 	{
 		return null;
 	}
 
+	@Override
 	public byte[] getBytes(String columnLabel) throws SQLException
 	{
 		return getString(columnLabel).getBytes();
 	}
 
+	@Override
 	public Date getDate(String columnLabel) throws SQLException
 	{
 		return null;
 	}
 
+	@Override
 	public Time getTime(String columnLabel) throws SQLException
 	{
 		return null;
 	}
 
+	@Override
 	public Timestamp getTimestamp(String columnLabel) throws SQLException
 	{
 		return null;
 	}
 
+	@Override
 	public InputStream getAsciiStream(String columnLabel) throws SQLException
 	{
 		return null;
 	}
 
+	@Override
 	public InputStream getUnicodeStream(String columnLabel) throws SQLException	{
 		return null;
 	}
 
+	@Override
 	public InputStream getBinaryStream(String columnLabel) throws SQLException {
 		return null;
 	}
 
+	@Override
 	public SQLWarning getWarnings() throws SQLException {
-        // SUGGESTED BY CRISTI TO SHOW EXECUTION WARNINGS
-        StringBuilder sb = new StringBuilder();
-        for ( String warning : dsResultSet.getExecutionInfo().getWarnings() ){
-            sb.append( warning).append( " ");
-        }
+		// SUGGESTED BY CRISTI TO SHOW EXECUTION WARNINGS
+		StringBuilder sb = new StringBuilder();
+		for ( String warning : dsResultSet.getExecutionInfo().getWarnings() ){
+			sb.append( warning).append( " ");
+		}
 		return sb.length() > 0 ? new SQLWarning( sb.toString()) : null;
 	}
 
+	@Override
 	public void clearWarnings() throws SQLException {}
 
+	@Override
 	public String getCursorName() throws SQLException {
 		return null;
 	}
@@ -290,166 +345,190 @@ public class ResultSetWrapper implements ResultSet
 	/**
 	 * @see java.sql.ResultSet#getMetaData()
 	 */
+	@Override
 	public ResultSetMetaData getMetaData() throws SQLException
 	{
 		checkClosed();
-        int size = dsResultSet.getColumnDefinitions().size();
-        String[] columnNames = new String[size];
-        int[] columnDisplaySizes = new int[size];
-        int[] columnJavaTypes = new int[size];
-        String tableName = null;
-        int i = 0;
-        for ( ColumnDefinitions.Definition def : dsResultSet.getColumnDefinitions() ){
-            columnNames[i] = def.getName();
-            String typeName = def.getType().getName().name();
-            int type = CassandraMetaData.getJavaTypeByName(typeName);
+		int size = dsResultSet.getColumnDefinitions().size();
+		String[] columnNames = new String[size];
+		int[] columnDisplaySizes = new int[size];
+		int[] columnJavaTypes = new int[size];
+		String tableName = null;
+		int i = 0;
+		for ( ColumnDefinitions.Definition def : dsResultSet.getColumnDefinitions() ){
+			columnNames[i] = def.getName();
+			String typeName = def.getType().getName().name();
+			int type = CassandraMetaData.getJavaTypeByName(typeName);
 
-            columnDisplaySizes[i] = 100;
-            columnJavaTypes[i] = type;
-            tableName = def.getTable();
-            i++;
-        }
+			columnDisplaySizes[i] = 100;
+			columnJavaTypes[i] = type;
+			tableName = def.getTable();
+			i++;
+		}
 
 		return new CassandraResultSetMetaData(tableName, columnNames, columnJavaTypes, columnDisplaySizes);
 	}
 
 
-    public Object getObject(int columnIndex) throws SQLException {
-        checkClosed();
-        if ( currentRow != null ){
-            return currentRow.getObject(columnIndex-1);
-        }
-        throw new SQLException("Result exhausted.");
+	@Override
+	public Object getObject(int columnIndex) throws SQLException {
+		checkClosed();
+		if ( currentRow != null ){
+			return currentRow.getObject(columnIndex-1);
+		}
+		throw new SQLException("Result exhausted.");
 	}
 
+	@Override
 	public Object getObject(String columnLabel) throws SQLException	{
-        checkClosed();
-        if ( currentRow != null ){
-            return currentRow.getObject(columnLabel);
-        }
-        throw new SQLException("Result exhausted.");
+		checkClosed();
+		if ( currentRow != null ){
+			return currentRow.getObject(columnLabel);
+		}
+		throw new SQLException("Result exhausted.");
 	}
 
+	@Override
 	public int findColumn(String columnLabel) throws SQLException
 	{
 
 		return 0;
 	}
 
+	@Override
 	public Reader getCharacterStream(int columnIndex) throws SQLException
 	{
 
 		return null;
 	}
 
+	@Override
 	public Reader getCharacterStream(String columnLabel) throws SQLException
 	{
 
 		return null;
 	}
 
+	@Override
 	public BigDecimal getBigDecimal(int columnIndex) throws SQLException
 	{
 
 		return null;
 	}
 
+	@Override
 	public BigDecimal getBigDecimal(String columnLabel) throws SQLException
 	{
 
 		return null;
 	}
 
+	@Override
 	public boolean isBeforeFirst() throws SQLException
 	{
 
 		return false;
 	}
 
+	@Override
 	public boolean isAfterLast() throws SQLException
 	{
 
 		return false;
 	}
 
+	@Override
 	public boolean isFirst() throws SQLException
 	{
 
 		return false;
 	}
 
+	@Override
 	public boolean isLast() throws SQLException
 	{
 
 		return false;
 	}
 
+	@Override
 	public void beforeFirst() throws SQLException
 	{
 
 
 	}
 
+	@Override
 	public void afterLast() throws SQLException
 	{
 
 
 	}
 
+	@Override
 	public boolean first() throws SQLException
 	{
 
 		return false;
 	}
 
+	@Override
 	public boolean last() throws SQLException
 	{
 
 		return false;
 	}
 
+	@Override
 	public int getRow() throws SQLException
 	{
 
 		return 0;
 	}
 
+	@Override
 	public boolean absolute(int row) throws SQLException
 	{
 
 		return false;
 	}
 
+	@Override
 	public boolean relative(int rows) throws SQLException
 	{
 
 		return false;
 	}
 
+	@Override
 	public boolean previous() throws SQLException
 	{
 
 		return false;
 	}
 
+	@Override
 	public void setFetchDirection(int direction) throws SQLException
 	{
 
 
 	}
 
+	@Override
 	public int getFetchDirection() throws SQLException
 	{
 
 		return 0;
 	}
 
+	@Override
 	public void setFetchSize(int rows) throws SQLException
 	{
 
 
 	}
 
+	@Override
 	public int getFetchSize() throws SQLException
 	{
 
@@ -459,6 +538,7 @@ public class ResultSetWrapper implements ResultSet
 	/**
 	 * @see java.sql.ResultSet#getType()
 	 */
+	@Override
 	public int getType() throws SQLException
 	{
 		return ResultSet.TYPE_FORWARD_ONLY;
@@ -467,66 +547,77 @@ public class ResultSetWrapper implements ResultSet
 	/**
 	 * @see java.sql.ResultSet#getConcurrency()
 	 */
+	@Override
 	public int getConcurrency() throws SQLException
 	{
 
 		return 0;
 	}
 
+	@Override
 	public boolean rowUpdated() throws SQLException
 	{
 
 		return false;
 	}
 
+	@Override
 	public boolean rowInserted() throws SQLException
 	{
 
 		return false;
 	}
 
+	@Override
 	public boolean rowDeleted() throws SQLException
 	{
 
 		return false;
 	}
 
+	@Override
 	public void updateNull(int columnIndex) throws SQLException
 	{
 
 
 	}
 
+	@Override
 	public void updateBoolean(int columnIndex, boolean x) throws SQLException
 	{
 
 
 	}
 
+	@Override
 	public void updateByte(int columnIndex, byte x) throws SQLException
 	{
 
 
 	}
 
+	@Override
 	public void updateShort(int columnIndex, short x) throws SQLException
 	{
 
 
 	}
 
+	@Override
 	public void updateInt(int columnIndex, int x) throws SQLException
 	{
 
 
 	}
 
+	@Override
 	public void updateLong(int columnIndex, long x) throws SQLException
 	{
 
 
 	}
 
+	@Override
 	public void updateFloat(int columnIndex, float x) throws SQLException
 	{
 
@@ -1223,13 +1314,13 @@ public class ResultSetWrapper implements ResultSet
 		}
 	}
 
-    @Override
-    public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
-        return null;
-    }
+	@Override
+	public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
+		return null;
+	}
 
-    @Override
-    public <T> T getObject(String columnLabel, Class<T> type) throws SQLException {
-        return null;
-    }
+	@Override
+	public <T> T getObject(String columnLabel, Class<T> type) throws SQLException {
+		return null;
+	}
 }
