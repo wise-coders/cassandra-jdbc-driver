@@ -1,8 +1,7 @@
 # Cassandra JDBC Driver
 
-This is an open source JDBC Driver for Cassandra used inside [DbSchema Database Designer](http://www.dbschema.com)
-DbSchema is an interactive diagram designer with relational data explorer, visual query builder, random data generator, forms and reports and many other tools.
-
+This is an open source JDBC Driver for Cassandra.
+The driver is used by [DbSchema](http://www.dbschema.com) Database Designer - an interactive diagram designer with relational data explorer, visual query builder, random data generator, forms and reports and many other tools.
 
 ## Download Binary
 
