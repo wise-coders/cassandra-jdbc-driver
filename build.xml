@@ -10,7 +10,7 @@
     </path>
 
     <pathconvert property="cassandra.classpath.jar" refid="cassandra.classpath" pathsep=" ">
-        <map from="C:\work\cassandra-jdbc\driver\src\main\lib\" to="./"/>
+        <map from="C:\work\cassandra-jdbc-driver\driver\src\main\lib\" to="./"/>
     </pathconvert>
 
 
