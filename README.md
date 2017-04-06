@@ -21,7 +21,7 @@ import java.sql.PreparedStatement;
 
 ...
 
-Class.forName("com.cassandra.CassandraJdbcDriver");
+Class.forName("com.dbschema.CassandraJdbcDriver");
 Properties properties = new Properties();
 properties.put("user", "someuser");
 properties.put("password", "somepassword" );
