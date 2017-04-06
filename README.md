@@ -10,6 +10,35 @@ You can test the driver by simply downloading [DbSchema Database Designer](http:
 
 ## Description
 
+Driver connectivity works on top of the native Cassandra Java driver.
+
+```
+#!java
+
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+
+...
+
+Class.forName("com.cassandra.CassandraJdbcDriver");
+Properties properties = new Properties();
+properties.put("user", "someuser");
+properties.put("password", "somepassword" );
+Connection con = DriverManager.getConnection("jdbc:cassandra://host1:9160/keyspace1", properties);
+// OTHER URL: jdbc:cassandra://host1--host2--host3:9160/keyspace1?primarydc=DC1&backupdc=DC2&consistency=QUORUM
+String query = "UPDATE Test SET a=? WHERE KEY=?";
+PreparedStatement statement = con.prepareStatement(query);
+
+statement.setLong(1, 100);
+statement.setString(2, "key0");
+
+statement.executeUpdate();
+
+statement.close();
+```
+
+
 The driver implements a PreparedStatement where native Cassandra queries can be passed.
 The result will be returned as ResultSet with one column containing the Map JSon object.
 
