@@ -72,18 +72,24 @@ public class CassandraMetaData implements DatabaseMetaData {
                 "TABLE_TYPE", "REMARKS", "TYPE_CAT", "TYPE_SCHEM", "TYPE_NAME", "SELF_REFERENCING_COL_NAME",
                 "REF_GENERATION"});
         final Metadata metadata = con.session.getCluster().getMetadata();
-        if ( catalogName == null ){
-            for ( KeyspaceMetadata keyspaceMetadata : metadata.getKeyspaces() )
-                for ( TableMetadata tableMetadata : keyspaceMetadata.getTables() ) {
-                    resultSet.addRow( createTableRow( catalogName, tableMetadata.getName(), tableMetadata.getOptions().getComment(), tableMetadata.getOptions() ) );
+        if ( catalogName != null && catalogName.trim().isEmpty() ) {
+            KeyspaceMetadata keyspace = metadata.getKeyspace(catalogName);
+            System.out.println("Loading tables for Catalog " + catalogName);
+            if ( keyspace == null ) metadata.getKeyspace("\"" + catalogName + "\"" );
+            if ( keyspace != null) {
+                for (TableMetadata tableMetadata : keyspace.getTables()) {
+                    resultSet.addRow(createTableRow(catalogName, tableMetadata.getName(), tableMetadata.getOptions().getComment(), tableMetadata.getOptions()));
                 }
-        } else {
-            for ( TableMetadata tableMetadata : metadata.getKeyspace( catalogName ).getTables() ) {
-                resultSet.addRow( createTableRow( catalogName, tableMetadata.getName(), tableMetadata.getOptions().getComment(), tableMetadata.getOptions() ) );
+                return resultSet;
+            }
+            System.out.println("Could not find any keyspace '" + catalogName + "'. Will list all keyspaces.");
+        }
+        for ( KeyspaceMetadata keyspaceMetadata : metadata.getKeyspaces() ) {
+            for (TableMetadata tableMetadata : keyspaceMetadata.getTables()) {
+                resultSet.addRow(createTableRow(catalogName, tableMetadata.getName(), tableMetadata.getOptions().getComment(), tableMetadata.getOptions()));
             }
         }
         return resultSet;
-
     }
 
     private String[] createTableRow( String catalogName, String tableName, String comment, TableOptionsMetadata options ){
