@@ -68,7 +68,7 @@ public class CassandraMetaData implements DatabaseMetaData {
             throws SQLException
     {
         ArrayResultSet resultSet = new ArrayResultSet();
-        resultSet.setColumnNames(new String[]{"TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME",
+        resultSet.setColumnNames(new String[]{"TABLE_CAT", "TABLE_SCHEMA", "TABLE_NAME",
                 "TABLE_TYPE", "REMARKS", "TYPE_CAT", "TYPE_SCHEM", "TYPE_NAME", "SELF_REFERENCING_COL_NAME",
                 "REF_GENERATION"});
         final Metadata metadata = con.session.getCluster().getMetadata();
@@ -133,9 +133,11 @@ public class CassandraMetaData implements DatabaseMetaData {
                 }
             } else {
                 final TableMetadata tableMetadata = metadata.getTable( tableNamePattern );
-                for ( ColumnMetadata field : tableMetadata.getColumns() ){
-                    if ( columnNamePattern == null || columnNamePattern.equals( field.getName())){
-                        exportColumnsRecursive( tableMetadata, result, field);
+                if ( tableMetadata != null ) {
+                    for (ColumnMetadata field : tableMetadata.getColumns()) {
+                        if (columnNamePattern == null || columnNamePattern.equals(field.getName())) {
+                            exportColumnsRecursive(tableMetadata, result, field);
+                        }
                     }
                 }
             }

@@ -173,14 +173,11 @@ public class CassandraPreparedStatement implements PreparedStatement {
 
     @Override
     public int getQueryTimeout() throws SQLException {
-        checkClosed();
-        throw new SQLFeatureNotSupportedException("Cassandra provides no support for query timeouts.");
+        return connection.getNetworkTimeout();
     }
 
     @Override
     public void setQueryTimeout(final int seconds) throws SQLException {
-        checkClosed();
-        throw new SQLFeatureNotSupportedException("Cassandra provides no support for query timeouts.");
     }
 
     @Override
