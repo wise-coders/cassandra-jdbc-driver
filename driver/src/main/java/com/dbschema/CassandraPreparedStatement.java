@@ -173,7 +173,7 @@ public class CassandraPreparedStatement implements PreparedStatement {
 
     @Override
     public int getQueryTimeout() throws SQLException {
-        return 1;
+        return connection.getNetworkTimeout();
     }
 
     @Override
