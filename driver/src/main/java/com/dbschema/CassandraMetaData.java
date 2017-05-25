@@ -74,7 +74,6 @@ public class CassandraMetaData implements DatabaseMetaData {
         final Metadata metadata = con.session.getCluster().getMetadata();
         if ( catalogName != null && catalogName.trim().isEmpty() ) {
             KeyspaceMetadata keyspace = metadata.getKeyspace(catalogName);
-            System.out.println("Loading tables for Catalog " + catalogName);
             if ( keyspace == null ) metadata.getKeyspace("\"" + catalogName + "\"" );
             if ( keyspace != null) {
                 for (TableMetadata tableMetadata : keyspace.getTables()) {
@@ -134,9 +133,11 @@ public class CassandraMetaData implements DatabaseMetaData {
                 }
             } else {
                 final TableMetadata tableMetadata = metadata.getTable( tableNamePattern );
-                for ( ColumnMetadata field : tableMetadata.getColumns() ){
-                    if ( columnNamePattern == null || columnNamePattern.equals( field.getName())){
-                        exportColumnsRecursive( tableMetadata, result, field);
+                if( tableMetadata != null ) {
+                    for (ColumnMetadata field : tableMetadata.getColumns()) {
+                        if (columnNamePattern == null || columnNamePattern.equals(field.getName())) {
+                            exportColumnsRecursive(tableMetadata, result, field);
+                        }
                     }
                 }
             }
