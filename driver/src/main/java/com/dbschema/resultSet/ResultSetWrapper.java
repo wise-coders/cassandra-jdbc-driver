@@ -2,6 +2,7 @@ package com.dbschema.resultSet;
 
 import com.datastax.driver.core.ColumnDefinitions;
 import com.datastax.driver.core.DataType;
+import com.datastax.driver.core.LocalDate;
 import com.datastax.driver.core.Row;
 import com.dbschema.CassandraMetaData;
 import com.dbschema.CassandraResultSetMetaData;
@@ -10,10 +11,10 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.sql.*;
-import java.util.Calendar;
-import java.util.Iterator;
-import java.util.Map;
+import java.sql.Date;
+import java.util.*;
 
 public class ResultSetWrapper implements ResultSet
 {
@@ -172,7 +173,8 @@ public class ResultSetWrapper implements ResultSet
 	public byte[] getBytes(int columnIndex) throws SQLException	{
 		checkClosed();
 		if ( currentRow != null ){
-			return currentRow.getBytes( columnIndex-1 ).array();
+			final ByteBuffer bytes = currentRow.getBytes(columnIndex - 1);
+			return bytes != null ? bytes.array() : null;
 		}
 		throw new SQLException("Exhausted ResultSet.");
 	}
@@ -183,9 +185,11 @@ public class ResultSetWrapper implements ResultSet
 		if ( currentRow != null ){
 			DataType type = currentRow.getColumnDefinitions().getType( columnIndex - 1 );
 			if (DataType.timestamp().equals(type)) {
-				return new Date( currentRow.getTimestamp( columnIndex-1 ).getTime() );
+				final java.util.Date date = currentRow.getTimestamp(columnIndex - 1);
+				return date != null ? new Date( date.getTime() ) : null;
 			} else {
-				return new Date( currentRow.getDate( columnIndex-1 ).getMillisSinceEpoch() );
+				final LocalDate date = currentRow.getDate(columnIndex - 1);
+				return date != null ? new Date( date.getMillisSinceEpoch() ) : null;
 			}
 		}
 		throw new SQLException("Exhausted ResultSet.");
@@ -197,9 +201,11 @@ public class ResultSetWrapper implements ResultSet
 		if ( currentRow != null ){
 			DataType type = currentRow.getColumnDefinitions().getType( columnIndex - 1 );
 			if (DataType.timestamp().equals(type)) {
-				return new Time( currentRow.getTimestamp( columnIndex-1 ).getTime() );
+				final java.util.Date date = currentRow.getTimestamp(columnIndex - 1);
+				return date != null ? new Time( date.getTime() ) : null;
 			} else {
-				return new Time( currentRow.getDate( columnIndex-1 ).getMillisSinceEpoch() );
+				LocalDate date = currentRow.getDate(columnIndex - 1);
+				return date != null ? new Time( date.getMillisSinceEpoch() ) : null;
 			}
 		}
 		throw new SQLException("Exhausted ResultSet.");
@@ -211,9 +217,11 @@ public class ResultSetWrapper implements ResultSet
 		if ( currentRow != null ){
 			DataType type = currentRow.getColumnDefinitions().getType( columnIndex - 1 );
 			if (DataType.timestamp().equals(type)) {
-				return new Timestamp( currentRow.getTimestamp( columnIndex-1 ).getTime() );
+				final java.util.Date date = currentRow.getTimestamp(columnIndex - 1);
+				return date != null ? new Timestamp( date.getTime() ) : null;
 			} else {
-				return new Timestamp( currentRow.getDate( columnIndex-1 ).getMillisSinceEpoch() );
+				final LocalDate date = currentRow.getDate(columnIndex - 1);
+				return date != null ? new Timestamp( date.getMillisSinceEpoch() ) : null;
 			}
 		}
 		throw new SQLException("Exhausted ResultSet.");
