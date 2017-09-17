@@ -77,7 +77,7 @@ public class ResultSetWrapper implements ResultSet
 	public String getString(int columnIndex) throws SQLException {
 		checkClosed();
 		if ( currentRow != null ){
-			return currentRow.getString( columnIndex-1 );
+			return String.valueOf( currentRow.getObject( columnIndex-1 ) );
 		}
 		throw new SQLException("Exhausted ResultSet.");
 	}
