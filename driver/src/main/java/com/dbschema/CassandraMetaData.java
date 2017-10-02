@@ -170,7 +170,7 @@ public class CassandraMetaData implements DatabaseMetaData {
                 tableMetadata.getName(), // "TABLE_NAME", (i.e. Cassandra Collection Name)
                 columnMetadata.getName(), // "COLUMN_NAME",
                 "" + CassandraMetaData.getJavaTypeByName( "" + columnMetadata.getType().getName() ), // "DATA_TYPE",
-                "" + columnMetadata.getType().getName(), // "TYPE_NAME",
+                "" + columnMetadata.getType(), // "TYPE_NAME", -- I LET THIS INTENTIONALLY TO USE .toString() BECAUSE OF USER DEFINED TYPES.
                 "800", // "COLUMN_SIZE",
                 "0", // "BUFFER_LENGTH", (not used)
                 "0", // "DECIMAL_DIGITS",
