@@ -2,6 +2,7 @@
 package com.dbschema;
 
 import com.datastax.driver.core.*;
+import com.datastax.driver.core.exceptions.SyntaxError;
 import com.datastax.driver.mapping.annotations.Query;
 import com.dbschema.resultSet.ArrayResultSet;
 import com.dbschema.resultSet.ResultSetWrapper;
@@ -106,12 +107,20 @@ public class CassandraPreparedStatement implements PreparedStatement {
 
     @Override
     public ResultSet executeQuery() throws SQLException {
-        return executeQuery( sql );
+        try {
+            return executeQuery(sql);
+        } catch ( SyntaxError ex ){
+            throw new SQLException( ex );
+        }
     }
 
     @Override
     public boolean execute(final String sql) throws SQLException {
-        executeQuery( sql );
+        try {
+            executeQuery(sql);
+        } catch ( SyntaxError ex ){
+            throw new SQLException( ex );
+        }
         return lastResultSet != null;
     }
 
@@ -134,7 +143,11 @@ public class CassandraPreparedStatement implements PreparedStatement {
 
     @Override
     public int executeUpdate( String sql) throws SQLException	{
-        executeQuery(sql);
+        try {
+            executeQuery(sql);
+        } catch ( SyntaxError ex ){
+            throw new SQLException( ex );
+        }
         return 1;
     }
 
