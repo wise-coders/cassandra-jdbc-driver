@@ -4,10 +4,7 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.policies.ConstantReconnectionPolicy;
 import com.datastax.driver.core.policies.DowngradingConsistencyRetryPolicy;
 
-import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
-import java.net.URLDecoder;
-import java.security.InvalidParameterException;
 import java.util.*;
 
 public class CassandraClientURI {

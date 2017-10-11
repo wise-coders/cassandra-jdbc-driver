@@ -3,7 +3,6 @@ package com.dbschema;
 
 import com.datastax.driver.core.*;
 import com.datastax.driver.core.exceptions.SyntaxError;
-import com.datastax.driver.mapping.annotations.Query;
 import com.dbschema.resultSet.ArrayResultSet;
 import com.dbschema.resultSet.ResultSetWrapper;
 
@@ -12,11 +11,12 @@ import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.*;
-import java.sql.Date;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

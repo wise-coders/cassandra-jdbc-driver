@@ -67,6 +67,7 @@ public class CassandraMetaData implements DatabaseMetaData {
     public ResultSet getTables(String catalogName, String schemaPattern, String tableNamePattern, String[] types)
             throws SQLException
     {
+        getUDTs( catalogName, schemaPattern, null, null );
         ArrayResultSet resultSet = new ArrayResultSet();
         resultSet.setColumnNames(new String[]{"TABLE_CAT", "TABLE_SCHEMA", "TABLE_NAME",
                 "TABLE_TYPE", "REMARKS", "TYPE_CAT", "TYPE_SCHEMA", "TYPE_NAME", "SELF_REFERENCING_COL_NAME",
@@ -1413,9 +1414,40 @@ public class CassandraMetaData implements DatabaseMetaData {
     public ResultSet getUDTs(String catalogName, String schemaPattern, String typeNamePattern, int[] types)
             throws SQLException	{
         ArrayResultSet retVal = new ArrayResultSet();
-        retVal.setColumnNames(new String[] { "TYPE_CAT", "TYPE_SCHEM", "TYPE_NAME", "CLASS_NAME", "DATA_TYPE",
-                "REMARKS", "BASE_TYPE", });
+        retVal.setColumnNames(new String[] { "TYPE_CAT", "TYPE_SCHEMA", "TYPE_NAME", "CLASS_NAME", "DATA_TYPE", "REMARKS", "BASE_TYPE", "DEFINITION" });
+        final KeyspaceMetadata metadata = con.session.getCluster().getMetadata().getKeyspace( catalogName );
+        if ( metadata != null ){
+            if ( typeNamePattern == null ){
+                for ( UserType type : metadata.getUserTypes()){
+                    exportUserDefinedType( retVal, type );
+                }
+            } else {
+                final UserType type = metadata.getUserType( typeNamePattern );
+                exportUserDefinedType( retVal, type );
+            }
+        }
         return retVal;
+    }
+
+    private void exportUserDefinedType(ArrayResultSet result, UserType type ) {
+        String name = type.toString();
+        if ( name.startsWith( type.getKeyspace() + ".")){
+            name = name.substring( type.getKeyspace().length() + 1 );
+        }
+        String script = type.asCQLQuery();
+        if ( script.endsWith(";")){
+            script = script.substring(0, script.length() -1);
+        }
+        result.addRow(new String[]{
+                type.getKeyspace(), // "TABLE_CAT",
+                null, // "TABLE_SCHEMA",
+                name, // "TABLE_NAME", (i.e. Cassandra Collection Name)
+                String.valueOf( type.getClass() ), // "CLASS_NAME",
+                "1111", // "DATA_TYPE" - 1111 CORRESPOND TO java.sql.Types.OTHER
+                null, // "REMARKS",
+                "0", // "BASE_TYPE",
+                script
+        });
     }
 
     /**
