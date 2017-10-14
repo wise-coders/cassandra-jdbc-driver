@@ -338,8 +338,8 @@ public class CassandraMetaData implements DatabaseMetaData {
         if ( query != null ){
             int idx = query.indexOf("(");
             if ( idx > 0 ) query = query.substring( idx+1 );
-            query = query.replaceAll("\\(" , "," );
-            query = query.replaceAll("\\)" , "," );
+            idx = query.lastIndexOf(")");
+            if ( idx > 0 ) query = query.substring( 0, idx );
             for ( String term : query.split(",")){
                 term = term.trim();
                 if ( term.length() > 0 ){
