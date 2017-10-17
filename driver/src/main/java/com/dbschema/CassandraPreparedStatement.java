@@ -455,7 +455,7 @@ public class CassandraPreparedStatement implements PreparedStatement {
 
     @Override
     public boolean execute() throws SQLException {
-        return false;
+        return execute( sql );
     }
 
     @Override
