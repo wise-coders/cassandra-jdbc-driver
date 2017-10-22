@@ -2,6 +2,7 @@ package com.dbschema;
 
 import com.datastax.driver.core.*;
 import com.dbschema.resultSet.ArrayResultSet;
+import io.netty.util.internal.StringUtil;
 
 import java.sql.Connection;
 import java.sql.*;
@@ -73,7 +74,7 @@ public class CassandraMetaData implements DatabaseMetaData {
                 "TABLE_TYPE", "REMARKS", "TYPE_CAT", "TYPE_SCHEMA", "TYPE_NAME", "SELF_REFERENCING_COL_NAME",
                 "REF_GENERATION"});
         final Metadata metadata = con.session.getCluster().getMetadata();
-        if ( catalogName != null && catalogName.trim().isEmpty() ) {
+        if ( catalogName != null && !catalogName.trim().isEmpty() ) {
             KeyspaceMetadata keyspace = metadata.getKeyspace(catalogName);
             if ( keyspace == null ) metadata.getKeyspace("\"" + catalogName + "\"" );
             if ( keyspace != null) {
@@ -82,15 +83,17 @@ public class CassandraMetaData implements DatabaseMetaData {
                 }
                 return resultSet;
             }
-            System.out.println("Could not find any keyspace '" + catalogName + "'. Will list all keyspaces.");
+            System.out.println("Could not find any keyspace '" + catalogName + "'.");
         }
+        return resultSet;
+        /*
         for ( KeyspaceMetadata keyspaceMetadata : metadata.getKeyspaces() ) {
             for (TableMetadata tableMetadata : keyspaceMetadata.getTables()) {
                 resultSet.addRow(createTableRow(catalogName, tableMetadata.getName(), tableMetadata.getOptions().getComment(), tableMetadata.getOptions()));
             }
         }
         return resultSet;
-
+*/
     }
 
     private String[] createTableRow( String catalogName, String tableName, String comment, TableOptionsMetadata options ){
