@@ -81,19 +81,10 @@ public class CassandraMetaData implements DatabaseMetaData {
                 for (TableMetadata tableMetadata : keyspace.getTables()) {
                     resultSet.addRow(createTableRow(catalogName, tableMetadata.getName(), tableMetadata.getOptions().getComment(), tableMetadata.getOptions()));
                 }
-                return resultSet;
             }
             System.out.println("Could not find any keyspace '" + catalogName + "'.");
         }
         return resultSet;
-        /*
-        for ( KeyspaceMetadata keyspaceMetadata : metadata.getKeyspaces() ) {
-            for (TableMetadata tableMetadata : keyspaceMetadata.getTables()) {
-                resultSet.addRow(createTableRow(catalogName, tableMetadata.getName(), tableMetadata.getOptions().getComment(), tableMetadata.getOptions()));
-            }
-        }
-        return resultSet;
-*/
     }
 
     private String[] createTableRow( String catalogName, String tableName, String comment, TableOptionsMetadata options ){
