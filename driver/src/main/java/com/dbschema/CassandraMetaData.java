@@ -81,8 +81,9 @@ public class CassandraMetaData implements DatabaseMetaData {
                 for (TableMetadata tableMetadata : keyspace.getTables()) {
                     resultSet.addRow(createTableRow(catalogName, tableMetadata.getName(), tableMetadata.getOptions().getComment(), tableMetadata.getOptions()));
                 }
+            } else {
+                System.out.println("Could not find any keyspace '" + catalogName + "'.");
             }
-            System.out.println("Could not find any keyspace '" + catalogName + "'.");
         }
         return resultSet;
     }
