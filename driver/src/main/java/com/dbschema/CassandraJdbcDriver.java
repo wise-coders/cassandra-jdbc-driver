@@ -43,7 +43,7 @@ public class CassandraJdbcDriver implements Driver {
 
                 return new CassandraConnection(session);
             } catch (UnknownHostException e) {
-                throw new SQLException("Unexpected exception: " + e.getMessage(), e);
+                throw new SQLException( e.getMessage(), e);
             }
         }
         return null;

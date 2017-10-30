@@ -90,8 +90,8 @@ public class CassandraClientURI {
         for ( String host : hosts ){
             int idx = host.indexOf(":");
             if ( idx > 0 ){
-                port = Integer.parseInt( host.substring( idx +1));
-                host = host.substring( 0, idx );
+                port = Integer.parseInt( host.substring( idx +1).trim() );
+                host = host.substring( 0, idx ).trim();
             }
             builder.addContactPoints( InetAddress.getByName( host ) );
         }
