@@ -78,7 +78,7 @@ public class CassandraResultSetMetaData implements ResultSetMetaData
 	@Override
 	public boolean isSigned(int column) throws SQLException
 	{
-		return false;
+		return true;
 	}
 
 	/**
