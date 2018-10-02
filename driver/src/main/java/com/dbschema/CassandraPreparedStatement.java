@@ -76,7 +76,7 @@ public class CassandraPreparedStatement implements PreparedStatement {
         return lastResultSet;
     }
 
-    public static final SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+    private static final SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
     private ArrayResultSet explainPlan( String query ){
         final ArrayResultSet rs = new ArrayResultSet();
@@ -225,7 +225,7 @@ public class CassandraPreparedStatement implements PreparedStatement {
     @Override
     public int getUpdateCount() throws SQLException	{
         checkClosed();
-        return 0;
+        return -1;
     }
 
     @Override
