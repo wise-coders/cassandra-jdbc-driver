@@ -11,7 +11,6 @@ import java.util.concurrent.Executor;
 
 public class CassandraConnection implements Connection
 {
-    private String catalog;
 	public final Session session;
 	private boolean isClosed = false;
 	private boolean isReadOnly = false;
@@ -21,8 +20,9 @@ public class CassandraConnection implements Connection
 		this.session = session;
 	}
 
-    public String getCatalog(){
-        return catalog;
+    public String getCatalog() throws SQLException {
+	    checkClosed();
+		return session.getLoggedKeyspace();
     }
 
 	public Session getSession() {
@@ -147,7 +147,7 @@ public class CassandraConnection implements Connection
 
     @Override
 	public void setCatalog(String catalog) {
-		this.catalog = catalog;
+		// todo: implement
 	}
 
     @Override
@@ -328,7 +328,7 @@ public class CassandraConnection implements Connection
 	public Array createArrayOf(String typeName, Object[] elements) throws SQLException
 	{
 		checkClosed();
-		
+
 		return null;
 	}
 
@@ -339,7 +339,7 @@ public class CassandraConnection implements Connection
 	public Struct createStruct(String typeName, Object[] attributes) throws SQLException
 	{
 		checkClosed();
-		
+
 		return null;
 	}
 
@@ -353,12 +353,13 @@ public class CassandraConnection implements Connection
 	}
 
     @Override
-    public void setSchema(String schema) throws SQLException {
+	public void setSchema(String schema) {
+		setCatalog(schema);
     }
 
     @Override
-    public String getSchema() throws SQLException {
-        return null;
+	public String getSchema() throws SQLException {
+		return getCatalog();
     }
 
     @Override
