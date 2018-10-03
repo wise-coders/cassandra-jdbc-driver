@@ -9,6 +9,8 @@ import java.sql.*;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+import static com.dbschema.CassandraClientURI.PREFIX;
+
 
 /**
  * Minimal implementation of the JDBC standards for the Cassandra database.
@@ -38,8 +40,8 @@ public class CassandraJdbcDriver implements Driver {
             CassandraClientURI clientURI = new CassandraClientURI( url, info );
             try	{
 
-                Cluster cluster = clientURI.createBuilder();
-                Session session = cluster.connect( clientURI.getDatabase() );
+                Cluster cluster = clientURI.createCluster();
+                Session session = cluster.connect( clientURI.getKeyspace() );
 
                 return new CassandraConnection(session);
             } catch (UnknownHostException e) {
@@ -57,7 +59,7 @@ public class CassandraJdbcDriver implements Driver {
      */
     @Override
     public boolean acceptsURL(String url) throws SQLException {
-        return url.startsWith("jdbc:cassandra:");
+        return url.startsWith(PREFIX);
     }
 
     /**

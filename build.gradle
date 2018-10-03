@@ -19,6 +19,11 @@ sourceSets {
             srcDirs = ['driver/src/main/resources']
         }
     }
+    test {
+        java {
+            srcDirs = ['driver/src/test']
+        }
+    }
 }
 
 dependencies {
@@ -30,4 +35,9 @@ jar {
     from {
         configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
     }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
 }
