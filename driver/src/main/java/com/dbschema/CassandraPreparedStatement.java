@@ -2,6 +2,7 @@
 package com.dbschema;
 
 import com.datastax.driver.core.*;
+import com.datastax.driver.core.exceptions.DriverException;
 import com.datastax.driver.core.exceptions.SyntaxError;
 import com.dbschema.resultSet.ArrayResultSet;
 import com.dbschema.resultSet.ResultSetWrapper;
@@ -53,32 +54,36 @@ public class CassandraPreparedStatement implements PreparedStatement {
 
     @Override
     public ResultSet executeQuery(String sql) throws SQLException	{
-        checkClosed();
-        if (lastResultSet != null ) {
-            lastResultSet.close();
-            lastResultSet = null;
-        }
-        if ( sql == null ){
-            throw new SQLException("Null statement.");
-        }
+        try {
+            checkClosed();
+            if (lastResultSet != null) {
+                lastResultSet.close();
+                lastResultSet = null;
+            }
+            if (sql == null) {
+                throw new SQLException("Null statement.");
+            }
 
-        Matcher matcherExplainPlan = PATTERN_EXPLAIN_PLAN.matcher( sql );
-        if ( matcherExplainPlan.matches() ){
-            lastResultSet = explainPlan( matcherExplainPlan.group(1));
-        } else if ( params != null ){
-            com.datastax.driver.core.PreparedStatement dsps = connection.session.prepare( sql );
-            BoundStatement boundStatement = new BoundStatement(dsps);
-            lastResultSet = new ResultSetWrapper( this, connection.session.execute( boundStatement.bind( params.toArray(new Object[params.size()]) )));
-            params.clear();
-        } else {
-            lastResultSet = new ResultSetWrapper( this, connection.session.execute( sql ) );
+            Matcher matcherExplainPlan = PATTERN_EXPLAIN_PLAN.matcher(sql);
+            if (matcherExplainPlan.matches()) {
+                lastResultSet = explainPlan(matcherExplainPlan.group(1));
+            } else if (params != null) {
+                com.datastax.driver.core.PreparedStatement dsps = connection.session.prepare(sql);
+                BoundStatement boundStatement = new BoundStatement(dsps);
+                lastResultSet = new ResultSetWrapper(this, connection.session.execute(boundStatement.bind(params.toArray(new Object[params.size()]))));
+                params.clear();
+            } else {
+                lastResultSet = new ResultSetWrapper(this, connection.session.execute(sql));
+            }
+        } catch (DriverException e) {
+            throw new SQLException(e);
         }
         return lastResultSet;
     }
 
     private static final SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
-    private ArrayResultSet explainPlan( String query ){
+    private ArrayResultSet explainPlan( String query ) throws SQLException {
         final ArrayResultSet rs = new ArrayResultSet();
         try {
             SimpleStatement scan = new SimpleStatement(query);
@@ -99,8 +104,8 @@ public class CassandraPreparedStatement implements PreparedStatement {
             if ( rs.getRowCount() == 0 ){
                 rs.addRow(new Object[]{ null, hostQueried, hostTried, null, null, null, null});
             }
-        } catch ( Throwable ex ){
-            ex.printStackTrace();
+        } catch (DriverException e) {
+            throw new SQLException(e);
         }
         return rs;
     }
