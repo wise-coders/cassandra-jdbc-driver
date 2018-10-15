@@ -15,6 +15,7 @@ import java.nio.ByteBuffer;
 import java.sql.*;
 import java.util.Calendar;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 public class ResultSetWrapper implements ResultSet
@@ -893,10 +894,23 @@ public class ResultSetWrapper implements ResultSet
 		return null;
 	}
 
-	public Array getArray(int columnIndex) throws SQLException
-	{
+	public Array getArray(int columnIndex) throws SQLException {
+		checkClosed();
+		if (currentRow != null) {
+			Object o = currentRow.getObject(columnIndex - 1);
+			if (!(o instanceof List)) return null;
+			List list = (List) o;
+			return toArray(list);
+		}
+		throw new SQLException("Exhausted ResultSet.");
+	}
 
-		return null;
+	private Array toArray(List list) {
+		Object[] array = new Object[list.size()];
+		for (int i = 0; i < list.size(); i++) {
+			array[i] = list.get(i);
+		}
+		return new ArrayImpl(array);
 	}
 
 	public Object getObject(String columnLabel, Map<String, Class<?>> map) throws SQLException
@@ -923,10 +937,15 @@ public class ResultSetWrapper implements ResultSet
 		return null;
 	}
 
-	public Array getArray(String columnLabel) throws SQLException
-	{
-
-		return null;
+	public Array getArray(String columnLabel) throws SQLException {
+		checkClosed();
+		if (currentRow != null) {
+			Object o = currentRow.getObject(columnLabel);
+			if (!(o instanceof List)) return null;
+			List list = (List) o;
+			return toArray(list);
+		}
+		throw new SQLException("Exhausted ResultSet.");
 	}
 
 	public Date getDate(int columnIndex, Calendar cal) throws SQLException
@@ -1331,5 +1350,72 @@ public class ResultSetWrapper implements ResultSet
 	@Override
 	public <T> T getObject(String columnLabel, Class<T> type) throws SQLException {
 		return null;
+	}
+
+	private static class ArrayImpl implements Array {
+
+		private Object[] array;
+
+		public ArrayImpl(Object[] array) {
+			this.array = array;
+		}
+
+		@Override
+		public String getBaseTypeName() throws SQLException {
+			throw new SQLFeatureNotSupportedException();
+		}
+
+		@Override
+		public int getBaseType() throws SQLException {
+			throw new SQLFeatureNotSupportedException();
+		}
+
+		@Override
+		public Object[] getArray() throws SQLException {
+			if (array == null) throw new SQLException("Array was freed");
+			return array;
+		}
+
+		@Override
+		public Object getArray(Map<String, Class<?>> map) throws SQLException {
+			throw new SQLFeatureNotSupportedException();
+		}
+
+		@Override
+		public Object getArray(long index, int count) throws SQLException {
+			throw new SQLFeatureNotSupportedException();
+		}
+
+		@Override
+		public Object getArray(long index, int count, Map<String, Class<?>> map) throws SQLException {
+			throw new SQLFeatureNotSupportedException();
+		}
+
+		@Override
+		public ResultSet getResultSet() throws SQLException {
+			throw new SQLFeatureNotSupportedException();
+		}
+
+		@Override
+		public ResultSet getResultSet(Map<String, Class<?>> map) throws SQLException {
+			throw new SQLFeatureNotSupportedException();
+		}
+
+		@Override
+		public ResultSet getResultSet(long index, int count) throws SQLException {
+			throw new SQLFeatureNotSupportedException();
+		}
+
+		@Override
+		public ResultSet getResultSet(long index, int count, Map<String, Class<?>> map) throws SQLException {
+			throw new SQLFeatureNotSupportedException();
+		}
+
+		@Override
+		public void free() {
+			if (array != null) {
+				array = null;
+			}
+		}
 	}
 }
