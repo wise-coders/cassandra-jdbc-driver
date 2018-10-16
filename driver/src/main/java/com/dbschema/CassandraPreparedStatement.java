@@ -68,12 +68,12 @@ public class CassandraPreparedStatement implements PreparedStatement {
             if (matcherExplainPlan.matches()) {
                 lastResultSet = explainPlan(matcherExplainPlan.group(1));
             } else if (params != null) {
-                com.datastax.driver.core.PreparedStatement dsps = connection.session.prepare(sql);
+                com.datastax.driver.core.PreparedStatement dsps = connection.getSession().prepare(sql);
                 BoundStatement boundStatement = new BoundStatement(dsps);
-                lastResultSet = new ResultSetWrapper(this, connection.session.execute(boundStatement.bind(params.toArray(new Object[params.size()]))));
+                lastResultSet = new ResultSetWrapper(this, connection.getSession().execute(boundStatement.bind(params.toArray(new Object[params.size()]))));
                 params.clear();
             } else {
-                lastResultSet = new ResultSetWrapper(this, connection.session.execute(sql));
+                lastResultSet = new ResultSetWrapper(this, connection.getSession().execute(sql));
             }
         } catch (DriverException e) {
             throw new SQLException(e);
@@ -87,7 +87,7 @@ public class CassandraPreparedStatement implements PreparedStatement {
         final ArrayResultSet rs = new ArrayResultSet();
         try {
             SimpleStatement scan = new SimpleStatement(query);
-            final ExecutionInfo executionInfo = connection.session.execute( scan.enableTracing() ).getExecutionInfo();
+            final ExecutionInfo executionInfo = connection.getSession().execute( scan.enableTracing() ).getExecutionInfo();
             final String hostQueried = executionInfo.getQueriedHost().toString();
             final StringBuilder hostTried = new StringBuilder();
             for (Host host : executionInfo.getTriedHosts()) {

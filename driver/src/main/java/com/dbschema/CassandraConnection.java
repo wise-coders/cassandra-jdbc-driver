@@ -3,7 +3,6 @@ package com.dbschema;
 
 import com.datastax.driver.core.Session;
 
-import java.net.UnknownHostException;
 import java.sql.*;
 import java.util.Map;
 import java.util.Properties;
@@ -11,12 +10,12 @@ import java.util.concurrent.Executor;
 
 public class CassandraConnection implements Connection
 {
-	public final Session session;
+	private final Session session;
 	private boolean isClosed = false;
 	private boolean isReadOnly = false;
 
 
-	public CassandraConnection(Session session) throws UnknownHostException {
+	public CassandraConnection(Session session) {
 		this.session = session;
 	}
 

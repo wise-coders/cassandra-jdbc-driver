@@ -11,10 +11,10 @@ public class CassandraMetaData implements DatabaseMetaData {
     private static final int TYPE_MAP = 4999544;
     private static final int TYPE_LIST = 4999545;
 
-    private final CassandraConnection con;
+    private final CassandraConnection connection;
 
-    CassandraMetaData(CassandraConnection con) {
-        this.con = con;
+    CassandraMetaData(CassandraConnection connection) {
+        this.connection = connection;
     }
 
     @Override
@@ -99,7 +99,8 @@ public class CassandraMetaData implements DatabaseMetaData {
     }
 
     public String getDatabaseProductVersion() {
-        return "1.0";
+        com.datastax.driver.core.ResultSet result = connection.getSession().execute("select release_version from system.local");
+        return result.one().getString(0);
     }
 
     public String getDriverName() {
@@ -657,7 +658,7 @@ public class CassandraMetaData implements DatabaseMetaData {
 
     @Override
     public Connection getConnection() {
-        return con;
+        return connection;
     }
 
     @Override
