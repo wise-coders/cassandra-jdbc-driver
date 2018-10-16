@@ -121,13 +121,10 @@ public class CassandraConnection implements Connection
 		return isClosed;
 	}
 
-
-    private final CassandraMetaData metaData = new CassandraMetaData(this);
-
     @Override
 	public DatabaseMetaData getMetaData() throws SQLException {
 		checkClosed();
-        return metaData;
+        return new CassandraMetaData(this);
 	}
 
     @Override
