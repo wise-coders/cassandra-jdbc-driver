@@ -474,18 +474,18 @@ public class CassandraResultSet implements ResultSet {
     }
 
     @Override
-    public int getFetchDirection() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public int getFetchDirection() {
+        return ResultSet.FETCH_FORWARD;
     }
 
     @Override
-    public void setFetchSize(int rows) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public void setFetchSize(int rows) {
+        // todo
     }
 
     @Override
-    public int getFetchSize() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public int getFetchSize() {
+        return 0;
     }
 
     @Override

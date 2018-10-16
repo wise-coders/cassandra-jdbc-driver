@@ -201,8 +201,8 @@ public class CassandraPreparedStatement implements PreparedStatement {
     }
 
     @Override
-    public int getFetchDirection() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public int getFetchDirection() {
+        return ResultSet.FETCH_FORWARD;
     }
 
     @Override

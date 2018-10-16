@@ -124,40 +124,40 @@ public class CassandraMetaData implements DatabaseMetaData {
         throw new SQLFeatureNotSupportedException();
     }
 
-    public boolean supportsMixedCaseIdentifiers() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public boolean supportsMixedCaseIdentifiers() {
+        return false;
     }
 
-    public boolean storesUpperCaseIdentifiers() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public boolean storesUpperCaseIdentifiers() {
+        return false;
     }
 
-    public boolean storesLowerCaseIdentifiers() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public boolean storesLowerCaseIdentifiers() {
+        return true;
     }
 
-    public boolean storesMixedCaseIdentifiers() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public boolean storesMixedCaseIdentifiers() {
+        return false;
     }
 
-    public boolean supportsMixedCaseQuotedIdentifiers() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public boolean supportsMixedCaseQuotedIdentifiers() {
+        return true;
     }
 
-    public boolean storesUpperCaseQuotedIdentifiers() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public boolean storesUpperCaseQuotedIdentifiers() {
+        return true;
     }
 
-    public boolean storesLowerCaseQuotedIdentifiers() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public boolean storesLowerCaseQuotedIdentifiers() {
+        return true;
     }
 
     public boolean storesMixedCaseQuotedIdentifiers() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+        return true;
     }
 
-    public String getIdentifierQuoteString() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public String getIdentifierQuoteString() {
+        return "\"";
     }
 
     public String getSQLKeywords() throws SQLException {
@@ -184,8 +184,8 @@ public class CassandraMetaData implements DatabaseMetaData {
         throw new SQLFeatureNotSupportedException();
     }
 
-    public String getExtraNameCharacters() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public String getExtraNameCharacters() {
+        return "";
     }
 
     public boolean supportsAlterTableWithAddColumn() throws SQLException {
