@@ -8,9 +8,6 @@ import java.sql.*;
  */
 public class CassandraMetaData implements DatabaseMetaData {
 
-    private static final int TYPE_MAP = 4999544;
-    private static final int TYPE_LIST = 4999545;
-
     private final CassandraConnection connection;
 
     CassandraMetaData(CassandraConnection connection) {
@@ -662,8 +659,8 @@ public class CassandraMetaData implements DatabaseMetaData {
     }
 
     @Override
-    public boolean supportsSavepoints() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public boolean supportsSavepoints() {
+        return false;
     }
 
     @Override
@@ -789,28 +786,5 @@ public class CassandraMetaData implements DatabaseMetaData {
     @Override
     public boolean generatedKeyAlwaysReturned() throws SQLException {
         throw new SQLFeatureNotSupportedException();
-    }
-
-    public static int getJavaTypeByName(String typeName) {
-        if ("ascii".equalsIgnoreCase(typeName)) return Types.VARCHAR;
-        if ("bigint".equalsIgnoreCase(typeName)) return Types.BIGINT;
-        if ("blob".equalsIgnoreCase(typeName)) return Types.BLOB;
-        if ("boolean".equalsIgnoreCase(typeName)) return Types.BOOLEAN;
-        if ("counter".equalsIgnoreCase(typeName)) return Types.NUMERIC;
-        if ("decimal".equalsIgnoreCase(typeName)) return Types.DECIMAL;
-        if ("double".equalsIgnoreCase(typeName)) return Types.DOUBLE;
-        if ("float".equalsIgnoreCase(typeName)) return Types.FLOAT;
-        if ("inet".equalsIgnoreCase(typeName)) return Types.VARCHAR;
-        if ("int".equalsIgnoreCase(typeName)) return Types.INTEGER;
-        if ("list".equalsIgnoreCase(typeName)) return TYPE_LIST;
-        if ("map".equalsIgnoreCase(typeName)) return TYPE_MAP;
-        if ("set".equalsIgnoreCase(typeName)) return Types.STRUCT;
-        if ("text".equalsIgnoreCase(typeName)) return Types.VARCHAR;
-        if ("timestamp".equalsIgnoreCase(typeName)) return Types.TIMESTAMP;
-        if ("uuid".equalsIgnoreCase(typeName)) return Types.ROWID;
-        if ("timesuuid".equalsIgnoreCase(typeName)) return Types.ROWID;
-        if ("varchar".equalsIgnoreCase(typeName)) return Types.VARCHAR;
-        if ("varint".equalsIgnoreCase(typeName)) return Types.INTEGER;
-        throw new IllegalArgumentException("Type name is not known: " + typeName);
     }
 }

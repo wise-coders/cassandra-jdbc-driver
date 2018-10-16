@@ -1,11 +1,11 @@
 package com.dbschema.resultSet;
 
-import com.datastax.driver.core.ColumnDefinitions;
+import com.datastax.driver.core.ColumnDefinitions.Definition;
 import com.datastax.driver.core.DataType;
 import com.datastax.driver.core.LocalDate;
 import com.datastax.driver.core.Row;
-import com.dbschema.CassandraMetaData;
 import com.dbschema.CassandraResultSetMetaData;
+import com.dbschema.CassandraResultSetMetaData.ColumnMetaData;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -13,10 +13,8 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.sql.*;
-import java.util.Calendar;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.sql.Date;
+import java.util.*;
 
 public class CassandraResultSet implements ResultSet {
 
@@ -344,8 +342,8 @@ public class CassandraResultSet implements ResultSet {
     }
 
     @Override
-    public void clearWarnings() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public void clearWarnings() {
+        // todo
     }
 
     @Override
@@ -356,24 +354,12 @@ public class CassandraResultSet implements ResultSet {
     @Override
     public ResultSetMetaData getMetaData() throws SQLException {
         checkClosed();
-        int size = dsResultSet.getColumnDefinitions().size();
-        String[] columnNames = new String[size];
-        int[] columnDisplaySizes = new int[size];
-        int[] columnJavaTypes = new int[size];
-        String tableName = null;
-        int i = 0;
-        for (ColumnDefinitions.Definition def : dsResultSet.getColumnDefinitions()) {
-            columnNames[i] = def.getName();
+        List<ColumnMetaData> columnMetaData = new ArrayList<>();
+        for (Definition def : dsResultSet.getColumnDefinitions()) {
             String typeName = def.getType().getName().name();
-            int type = CassandraMetaData.getJavaTypeByName(typeName);
-
-            columnDisplaySizes[i] = 100;
-            columnJavaTypes[i] = type;
-            tableName = def.getTable();
-            i++;
+            columnMetaData.add(new ColumnMetaData(def.getName(), def.getTable(), def.getKeyspace(), typeName));
         }
-
-        return new CassandraResultSetMetaData(tableName, columnNames, columnJavaTypes, columnDisplaySizes);
+        return new CassandraResultSetMetaData(columnMetaData);
     }
 
 
@@ -501,8 +487,8 @@ public class CassandraResultSet implements ResultSet {
     }
 
     @Override
-    public int getType() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public int getType() {
+        return ResultSet.TYPE_FORWARD_ONLY; // todo
     }
 
     @Override

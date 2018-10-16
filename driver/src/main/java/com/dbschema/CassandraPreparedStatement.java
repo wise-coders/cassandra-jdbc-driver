@@ -139,8 +139,8 @@ public class CassandraPreparedStatement implements PreparedStatement {
     }
 
     @Override
-    public void setMaxRows(final int max) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public void setMaxRows(final int max) {
+        // todo
     }
 
     @Override
@@ -163,13 +163,13 @@ public class CassandraPreparedStatement implements PreparedStatement {
     }
 
     @Override
-    public SQLWarning getWarnings() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public SQLWarning getWarnings() {
+        return null; // todo
     }
 
     @Override
-    public void clearWarnings() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public void clearWarnings() {
+        // todo
     }
 
     @Override
@@ -206,8 +206,8 @@ public class CassandraPreparedStatement implements PreparedStatement {
     }
 
     @Override
-    public void setFetchSize(final int rows) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public void setFetchSize(final int rows) {
+        // todo
     }
 
     @Override
@@ -453,8 +453,8 @@ public class CassandraPreparedStatement implements PreparedStatement {
     }
 
     @Override
-    public ResultSetMetaData getMetaData() {
-        return null; // todo
+    public ResultSetMetaData getMetaData() throws SQLException {
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
