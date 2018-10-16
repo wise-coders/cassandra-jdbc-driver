@@ -6,14 +6,16 @@ import com.datastax.driver.core.LocalDate;
 import com.datastax.driver.core.Row;
 import com.dbschema.CassandraResultSetMetaData;
 import com.dbschema.CassandraResultSetMetaData.ColumnMetaData;
+import com.dbschema.types.ArrayImpl;
+import com.dbschema.types.BlobImpl;
 
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.nio.ByteBuffer;
-import java.sql.*;
 import java.sql.Date;
+import java.sql.*;
 import java.util.*;
 
 public class CassandraResultSet implements ResultSet {
@@ -533,7 +535,8 @@ public class CassandraResultSet implements ResultSet {
 
     @Override
     public void updateInt(int columnIndex, int x) throws SQLException {
-        throw new SQLFeatureNotSupportedException();    }
+        throw new SQLFeatureNotSupportedException();
+    }
 
     @Override
     public void updateLong(int columnIndex, long x) throws SQLException {
@@ -710,11 +713,16 @@ public class CassandraResultSet implements ResultSet {
     }
 
     public Blob getBlob(int columnIndex) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+        checkClosed();
+        if (currentRow != null) {
+            ByteBuffer bytes = currentRow.getBytes(columnIndex - 1);
+            return bytes == null ? null : new BlobImpl(bytes.array());
+        }
+        throw new SQLException("Exhausted ResultSet.");
     }
 
     public Clob getClob(int columnIndex) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+        throw new SQLException("Clob type is not supported by Cassandra");
     }
 
     public Array getArray(int columnIndex) throws SQLException {
@@ -745,11 +753,16 @@ public class CassandraResultSet implements ResultSet {
     }
 
     public Blob getBlob(String columnLabel) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+        checkClosed();
+        if (currentRow != null) {
+            ByteBuffer bytes = currentRow.getBytes(columnLabel);
+            return bytes == null ? null : new BlobImpl(bytes.array());
+        }
+        throw new SQLException("Exhausted ResultSet.");
     }
 
     public Clob getClob(String columnLabel) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+        throw new SQLException("Clob type is not supported by Cassandra");
     }
 
     public Array getArray(String columnLabel) throws SQLException {
@@ -1033,72 +1046,5 @@ public class CassandraResultSet implements ResultSet {
     @Override
     public <T> T getObject(String columnLabel, Class<T> type) throws SQLException {
         throw new SQLFeatureNotSupportedException();
-    }
-
-    private static class ArrayImpl implements Array {
-
-        private Object[] array;
-
-        ArrayImpl(Object[] array) {
-            this.array = array;
-        }
-
-        @Override
-        public String getBaseTypeName() throws SQLException {
-            throw new SQLFeatureNotSupportedException();
-        }
-
-        @Override
-        public int getBaseType() throws SQLException {
-            throw new SQLFeatureNotSupportedException();
-        }
-
-        @Override
-        public Object[] getArray() throws SQLException {
-            if (array == null) throw new SQLException("Array was freed");
-            return array;
-        }
-
-        @Override
-        public Object getArray(Map<String, Class<?>> map) throws SQLException {
-            throw new SQLFeatureNotSupportedException();
-        }
-
-        @Override
-        public Object getArray(long index, int count) throws SQLException {
-            throw new SQLFeatureNotSupportedException();
-        }
-
-        @Override
-        public Object getArray(long index, int count, Map<String, Class<?>> map) throws SQLException {
-            throw new SQLFeatureNotSupportedException();
-        }
-
-        @Override
-        public ResultSet getResultSet() throws SQLException {
-            throw new SQLFeatureNotSupportedException();
-        }
-
-        @Override
-        public ResultSet getResultSet(Map<String, Class<?>> map) throws SQLException {
-            throw new SQLFeatureNotSupportedException();
-        }
-
-        @Override
-        public ResultSet getResultSet(long index, int count) throws SQLException {
-            throw new SQLFeatureNotSupportedException();
-        }
-
-        @Override
-        public ResultSet getResultSet(long index, int count, Map<String, Class<?>> map) throws SQLException {
-            throw new SQLFeatureNotSupportedException();
-        }
-
-        @Override
-        public void free() {
-            if (array != null) {
-                array = null;
-            }
-        }
     }
 }
