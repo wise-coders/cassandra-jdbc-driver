@@ -27,7 +27,16 @@ public class CassandraStatement extends CassandraBaseStatement {
 
     @Override
     public int executeUpdate(String sql) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+        checkClosed();
+        try {
+            result = new CassandraResultSet(this, session.execute(sql));
+            if (result.isQuery()) {
+                throw new SQLException("Not an update statement");
+            }
+            return 1;
+        } catch (SyntaxError ex) {
+            throw new SQLSyntaxErrorException(ex);
+        }
     }
 
     @Override

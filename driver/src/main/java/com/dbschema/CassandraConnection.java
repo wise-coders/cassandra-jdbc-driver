@@ -121,8 +121,8 @@ public class CassandraConnection implements Connection {
     }
 
     @Override
-    public void setCatalog(String catalog) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public void setCatalog(String catalog) {
+
     }
 
     @Override

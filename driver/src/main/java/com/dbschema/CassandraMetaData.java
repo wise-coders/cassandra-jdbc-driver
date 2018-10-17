@@ -1,5 +1,7 @@
 package com.dbschema;
 
+import com.dbschema.resultSet.CassandraResultSet;
+
 import java.sql.*;
 
 /**
@@ -15,36 +17,38 @@ public class CassandraMetaData implements DatabaseMetaData {
     }
 
     @Override
-    public ResultSet getSchemas() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public ResultSet getSchemas() {
+        return getCatalogs();
     }
 
     @Override
-    public ResultSet getCatalogs() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public ResultSet getCatalogs() {
+        com.datastax.driver.core.ResultSet resultSet =
+                connection.getSession().execute("select keyspace_name from system_schema.keyspaces");
+        return new CassandraResultSet(null, resultSet);
     }
 
     public ResultSet getTables(String catalogName, String schemaPattern,
-                               String tableNamePattern, String[] types) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+                               String tableNamePattern, String[] types) {
+        return null;
     }
 
     public ResultSet getColumns(String catalogName, String schemaName,
-                                String tableNamePattern, String columnNamePattern) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+                                String tableNamePattern, String columnNamePattern) {
+        return null;
     }
 
-    public ResultSet getPrimaryKeys(String catalogName, String schemaName, String tableNamePattern) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public ResultSet getPrimaryKeys(String catalogName, String schemaName, String tableNamePattern) {
+        return null;
     }
 
     public ResultSet getIndexInfo(String catalogName, String schemaName, String tableNamePattern, boolean unique,
-                                  boolean approximate) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+                                  boolean approximate) {
+        return null;
     }
 
-    public ResultSet getTypeInfo() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public ResultSet getTypeInfo() {
+        return null;
     }
 
     public <T> T unwrap(Class<T> iface) throws SQLException {
@@ -63,12 +67,12 @@ public class CassandraMetaData implements DatabaseMetaData {
         throw new SQLFeatureNotSupportedException();
     }
 
-    public String getURL() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public String getURL() {
+        return null;
     }
 
-    public String getUserName() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public String getUserName() {
+        return null;
     }
 
     public boolean isReadOnly() throws SQLException {
@@ -152,7 +156,7 @@ public class CassandraMetaData implements DatabaseMetaData {
         return true;
     }
 
-    public boolean storesMixedCaseQuotedIdentifiers() throws SQLException {
+    public boolean storesMixedCaseQuotedIdentifiers() {
         return true;
     }
 
@@ -160,28 +164,28 @@ public class CassandraMetaData implements DatabaseMetaData {
         return "\"";
     }
 
-    public String getSQLKeywords() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public String getSQLKeywords() {
+        return null;
     }
 
-    public String getNumericFunctions() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public String getNumericFunctions() {
+        return null;
     }
 
-    public String getStringFunctions() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public String getStringFunctions() {
+        return null;
     }
 
-    public String getSystemFunctions() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public String getSystemFunctions() {
+        return null;
     }
 
-    public String getTimeDateFunctions() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public String getTimeDateFunctions() {
+        return null;
     }
 
-    public String getSearchStringEscape() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public String getSearchStringEscape() {
+        return null;
     }
 
     public String getExtraNameCharacters() {
@@ -532,59 +536,58 @@ public class CassandraMetaData implements DatabaseMetaData {
     }
 
     public ResultSet getProcedures(String catalogName, String schemaPattern,
-                                   String procedureNamePattern) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+                                   String procedureNamePattern) {
+        return null;
     }
 
     @Override
     public ResultSet getProcedureColumns(String catalogName, String schemaPattern, String procedureNamePattern,
-                                         String columnNamePattern) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+                                         String columnNamePattern) {
+        return null;
     }
 
     @Override
-    public ResultSet getTableTypes() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
-    }
-
-
-    @Override
-    public ResultSet getColumnPrivileges(String catalogName, String schemaName, String table, String columnNamePattern)
-            throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public ResultSet getTableTypes() {
+        return null;
     }
 
     @Override
-    public ResultSet getTablePrivileges(String catalogName, String schemaPattern, String tableNamePattern) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public ResultSet getColumnPrivileges(String catalogName, String schemaName,
+                                         String table, String columnNamePattern) {
+        return null;
+    }
+
+    @Override
+    public ResultSet getTablePrivileges(String catalogName, String schemaPattern, String tableNamePattern) {
+        return null;
     }
 
     @Override
     public ResultSet getBestRowIdentifier(String catalogName, String schemaName, String table, int scope,
-                                          boolean nullable) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+                                          boolean nullable) {
+        return null;
     }
 
     @Override
-    public ResultSet getVersionColumns(String catalogName, String schemaName, String table) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public ResultSet getVersionColumns(String catalogName, String schemaName, String table) {
+        return null;
     }
 
     @Override
-    public ResultSet getExportedKeys(String catalogName, String schemaName, String tableNamePattern) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public ResultSet getExportedKeys(String catalogName, String schemaName, String tableNamePattern) {
+        return null;
     }
 
     @Override
-    public ResultSet getImportedKeys(String catalogName, String schemaName, String tableNamePattern) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public ResultSet getImportedKeys(String catalogName, String schemaName, String tableNamePattern) {
+        return null;
     }
 
 
     @Override
     public ResultSet getCrossReference(String parentCatalog, String parentSchema, String parentTable,
-                                       String foreignCatalog, String foreignSchema, String foreignTable) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+                                       String foreignCatalog, String foreignSchema, String foreignTable) {
+        return null;
     }
 
 
@@ -649,8 +652,8 @@ public class CassandraMetaData implements DatabaseMetaData {
     }
 
     @Override
-    public ResultSet getUDTs(String catalogName, String schemaPattern, String typeNamePattern, int[] types) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public ResultSet getUDTs(String catalogName, String schemaPattern, String typeNamePattern, int[] types) {
+        return null;
     }
 
     @Override
@@ -679,21 +682,19 @@ public class CassandraMetaData implements DatabaseMetaData {
     }
 
     @Override
-    public ResultSet getSuperTypes(String catalogName, String schemaPattern, String typeNamePattern)
-            throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public ResultSet getSuperTypes(String catalogName, String schemaPattern, String typeNamePattern) {
+        return null;
     }
 
     @Override
-    public ResultSet getSuperTables(String catalogName, String schemaPattern, String tableNamePattern)
-            throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public ResultSet getSuperTables(String catalogName, String schemaPattern, String tableNamePattern) {
+        return null;
     }
 
     @Override
     public ResultSet getAttributes(String catalogName, String schemaPattern, String typeNamePattern,
-                                   String attributeNamePattern) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+                                   String attributeNamePattern) {
+        return null;
     }
 
     @Override
@@ -747,8 +748,8 @@ public class CassandraMetaData implements DatabaseMetaData {
     }
 
     @Override
-    public ResultSet getSchemas(String catalogName, String schemaPattern) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public ResultSet getSchemas(String catalogName, String schemaPattern) {
+        return null;
     }
 
     @Override
@@ -767,20 +768,19 @@ public class CassandraMetaData implements DatabaseMetaData {
     }
 
     @Override
-    public ResultSet getFunctions(String catalogName, String schemaPattern, String functionNamePattern)
-            throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public ResultSet getFunctions(String catalogName, String schemaPattern, String functionNamePattern) {
+        return null;
     }
 
     @Override
     public ResultSet getFunctionColumns(String catalogName, String schemaPattern, String functionNamePattern,
-                                        String columnNamePattern) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+                                        String columnNamePattern) {
+        return null;
     }
 
     @Override
-    public ResultSet getPseudoColumns(String catalogName, String schemaPattern, String tableNamePattern, String columnNamePattern) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public ResultSet getPseudoColumns(String catalogName, String schemaPattern, String tableNamePattern, String columnNamePattern) {
+        return null;
     }
 
     @Override
