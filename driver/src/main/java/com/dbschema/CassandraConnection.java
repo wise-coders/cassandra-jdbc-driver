@@ -13,8 +13,7 @@ public class CassandraConnection implements Connection {
     private boolean isClosed = false;
     private boolean isReadOnly = false;
 
-
-    public CassandraConnection(Session session) {
+    CassandraConnection(Session session) {
         this.session = session;
     }
 
@@ -23,7 +22,7 @@ public class CassandraConnection implements Connection {
         return session.getLoggedKeyspace();
     }
 
-    public Session getSession() {
+    Session getSession() {
         return session;
     }
 
@@ -42,38 +41,34 @@ public class CassandraConnection implements Connection {
     @Override
     public Statement createStatement() throws SQLException {
         checkClosed();
-        return new CassandraPreparedStatement(this);
+        return new CassandraStatement(session);
     }
 
     @Override
     public Statement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
-        checkClosed();
-        return new CassandraPreparedStatement(this);
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
-        checkClosed();
-        return new CassandraPreparedStatement(this);
+        throw new SQLFeatureNotSupportedException();
     }
-
 
     @Override
     public PreparedStatement prepareStatement(String sql) throws SQLException {
         checkClosed();
-        return new CassandraPreparedStatement(this, sql);
+        return new CassandraPreparedStatement(session, session.prepare(sql));
     }
 
     @Override
     public CallableStatement prepareCall(String sql) throws SQLException {
-        checkClosed();
-        return null;
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public String nativeSQL(String sql) throws SQLException {
         checkClosed();
-        throw new UnsupportedOperationException("Cassandra does not support SQL natively.");
+        throw new SQLFeatureNotSupportedException("Cassandra does not support SQL natively.");
     }
 
     @Override

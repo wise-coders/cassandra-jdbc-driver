@@ -2,9 +2,7 @@
 package com.dbschema;
 
 import com.datastax.driver.core.BoundStatement;
-import com.datastax.driver.core.exceptions.DriverException;
-import com.datastax.driver.core.exceptions.SyntaxError;
-import com.dbschema.resultSet.CassandraResultSet;
+import com.datastax.driver.core.Session;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -14,77 +12,30 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-public class CassandraPreparedStatement implements PreparedStatement {
+public class CassandraPreparedStatement extends CassandraBaseStatement implements PreparedStatement {
 
-    private final CassandraConnection connection;
-    private ResultSet lastResultSet;
-    private boolean isClosed = false;
-    private final String sql;
+    private final com.datastax.driver.core.Session session;
+    private final com.datastax.driver.core.PreparedStatement preparedStatement;
     private ArrayList<Object> params;
 
-    public CassandraPreparedStatement(final CassandraConnection connection) {
-        this.connection = connection;
-        this.sql = null;
-    }
-
-    public CassandraPreparedStatement(final CassandraConnection connection, String sql) {
-        this.connection = connection;
-        this.sql = sql;
+    CassandraPreparedStatement(Session session, final com.datastax.driver.core.PreparedStatement preparedStatement) {
+        this.session = session;
+        this.preparedStatement = preparedStatement;
     }
 
     @Override
-    public <T> T unwrap(final Class<T> iface) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    public boolean isWrapperFor(final Class<?> iface) throws SQLException {
+    public ResultSet executeQuery() throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public ResultSet executeQuery(String sql) throws SQLException {
-        try {
-            checkClosed();
-            if (lastResultSet != null) {
-                lastResultSet.close();
-                lastResultSet = null;
-            }
-            if (sql == null) {
-                throw new SQLException("Null statement.");
-            }
-
-            if (params != null) {
-                com.datastax.driver.core.PreparedStatement dsps = connection.getSession().prepare(sql);
-                BoundStatement boundStatement = new BoundStatement(dsps);
-                lastResultSet = new CassandraResultSet(this, connection.getSession().execute(boundStatement.bind(params.toArray())));
-                params.clear();
-            } else {
-                lastResultSet = new CassandraResultSet(this, connection.getSession().execute(sql));
-            }
-        } catch (DriverException e) {
-            throw new SQLException(e);
-        }
-        return lastResultSet;
-    }
-
-    @Override
-    public ResultSet executeQuery() throws SQLException {
-        try {
-            return executeQuery(sql);
-        } catch (SyntaxError ex) {
-            throw new SQLException(ex);
-        }
+        throw new SQLException("Method should not be called on prepared statement");
     }
 
     @Override
     public boolean execute(final String sql) throws SQLException {
-        try {
-            executeQuery(sql);
-        } catch (SyntaxError ex) {
-            throw new SQLException(ex);
-        }
-        return lastResultSet != null;
+        throw new SQLException("Method should not be called on prepared statement");
     }
 
     @Override
@@ -101,225 +52,57 @@ public class CassandraPreparedStatement implements PreparedStatement {
 
     @Override
     public int executeUpdate() throws SQLException {
-        return executeUpdate(sql);
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public int executeUpdate(String sql) throws SQLException {
-        try {
-            executeQuery(sql);
-        } catch (SyntaxError ex) {
-            throw new SQLException(ex);
+        throw new SQLException("Method should not be called on prepared statement");
+    }
+
+    @Override
+    public void close() {
+        super.close();
+        if (result != null) {
+            result.close();
+            result = null;
         }
-        return 1;
-    }
-
-    @Override
-    public void close() throws SQLException {
-        if (lastResultSet != null) {
-            lastResultSet.close();
-            lastResultSet = null;
-        }
-        this.isClosed = true;
-    }
-
-    @Override
-    public int getMaxFieldSize() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    public void setMaxFieldSize(final int max) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    public int getMaxRows() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    public void setMaxRows(final int max) {
-        // todo
-    }
-
-    @Override
-    public void setEscapeProcessing(final boolean enable) {
-    }
-
-    @Override
-    public int getQueryTimeout() throws SQLException {
-        return connection.getNetworkTimeout();
-    }
-
-    @Override
-    public void setQueryTimeout(final int seconds) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    public void cancel() throws SQLException {
-        throw new SQLFeatureNotSupportedException("Cassandra provides no support for interrupting an operation.");
-    }
-
-    @Override
-    public SQLWarning getWarnings() {
-        return null; // todo
-    }
-
-    @Override
-    public void clearWarnings() {
-        // todo
-    }
-
-    @Override
-    public void setCursorName(final String name) throws SQLException {
-        checkClosed();
-        // Driver doesn't support positioned updates for now, so no-op.
     }
 
     @Override
     public ResultSet getResultSet() throws SQLException {
         checkClosed();
-        return lastResultSet;
+        return result;
     }
 
     @Override
-    public int getUpdateCount() throws SQLException {
-        checkClosed();
-        return -1;
+    public int executeUpdate(String sql, int autoGeneratedKeys) throws SQLException {
+        throw new SQLException("Method should not be called on prepared statement");
     }
 
     @Override
-    public boolean getMoreResults() {
-        return false;
+    public int executeUpdate(String sql, int[] columnIndexes) throws SQLException {
+        throw new SQLException("Method should not be called on prepared statement");
     }
 
     @Override
-    public void setFetchDirection(final int direction) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public int executeUpdate(String sql, String[] columnNames) throws SQLException {
+        throw new SQLException("Method should not be called on prepared statement");
     }
 
     @Override
-    public int getFetchDirection() {
-        return ResultSet.FETCH_FORWARD;
+    public boolean execute(String sql, int autoGeneratedKeys) throws SQLException {
+        throw new SQLException("Method should not be called on prepared statement");
     }
 
     @Override
-    public void setFetchSize(final int rows) {
-        // todo
+    public boolean execute(String sql, int[] columnIndexes) throws SQLException {
+        throw new SQLException("Method should not be called on prepared statement");
     }
 
     @Override
-    public int getFetchSize() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    public int getResultSetConcurrency() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    public int getResultSetType() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    public void addBatch(final String sql) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    public void clearBatch() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    public int[] executeBatch() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    public Connection getConnection() throws SQLException {
-        checkClosed();
-        return this.connection;
-    }
-
-    @Override
-    public boolean getMoreResults(final int current) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    public ResultSet getGeneratedKeys() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    public int executeUpdate(final String sql, final int autoGeneratedKeys) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    public int executeUpdate(final String sql, final int[] columnIndexes) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    public int executeUpdate(final String sql, final String[] columnNames) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    public boolean execute(final String sql, final int autoGeneratedKeys) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    public boolean execute(final String sql, final int[] columnIndexes) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    public boolean execute(final String sql, final String[] columnNames) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    public int getResultSetHoldability() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    public boolean isClosed() {
-        return isClosed;
-    }
-
-    @Override
-    public void setPoolable(final boolean poolable) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    public boolean isPoolable() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    private void checkClosed() throws SQLException {
-        if (isClosed) {
-            throw new SQLException("Statement was previously closed.");
-        }
-    }
-
-    @Override
-    public void closeOnCompletion() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    public boolean isCloseOnCompletion() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public boolean execute(String sql, String[] columnNames) throws SQLException {
+        throw new SQLException("Method should not be called on prepared statement");
     }
 
     @Override
@@ -327,104 +110,128 @@ public class CassandraPreparedStatement implements PreparedStatement {
     }
 
     @Override
-    public void setBoolean(int parameterIndex, boolean x) {
+    public void setBoolean(int parameterIndex, boolean x) throws SQLException {
+        checkClosed();
         setObject(parameterIndex, x);
     }
 
     @Override
-    public void setByte(int parameterIndex, byte x) {
+    public void setByte(int parameterIndex, byte x) throws SQLException {
+        checkClosed();
         setObject(parameterIndex, x);
     }
 
     @Override
-    public void setShort(int parameterIndex, short x) {
+    public void setShort(int parameterIndex, short x) throws SQLException {
+        checkClosed();
         setObject(parameterIndex, x);
     }
 
     @Override
-    public void setInt(int parameterIndex, int x) {
+    public void setInt(int parameterIndex, int x) throws SQLException {
+        checkClosed();
         setObject(parameterIndex, x);
     }
 
     @Override
-    public void setLong(int parameterIndex, long x) {
+    public void setLong(int parameterIndex, long x) throws SQLException {
+        checkClosed();
         setObject(parameterIndex, x);
     }
 
     @Override
-    public void setFloat(int parameterIndex, float x) {
+    public void setFloat(int parameterIndex, float x) throws SQLException {
+        checkClosed();
         setObject(parameterIndex, x);
     }
 
     @Override
-    public void setDouble(int parameterIndex, double x) {
+    public void setDouble(int parameterIndex, double x) throws SQLException {
+        checkClosed();
         setObject(parameterIndex, x);
     }
 
     @Override
-    public void setBigDecimal(int parameterIndex, BigDecimal x) {
+    public void setBigDecimal(int parameterIndex, BigDecimal x) throws SQLException {
+        checkClosed();
         setObject(parameterIndex, x);
     }
 
     @Override
-    public void setString(int parameterIndex, String x) {
+    public void setString(int parameterIndex, String x) throws SQLException {
+        checkClosed();
         setObject(parameterIndex, x);
     }
 
     @Override
-    public void setBytes(int parameterIndex, byte[] x) {
+    public void setBytes(int parameterIndex, byte[] x) throws SQLException {
+        checkClosed();
         setObject(parameterIndex, x);
     }
 
     @Override
-    public void setDate(int parameterIndex, Date x) {
+    public void setDate(int parameterIndex, Date x) throws SQLException {
+        checkClosed();
         setObject(parameterIndex, x);
     }
 
     @Override
-    public void setTime(int parameterIndex, Time x) {
+    public void setTime(int parameterIndex, Time x) throws SQLException {
+        checkClosed();
         setObject(parameterIndex, x);
     }
 
     @Override
-    public void setTimestamp(int parameterIndex, Timestamp x) {
+    public void setTimestamp(int parameterIndex, Timestamp x) throws SQLException {
+        checkClosed();
         setObject(parameterIndex, x);
     }
 
     @Override
-    public void setAsciiStream(int parameterIndex, InputStream x, int length) {
+    public void setAsciiStream(int parameterIndex, InputStream x, int length) throws SQLException {
+        checkClosed();
         setObject(parameterIndex, x);
     }
 
     @Override
-    public void setUnicodeStream(int parameterIndex, InputStream x, int length) {
+    public void setUnicodeStream(int parameterIndex, InputStream x, int length) throws SQLException {
+        checkClosed();
         setObject(parameterIndex, x);
     }
 
     @Override
-    public void setBinaryStream(int parameterIndex, InputStream x, int length) {
+    public void setBinaryStream(int parameterIndex, InputStream x, int length) throws SQLException {
+        checkClosed();
         setObject(parameterIndex, x);
     }
 
     @Override
-    public void clearParameters() {
+    public void clearParameters() throws SQLException {
+        checkClosed();
         params = null;
     }
 
     @Override
-    public void setObject(int parameterIndex, Object x, int targetSqlType) {
+    public void setObject(int parameterIndex, Object x, int targetSqlType) throws SQLException {
+        throw new SQLFeatureNotSupportedException();
     }
-
 
     @Override
     public boolean execute() throws SQLException {
-        return execute(sql);
+        checkClosed();
+        return executeInner(session.execute(bindParameters()));
+    }
+
+    private BoundStatement bindParameters() {
+        if (params == null) return preparedStatement.bind();
+        BoundStatement boundStatement = preparedStatement.bind(params.toArray());
+        params = null;
+        return boundStatement;
     }
 
     @Override
     public void addBatch() throws SQLException {
         throw new SQLFeatureNotSupportedException();
-
     }
 
     @Override
@@ -448,7 +255,8 @@ public class CassandraPreparedStatement implements PreparedStatement {
     }
 
     @Override
-    public void setArray(int parameterIndex, Array x) {
+    public void setArray(int parameterIndex, Array x) throws SQLException {
+        checkClosed();
         setObject(parameterIndex, x);
     }
 
@@ -458,17 +266,20 @@ public class CassandraPreparedStatement implements PreparedStatement {
     }
 
     @Override
-    public void setDate(int parameterIndex, Date x, Calendar cal) {
+    public void setDate(int parameterIndex, Date x, Calendar cal) throws SQLException {
+        checkClosed();
         setObject(parameterIndex, x);
     }
 
     @Override
-    public void setTime(int parameterIndex, Time x, Calendar cal) {
+    public void setTime(int parameterIndex, Time x, Calendar cal) throws SQLException {
+        checkClosed();
         setObject(parameterIndex, x);
     }
 
     @Override
-    public void setTimestamp(int parameterIndex, Timestamp x, Calendar cal) {
+    public void setTimestamp(int parameterIndex, Timestamp x, Calendar cal) throws SQLException {
+        checkClosed();
         setObject(parameterIndex, x);
     }
 

@@ -57,6 +57,10 @@ public class CassandraResultSet implements ResultSet {
         isClosed = true;
     }
 
+    public boolean isQuery() {
+        return dsResultSet.getColumnDefinitions().size() != 0;
+    }
+
     @Override
     public boolean wasNull() {
         return false;
