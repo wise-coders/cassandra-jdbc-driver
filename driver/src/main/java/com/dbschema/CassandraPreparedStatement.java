@@ -51,6 +51,21 @@ public class CassandraPreparedStatement extends CassandraBaseStatement implement
     }
 
     @Override
+    public void addBatch(String sql) throws SQLException {
+        throw new SQLException("Method should not be called on prepared statement");
+    }
+
+    @Override
+    public int[] executeBatch() throws SQLException {
+        throw new SQLFeatureNotSupportedException();
+    }
+
+    @Override
+    public void clearBatch() throws SQLException {
+        throw new SQLFeatureNotSupportedException();
+    }
+
+    @Override
     public int executeUpdate() throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }

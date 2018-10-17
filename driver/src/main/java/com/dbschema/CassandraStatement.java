@@ -5,10 +5,13 @@ import com.datastax.driver.core.exceptions.SyntaxError;
 import com.dbschema.resultSet.CassandraResultSet;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CassandraStatement extends CassandraBaseStatement {
 
     private final Session session;
+    private final List<String> batchStatements = new ArrayList<>();
 
     CassandraStatement(Session session) {
         this.session = session;
@@ -49,6 +52,31 @@ public class CassandraStatement extends CassandraBaseStatement {
     public ResultSet getResultSet() throws SQLException {
         checkClosed();
         return result;
+    }
+
+    @Override
+    public void addBatch(String sql) {
+        batchStatements.add(sql);
+    }
+
+    @Override
+    public int[] executeBatch() throws SQLException {
+        StringBuilder builder = new StringBuilder("BEGIN BATCH\n");
+        for (String batchStatement : batchStatements) {
+            builder.append(batchStatement).append(";\n");
+        }
+        builder.append("APPLY BATCH");
+        execute(builder.toString());
+        int[] res = new int[batchStatements.size()];
+        for (int i = 0; i < batchStatements.size(); i++) {
+            res[i] = SUCCESS_NO_INFO;
+        }
+        return res;
+    }
+
+    @Override
+    public void clearBatch() {
+        batchStatements.clear();
     }
 
     @Override

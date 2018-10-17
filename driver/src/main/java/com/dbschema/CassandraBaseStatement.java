@@ -175,21 +175,6 @@ public abstract class CassandraBaseStatement implements Statement {
     }
 
     @Override
-    public void addBatch(String sql) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    public void clearBatch() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    public int[] executeBatch() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
     public Connection getConnection() throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
