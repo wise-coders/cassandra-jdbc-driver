@@ -10,11 +10,13 @@ import java.util.concurrent.Executor;
 
 public class CassandraConnection implements Connection {
     private final Session session;
+    private CassandraJdbcDriver driver;
     private boolean isClosed = false;
     private boolean isReadOnly = false;
 
-    CassandraConnection(Session session) {
+    CassandraConnection(Session session, CassandraJdbcDriver cassandraJdbcDriver) {
         this.session = session;
+        driver = cassandraJdbcDriver;
     }
 
     public String getCatalog() throws SQLException {
@@ -105,7 +107,7 @@ public class CassandraConnection implements Connection {
     @Override
     public DatabaseMetaData getMetaData() throws SQLException {
         checkClosed();
-        return new CassandraMetaData(this);
+        return new CassandraMetaData(this, driver);
     }
 
     @Override
@@ -301,7 +303,7 @@ public class CassandraConnection implements Connection {
     }
 
     @Override
-    public void setSchema(String schema) throws SQLException {
+    public void setSchema(String schema) {
         setCatalog(schema);
     }
 

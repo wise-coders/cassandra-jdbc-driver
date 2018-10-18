@@ -11,9 +11,11 @@ import java.sql.*;
 public class CassandraMetaData implements DatabaseMetaData {
 
     private final CassandraConnection connection;
+    private CassandraJdbcDriver driver;
 
-    CassandraMetaData(CassandraConnection connection) {
+    CassandraMetaData(CassandraConnection connection, CassandraJdbcDriver driver) {
         this.connection = connection;
+        this.driver = driver;
     }
 
     @Override
@@ -109,15 +111,15 @@ public class CassandraMetaData implements DatabaseMetaData {
     }
 
     public String getDriverVersion() {
-        return "1.2.3-SNAPSHOT";
+        return driver.getVersion();
     }
 
     public int getDriverMajorVersion() {
-        return 1;
+        return driver.getMajorVersion();
     }
 
     public int getDriverMinorVersion() {
-        return 23;
+        return driver.getMinorVersion();
     }
 
     public boolean usesLocalFiles() throws SQLException {
@@ -719,12 +721,12 @@ public class CassandraMetaData implements DatabaseMetaData {
 
     @Override
     public int getJDBCMajorVersion() {
-        return 1;
+        return 4;
     }
 
     @Override
     public int getJDBCMinorVersion() {
-        return 0;
+        return 2;
     }
 
     @Override

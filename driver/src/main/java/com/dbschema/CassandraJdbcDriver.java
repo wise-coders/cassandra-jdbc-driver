@@ -43,7 +43,7 @@ public class CassandraJdbcDriver implements Driver {
                 Cluster cluster = clientURI.createCluster();
                 Session session = cluster.connect( clientURI.getKeyspace() );
 
-                return new CassandraConnection(session);
+                return new CassandraConnection(session, this);
             } catch (UnknownHostException e) {
                 throw new SQLException( e.getMessage(), e);
             }
@@ -54,44 +54,31 @@ public class CassandraJdbcDriver implements Driver {
 
     /**
      * URLs accepted are of the form: jdbc:cassandra://host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[keyspace][?options]]
-     *
-     * @see java.sql.Driver#acceptsURL(java.lang.String)
      */
     @Override
-    public boolean acceptsURL(String url) throws SQLException {
+    public boolean acceptsURL(String url) {
         return url.startsWith(PREFIX);
     }
 
-    /**
-     * @see java.sql.Driver#getPropertyInfo(java.lang.String, java.util.Properties)
-     */
     @Override
-    public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) throws SQLException
-    {
+    public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) {
         return null;
     }
 
-    /**
-     * @see java.sql.Driver#getMajorVersion()
-     */
+    String getVersion() {
+        return "1.2.3-SNAPSHOT";
+    }
+
     @Override
-    public int getMajorVersion()
-    {
+    public int getMajorVersion() {
         return 1;
     }
 
-    /**
-     * @see java.sql.Driver#getMinorVersion()
-     */
     @Override
-    public int getMinorVersion()
-    {
-        return 0;
+    public int getMinorVersion() {
+        return 23;
     }
 
-    /**
-     * @see java.sql.Driver#jdbcCompliant()
-     */
     @Override
     public boolean jdbcCompliant() {
         return true;
@@ -99,7 +86,7 @@ public class CassandraJdbcDriver implements Driver {
 
     @Override
     public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-        return null;
+        throw new SQLFeatureNotSupportedException();
     }
 
 }
