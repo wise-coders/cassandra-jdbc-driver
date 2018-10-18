@@ -66,7 +66,7 @@ public class CassandraJdbcDriver implements Driver {
     }
 
     String getVersion() {
-        return "1.2.3-SNAPSHOT";
+        return "1.2.3";
     }
 
     @Override
