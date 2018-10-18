@@ -78,7 +78,7 @@ public class CassandraResultSetMetaData implements ResultSetMetaData {
 
     @Override
     public String getSchemaName(int column) {
-        return getCatalogName(column - 1);
+        return getCatalogName(column);
     }
 
     @Override
@@ -144,8 +144,10 @@ public class CassandraResultSetMetaData implements ResultSetMetaData {
             javaTypeMap.put("blob", Types.BLOB);
             javaTypeMap.put("boolean", Types.BOOLEAN);
             javaTypeMap.put("counter", Types.BIGINT);
+            javaTypeMap.put("date", Types.DATE);
             javaTypeMap.put("decimal", Types.DECIMAL);
             javaTypeMap.put("double", Types.DOUBLE);
+            javaTypeMap.put("duration", Types.JAVA_OBJECT);
             javaTypeMap.put("float", Types.FLOAT);
             javaTypeMap.put("inet", Types.JAVA_OBJECT);
             javaTypeMap.put("int", Types.INTEGER);
@@ -156,7 +158,8 @@ public class CassandraResultSetMetaData implements ResultSetMetaData {
             javaTypeMap.put("text", Types.VARCHAR);
             javaTypeMap.put("timestamp", Types.TIMESTAMP);
             javaTypeMap.put("uuid", Types.JAVA_OBJECT);
-            javaTypeMap.put("timesuuid", Types.ROWID);
+            javaTypeMap.put("time", Types.TIME);
+            javaTypeMap.put("timeuuid", Types.JAVA_OBJECT);
             javaTypeMap.put("tinyint", Types.TINYINT);
             javaTypeMap.put("varchar", Types.VARCHAR);
             javaTypeMap.put("varint", Types.INTEGER);
@@ -166,8 +169,10 @@ public class CassandraResultSetMetaData implements ResultSetMetaData {
             typeNameMap.put("blob", "java.lang.Byte[]");
             typeNameMap.put("boolean", "java.lang.Boolean");
             typeNameMap.put("counter", "java.lang.Long");
+            typeNameMap.put("date", "java.util.Date");
             typeNameMap.put("decimal", "java.math.BigDecimal");
             typeNameMap.put("double", "java.lang.Double");
+            typeNameMap.put("duration", "java.time.Duration");
             typeNameMap.put("float", "java.lang.Float");
             typeNameMap.put("inet", "java.net.InetAddress");
             typeNameMap.put("int", "java.lang.Integer");
@@ -178,7 +183,8 @@ public class CassandraResultSetMetaData implements ResultSetMetaData {
             typeNameMap.put("text", "java.lang.String");
             typeNameMap.put("timestamp", "java.util.Date");
             typeNameMap.put("uuid", "java.util.UUID");
-            typeNameMap.put("timesuuid", "java.util.Date");
+            typeNameMap.put("time", "java.util.Date");
+            typeNameMap.put("timeuuid", "java.util.UUID");
             typeNameMap.put("tinyint", "java.lang.Byte");
             typeNameMap.put("varchar", "java.lang.String");
             typeNameMap.put("varint", "java.math.BigInteger");
@@ -205,7 +211,7 @@ public class CassandraResultSetMetaData implements ResultSetMetaData {
         String getClassName() {
             String lower = typeName.toLowerCase();
             if (typeNameMap.containsKey(lower)) return typeNameMap.get(lower);
-            throw new IllegalArgumentException("Type name is not known: " + typeName);
+            throw new IllegalArgumentException("Type name is not known: " + lower);
         }
     }
 }

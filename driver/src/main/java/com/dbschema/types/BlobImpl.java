@@ -24,7 +24,7 @@ public class BlobImpl implements Blob {
     @Override
     public byte[] getBytes(long pos, int length) {
         byte[] newBytes = new byte[length];
-        System.arraycopy(bytes, (int) pos, newBytes, 0, length);
+        System.arraycopy(bytes, (int) pos - 1, newBytes, 0, length);
         return newBytes;
     }
 
