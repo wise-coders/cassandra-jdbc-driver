@@ -58,15 +58,15 @@ public class CassandraJdbcDriver implements Driver {
     @Override
     public boolean acceptsURL(String url) {
         return url.startsWith(PREFIX);
-    }
 
+    }
     @Override
     public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) {
         return null;
     }
 
     String getVersion() {
-        return "1.2.3";
+        return "1.2.4-SNAPSHOT";
     }
 
     @Override
@@ -76,7 +76,7 @@ public class CassandraJdbcDriver implements Driver {
 
     @Override
     public int getMinorVersion() {
-        return 23;
+        return 24;
     }
 
     @Override
