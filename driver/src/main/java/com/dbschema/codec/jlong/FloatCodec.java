@@ -1,10 +1,13 @@
-package com.dbschema.codec.javalong;
+package com.dbschema.codec.jlong;
 
 import com.datastax.driver.core.DataType;
 import com.datastax.driver.core.exceptions.InvalidTypeException;
 
 import java.nio.ByteBuffer;
 
+/**
+ * @author Liudmila Kornilova
+ **/
 public class FloatCodec extends BaseLongCodec {
 
     public static final FloatCodec INSTANCE = new FloatCodec();

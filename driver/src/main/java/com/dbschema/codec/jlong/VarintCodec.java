@@ -1,4 +1,4 @@
-package com.dbschema.codec.javalong;
+package com.dbschema.codec.jlong;
 
 import com.datastax.driver.core.DataType;
 import com.datastax.driver.core.ProtocolVersion;

@@ -1,4 +1,4 @@
-package com.dbschema.codec.javalong;
+package com.dbschema.codec.jlong;
 
 import com.datastax.driver.core.DataType;
 import com.datastax.driver.core.ProtocolVersion;
@@ -9,6 +9,9 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
+/**
+ * @author Liudmila Kornilova
+ **/
 public class DecimalCodec extends TypeCodec<Long> {
 
     public static final DecimalCodec INSTANCE = new DecimalCodec();

@@ -1,4 +1,4 @@
-package com.dbschema.resultSet;
+package com.dbschema;
 
 import com.datastax.driver.core.ColumnDefinitions.Definition;
 import com.datastax.driver.core.DataType;

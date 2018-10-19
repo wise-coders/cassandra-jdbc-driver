@@ -1,10 +1,10 @@
 
 package com.dbschema;
 
+import com.datastax.driver.core.BatchStatement;
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.exceptions.SyntaxError;
-import com.dbschema.resultSet.CassandraResultSet;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -16,12 +16,11 @@ import java.util.Calendar;
 
 public class CassandraPreparedStatement extends CassandraBaseStatement implements PreparedStatement {
 
-    private final com.datastax.driver.core.Session session;
     private final com.datastax.driver.core.PreparedStatement preparedStatement;
     private ArrayList<Object> params;
 
     CassandraPreparedStatement(Session session, final com.datastax.driver.core.PreparedStatement preparedStatement) {
-        this.session = session;
+        super(session);
         this.preparedStatement = preparedStatement;
     }
 
@@ -55,11 +54,6 @@ public class CassandraPreparedStatement extends CassandraBaseStatement implement
     @Override
     public void addBatch(String sql) throws SQLException {
         throw new SQLException("Method should not be called on prepared statement");
-    }
-
-    @Override
-    public int[] executeBatch() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
@@ -251,9 +245,8 @@ public class CassandraPreparedStatement extends CassandraBaseStatement implement
     }
 
     private BoundStatement bindParameters() {
-        if (params == null) return preparedStatement.bind();
         try {
-            return preparedStatement.bind(params.toArray());
+            return preparedStatement.bind(params == null ? new Object[]{} : params.toArray());
         } finally {
             params = null;
         }
@@ -261,7 +254,16 @@ public class CassandraPreparedStatement extends CassandraBaseStatement implement
 
     @Override
     public void addBatch() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+        try {
+            if (batchStatement == null) {
+                batchStatement = new BatchStatement();
+            }
+            batchStatement.add(preparedStatement.bind(params == null ? new Object[]{} : params.toArray()));
+        } catch (Throwable t) {
+            throw new SQLException(t);
+        } finally {
+            params = null;
+        }
     }
 
     @Override

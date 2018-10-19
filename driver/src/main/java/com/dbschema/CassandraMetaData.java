@@ -1,7 +1,5 @@
 package com.dbschema;
 
-import com.dbschema.resultSet.CassandraResultSet;
-
 import java.sql.*;
 
 /**

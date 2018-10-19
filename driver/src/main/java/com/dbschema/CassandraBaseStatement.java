@@ -1,7 +1,8 @@
 package com.dbschema;
 
+import com.datastax.driver.core.BatchStatement;
+import com.datastax.driver.core.Session;
 import com.datastax.driver.core.exceptions.SyntaxError;
-import com.dbschema.resultSet.CassandraResultSet;
 
 import java.sql.*;
 
@@ -9,8 +10,14 @@ import java.sql.*;
  * @author Liudmila Kornilova
  **/
 public abstract class CassandraBaseStatement implements Statement {
+    final com.datastax.driver.core.Session session;
+    BatchStatement batchStatement = null;
     private boolean isClosed = false;
     CassandraResultSet result;
+
+    CassandraBaseStatement(Session session) {
+        this.session = session;
+    }
 
     @Override
     public void close() {
@@ -53,6 +60,24 @@ public abstract class CassandraBaseStatement implements Statement {
     public int getUpdateCount() throws SQLException {
         checkClosed();
         return -1;
+    }
+
+    @Override
+    public int[] executeBatch() throws SQLException {
+        if (batchStatement == null) throw new SQLException("No batch statements were submitted");
+        int statementsCount = batchStatement.size();
+        try {
+            session.execute(batchStatement);
+        } catch (Throwable t) {
+            throw new SQLException(t);
+        } finally {
+            batchStatement = null;
+        }
+        int[] res = new int[statementsCount];
+        for (int i = 0; i < statementsCount; i++) {
+            res[i] = SUCCESS_NO_INFO;
+        }
+        return res;
     }
 
     @Override

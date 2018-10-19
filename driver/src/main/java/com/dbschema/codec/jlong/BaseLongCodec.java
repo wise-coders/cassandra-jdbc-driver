@@ -1,4 +1,4 @@
-package com.dbschema.codec.javalong;
+package com.dbschema.codec.jlong;
 
 import com.datastax.driver.core.DataType;
 import com.datastax.driver.core.ProtocolVersion;
@@ -7,6 +7,9 @@ import com.datastax.driver.core.exceptions.InvalidTypeException;
 
 import java.nio.ByteBuffer;
 
+/**
+ * @author Liudmila Kornilova
+ **/
 public abstract class BaseLongCodec extends TypeCodec.PrimitiveLongCodec {
     BaseLongCodec(DataType cqlType) {
         super(cqlType);

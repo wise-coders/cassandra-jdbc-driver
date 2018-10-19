@@ -1,23 +1,20 @@
 package com.dbschema;
 
+import com.datastax.driver.core.BatchStatement;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.core.SimpleStatement;
 import com.datastax.driver.core.exceptions.SyntaxError;
-import com.dbschema.resultSet.CassandraResultSet;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLSyntaxErrorException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class CassandraStatement extends CassandraBaseStatement {
 
-    private final Session session;
-    private final List<String> batchStatements = new ArrayList<>();
 
     CassandraStatement(Session session) {
-        this.session = session;
+        super(session);
     }
 
     @Override
@@ -63,27 +60,15 @@ public class CassandraStatement extends CassandraBaseStatement {
 
     @Override
     public void addBatch(String sql) {
-        batchStatements.add(sql);
-    }
-
-    @Override
-    public int[] executeBatch() throws SQLException {
-        StringBuilder builder = new StringBuilder("BEGIN BATCH\n");
-        for (String batchStatement : batchStatements) {
-            builder.append(batchStatement).append(";\n");
+        if (batchStatement == null) {
+            batchStatement = new BatchStatement();
         }
-        builder.append("APPLY BATCH");
-        execute(builder.toString());
-        int[] res = new int[batchStatements.size()];
-        for (int i = 0; i < batchStatements.size(); i++) {
-            res[i] = SUCCESS_NO_INFO;
-        }
-        return res;
+        batchStatement.add(new SimpleStatement(sql));
     }
 
     @Override
     public void clearBatch() {
-        batchStatements.clear();
+        batchStatement = null;
     }
 
     @Override
