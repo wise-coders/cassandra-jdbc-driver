@@ -3,7 +3,6 @@ package com.dbschema;
 
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.Session;
-import com.datastax.driver.core.exceptions.DriverException;
 import com.datastax.driver.core.exceptions.SyntaxError;
 import com.dbschema.resultSet.CassandraResultSet;
 
@@ -79,8 +78,8 @@ public class CassandraPreparedStatement extends CassandraBaseStatement implement
             return 1;
         } catch (SyntaxError ex) {
             throw new SQLSyntaxErrorException(ex);
-        } catch (DriverException e) {
-            throw new SQLException(e);
+        } catch (Throwable t) {
+            throw new SQLException(t);
         }
     }
 
@@ -253,9 +252,11 @@ public class CassandraPreparedStatement extends CassandraBaseStatement implement
 
     private BoundStatement bindParameters() {
         if (params == null) return preparedStatement.bind();
-        BoundStatement boundStatement = preparedStatement.bind(params.toArray());
-        params = null;
-        return boundStatement;
+        try {
+            return preparedStatement.bind(params.toArray());
+        } finally {
+            params = null;
+        }
     }
 
     @Override

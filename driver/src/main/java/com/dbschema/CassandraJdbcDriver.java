@@ -2,7 +2,9 @@
 package com.dbschema;
 
 import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.CodecRegistry;
 import com.datastax.driver.core.Session;
+import com.dbschema.codec.javalong.*;
 
 import java.net.UnknownHostException;
 import java.sql.*;
@@ -23,8 +25,8 @@ import static com.dbschema.CassandraClientURI.PREFIX;
 public class CassandraJdbcDriver implements Driver {
     static {
         try {
-            DriverManager.registerDriver( new CassandraJdbcDriver());
-        } catch ( SQLException ex ){
+            DriverManager.registerDriver(new CassandraJdbcDriver());
+        } catch (SQLException ex) {
             ex.printStackTrace();
         }
     }
@@ -36,19 +38,30 @@ public class CassandraJdbcDriver implements Driver {
      * The URL excepting the jdbc: prefix is passed as it is to the Cassandra native Java driver.
      */
     public Connection connect(String url, Properties info) throws SQLException {
-        if ( url != null && acceptsURL( url )){
-            CassandraClientURI clientURI = new CassandraClientURI( url, info );
-            try	{
-
+        if (url != null && acceptsURL(url)) {
+            CassandraClientURI clientURI = new CassandraClientURI(url, info);
+            try {
                 Cluster cluster = clientURI.createCluster();
-                Session session = cluster.connect( clientURI.getKeyspace() );
+                registerCodecs(cluster);
+                Session session = cluster.connect(clientURI.getKeyspace());
 
                 return new CassandraConnection(session, this);
             } catch (UnknownHostException e) {
-                throw new SQLException( e.getMessage(), e);
+                throw new SQLException(e.getMessage(), e);
             }
         }
         return null;
+    }
+
+    private void registerCodecs(Cluster cluster) {
+        CodecRegistry myCodecRegistry = cluster.getConfiguration().getCodecRegistry();
+        myCodecRegistry.register(IntCodec.INSTANCE);
+        myCodecRegistry.register(DecimalCodec.INSTANCE);
+        myCodecRegistry.register(DoubleCodec.INSTANCE);
+        myCodecRegistry.register(FloatCodec.INSTANCE);
+        myCodecRegistry.register(SmallintCodec.INSTANCE);
+        myCodecRegistry.register(TinyintCodec.INSTANCE);
+        myCodecRegistry.register(VarintCodec.INSTANCE);
     }
 
 
@@ -58,8 +71,8 @@ public class CassandraJdbcDriver implements Driver {
     @Override
     public boolean acceptsURL(String url) {
         return url.startsWith(PREFIX);
-
     }
+
     @Override
     public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) {
         return null;

@@ -1,6 +1,5 @@
 package com.dbschema;
 
-import com.datastax.driver.core.exceptions.DriverException;
 import com.datastax.driver.core.exceptions.SyntaxError;
 import com.dbschema.resultSet.CassandraResultSet;
 
@@ -39,8 +38,8 @@ public abstract class CassandraBaseStatement implements Statement {
             return true;
         } catch (SyntaxError ex) {
             throw new SQLSyntaxErrorException(ex);
-        } catch (DriverException e) {
-            throw new SQLException(e);
+        } catch (Throwable t) {
+            throw new SQLException(t);
         }
     }
 
