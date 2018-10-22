@@ -18,14 +18,12 @@ public class CassandraMetaData implements DatabaseMetaData {
 
     @Override
     public ResultSet getSchemas() {
-        return getCatalogs();
+        return null;
     }
 
     @Override
     public ResultSet getCatalogs() {
-        com.datastax.driver.core.ResultSet resultSet =
-                connection.getSession().execute("select keyspace_name from system_schema.keyspaces");
-        return new CassandraResultSet(null, resultSet);
+        return null;
     }
 
     public ResultSet getTables(String catalogName, String schemaPattern,

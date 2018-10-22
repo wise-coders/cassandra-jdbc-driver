@@ -6,6 +6,8 @@ import com.datastax.driver.core.CodecRegistry;
 import com.datastax.driver.core.Session;
 import com.dbschema.codec.jbytes.BlobCodec;
 import com.dbschema.codec.jlong.*;
+import com.dbschema.codec.jsqldate.DateCodec;
+import com.dbschema.codec.jsqltime.TimeCodec;
 
 import java.net.UnknownHostException;
 import java.sql.*;
@@ -65,6 +67,12 @@ public class CassandraJdbcDriver implements Driver {
         myCodecRegistry.register(VarintCodec.INSTANCE);
         myCodecRegistry.register(BlobCodec.INSTANCE);
         myCodecRegistry.register(com.dbschema.codec.jdouble.FloatCodec.INSTANCE);
+        myCodecRegistry.register(DateCodec.INSTANCE);
+        myCodecRegistry.register(TimeCodec.INSTANCE);
+        myCodecRegistry.register(com.dbschema.codec.juuid.StringCodec.INSTANCE);
+        myCodecRegistry.register(com.dbschema.codec.jduration.StringCodec.INSTANCE);
+        myCodecRegistry.register(com.dbschema.codec.jtimeuuid.StringCodec.INSTANCE);
+        myCodecRegistry.register(com.dbschema.codec.jinet.StringCodec.INSTANCE);
     }
 
 
