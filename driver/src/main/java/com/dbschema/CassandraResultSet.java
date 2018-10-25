@@ -1,10 +1,8 @@
 package com.dbschema;
 
 import com.datastax.driver.core.ColumnDefinitions.Definition;
-import com.datastax.driver.core.DataType;
 import com.datastax.driver.core.LocalDate;
 import com.datastax.driver.core.Row;
-import com.dbschema.CassandraResultSetMetaData;
 import com.dbschema.CassandraResultSetMetaData.ColumnMetaData;
 import com.dbschema.types.ArrayImpl;
 import com.dbschema.types.BlobImpl;
@@ -161,14 +159,8 @@ public class CassandraResultSet implements ResultSet {
     public Date getDate(int columnIndex) throws SQLException {
         checkClosed();
         if (currentRow != null) {
-            DataType type = currentRow.getColumnDefinitions().getType(columnIndex - 1);
-            if (DataType.timestamp().equals(type)) {
-                final java.util.Date date = currentRow.getTimestamp(columnIndex - 1);
-                return date != null ? new Date(date.getTime()) : null;
-            } else {
-                final LocalDate date = currentRow.getDate(columnIndex - 1);
-                return date != null ? new Date(date.getMillisSinceEpoch()) : null;
-            }
+            final LocalDate date = currentRow.getDate(columnIndex - 1);
+            return date != null ? new Date(date.getMillisSinceEpoch()) : null;
         }
         throw new SQLException("Exhausted ResultSet.");
     }
@@ -177,14 +169,8 @@ public class CassandraResultSet implements ResultSet {
     public Time getTime(int columnIndex) throws SQLException {
         checkClosed();
         if (currentRow != null) {
-            DataType type = currentRow.getColumnDefinitions().getType(columnIndex - 1);
-            if (DataType.timestamp().equals(type)) {
-                final java.util.Date date = currentRow.getTimestamp(columnIndex - 1);
-                return date != null ? new Time(date.getTime()) : null;
-            } else {
-                LocalDate date = currentRow.getDate(columnIndex - 1);
-                return date != null ? new Time(date.getMillisSinceEpoch()) : null;
-            }
+            long millis = currentRow.getTime(columnIndex - 1);
+            return new Time(millis);
         }
         throw new SQLException("Exhausted ResultSet.");
     }
@@ -193,14 +179,8 @@ public class CassandraResultSet implements ResultSet {
     public Timestamp getTimestamp(int columnIndex) throws SQLException {
         checkClosed();
         if (currentRow != null) {
-            DataType type = currentRow.getColumnDefinitions().getType(columnIndex - 1);
-            if (DataType.timestamp().equals(type)) {
-                final java.util.Date date = currentRow.getTimestamp(columnIndex - 1);
-                return date != null ? new Timestamp(date.getTime()) : null;
-            } else {
-                final LocalDate date = currentRow.getDate(columnIndex - 1);
-                return date != null ? new Timestamp(date.getMillisSinceEpoch()) : null;
-            }
+            final java.util.Date date = currentRow.getTimestamp(columnIndex - 1);
+            return date != null ? new Timestamp(date.getTime()) : null;
         }
         throw new SQLException("Exhausted ResultSet.");
     }
@@ -781,7 +761,7 @@ public class CassandraResultSet implements ResultSet {
     }
 
     public Date getDate(int columnIndex, Calendar cal) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+        return getDate(columnIndex); // todo: properly implement
     }
 
     public Date getDate(String columnLabel, Calendar cal) throws SQLException {
@@ -789,7 +769,7 @@ public class CassandraResultSet implements ResultSet {
     }
 
     public Time getTime(int columnIndex, Calendar cal) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+        return getTime(columnIndex); // todo: properly implement
     }
 
     public Time getTime(String columnLabel, Calendar cal) throws SQLException {
@@ -797,7 +777,7 @@ public class CassandraResultSet implements ResultSet {
     }
 
     public Timestamp getTimestamp(int columnIndex, Calendar cal) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+        return getTimestamp(columnIndex); // todo: properly implement
     }
 
     public Timestamp getTimestamp(String columnLabel, Calendar cal) throws SQLException {
