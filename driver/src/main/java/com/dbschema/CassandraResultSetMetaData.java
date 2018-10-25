@@ -12,7 +12,7 @@ public class CassandraResultSetMetaData implements ResultSetMetaData {
 
     private final List<ColumnMetaData> columnMetaData;
 
-    public CassandraResultSetMetaData(List<ColumnMetaData> columnMetaData) {
+    CassandraResultSetMetaData(List<ColumnMetaData> columnMetaData) {
         this.columnMetaData = columnMetaData;
     }
 
@@ -131,7 +131,7 @@ public class CassandraResultSetMetaData implements ResultSetMetaData {
         return columnMetaData.get(column - 1).getClassName();
     }
 
-    public static class ColumnMetaData {
+    static class ColumnMetaData {
         private static final int TYPE_MAP = 4999544;
         private static final int TYPE_LIST = 4999545;
 
@@ -157,6 +157,8 @@ public class CassandraResultSetMetaData implements ResultSetMetaData {
             javaTypeMap.put("smallint", Types.SMALLINT);
             javaTypeMap.put("text", Types.VARCHAR);
             javaTypeMap.put("timestamp", Types.TIMESTAMP);
+            javaTypeMap.put("tuple", Types.JAVA_OBJECT);
+            javaTypeMap.put("udt", Types.JAVA_OBJECT);
             javaTypeMap.put("uuid", Types.JAVA_OBJECT);
             javaTypeMap.put("time", Types.TIME);
             javaTypeMap.put("timeuuid", Types.JAVA_OBJECT);
@@ -182,6 +184,8 @@ public class CassandraResultSetMetaData implements ResultSetMetaData {
             typeNameMap.put("smallint", "java.lang.Short");
             typeNameMap.put("text", "java.lang.String");
             typeNameMap.put("timestamp", "java.util.Date");
+            typeNameMap.put("tuple", "com.datastax.driver.core.TupleValue");
+            typeNameMap.put("udt", "com.datastax.driver.core.UDTValue");
             typeNameMap.put("uuid", "java.util.UUID");
             typeNameMap.put("time", "java.util.Date");
             typeNameMap.put("timeuuid", "java.util.UUID");
@@ -195,7 +199,7 @@ public class CassandraResultSetMetaData implements ResultSetMetaData {
         private final String typeName;
         private final String keyspace;
 
-        public ColumnMetaData(String name, String tableName, String keyspace, String typeName) {
+        ColumnMetaData(String name, String tableName, String keyspace, String typeName) {
             this.name = name;
             this.tableName = tableName;
             this.typeName = typeName;
