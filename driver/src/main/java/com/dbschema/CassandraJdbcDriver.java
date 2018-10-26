@@ -3,6 +3,7 @@ package com.dbschema;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.CodecRegistry;
+import com.datastax.driver.core.ParseUtils;
 import com.datastax.driver.core.Session;
 import com.dbschema.codec.jbytes.BlobCodec;
 import com.dbschema.codec.jlong.*;
@@ -46,7 +47,11 @@ public class CassandraJdbcDriver implements Driver {
             try {
                 Cluster cluster = clientURI.createCluster();
                 registerCodecs(cluster);
-                Session session = cluster.connect(clientURI.getKeyspace());
+                String keyspace = clientURI.getKeyspace();
+                if (!ParseUtils.isDoubleQuoted(keyspace)) {
+                    keyspace = ParseUtils.doubleQuote(keyspace);
+                }
+                Session session = cluster.connect(keyspace);
 
                 return new CassandraConnection(session, this);
             } catch (UnknownHostException e) {
