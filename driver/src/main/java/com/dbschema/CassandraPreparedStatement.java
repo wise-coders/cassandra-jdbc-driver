@@ -1,4 +1,3 @@
-
 package com.dbschema;
 
 import com.datastax.driver.core.BatchStatement;
@@ -11,13 +10,12 @@ import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.Calendar;
 
 public class CassandraPreparedStatement extends CassandraBaseStatement implements PreparedStatement {
 
     private final com.datastax.driver.core.PreparedStatement preparedStatement;
-    private ArrayList<Object> params;
+    private Object[] params;
 
     CassandraPreparedStatement(Session session, final com.datastax.driver.core.PreparedStatement preparedStatement) {
         super(session);
@@ -42,13 +40,11 @@ public class CassandraPreparedStatement extends CassandraBaseStatement implement
     @Override
     public void setObject(int parameterIndex, Object value) {
         if (params == null) {
-            params = new ArrayList<>();
+            int size = preparedStatement.getVariables().size();
+            params = new Object[size];
         }
         int idx = parameterIndex - 1;
-        for (int i = params.size(); i < idx; i++) {
-            params.add(i, null);
-        }
-        params.add(idx, value);
+        params[idx] = value;
     }
 
     @Override
@@ -230,7 +226,7 @@ public class CassandraPreparedStatement extends CassandraBaseStatement implement
     @Override
     public void clearParameters() throws SQLException {
         checkClosed();
-        params = null;
+        clearParams();
     }
 
     @Override
@@ -246,9 +242,16 @@ public class CassandraPreparedStatement extends CassandraBaseStatement implement
 
     private BoundStatement bindParameters() {
         try {
-            return preparedStatement.bind(params == null ? new Object[]{} : params.toArray());
+            return preparedStatement.bind(params == null ? new Object[]{} : params);
         } finally {
-            params = null;
+            clearParams();
+        }
+    }
+
+    private void clearParams() {
+        if (params == null) return;
+        for (int i = 0; i < params.length; i++) {
+            params[i] = null;
         }
     }
 
@@ -258,11 +261,11 @@ public class CassandraPreparedStatement extends CassandraBaseStatement implement
             if (batchStatement == null) {
                 batchStatement = new BatchStatement();
             }
-            batchStatement.add(preparedStatement.bind(params == null ? new Object[]{} : params.toArray()));
+            batchStatement.add(preparedStatement.bind(params == null ? new Object[]{} : params));
         } catch (Throwable t) {
             throw new SQLException(t);
         } finally {
-            params = null;
+            clearParameters();
         }
     }
 
