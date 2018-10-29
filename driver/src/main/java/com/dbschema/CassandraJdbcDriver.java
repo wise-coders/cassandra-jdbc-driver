@@ -48,11 +48,13 @@ public class CassandraJdbcDriver implements Driver {
                 Cluster cluster = clientURI.createCluster();
                 registerCodecs(cluster);
                 String keyspace = clientURI.getKeyspace();
-                if (!ParseUtils.isDoubleQuoted(keyspace)) {
-                    keyspace = ParseUtils.doubleQuote(keyspace);
+                Session session;
+                if (keyspace != null && !keyspace.isEmpty()) {
+                    if (!ParseUtils.isDoubleQuoted(keyspace)) keyspace = ParseUtils.doubleQuote(keyspace);
+                    session = cluster.connect(keyspace);
+                } else {
+                    session = cluster.connect();
                 }
-                Session session = cluster.connect(keyspace);
-
                 return new CassandraConnection(session, this);
             } catch (UnknownHostException e) {
                 throw new SQLException(e.getMessage(), e);
