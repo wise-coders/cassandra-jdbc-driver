@@ -5,6 +5,7 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.CodecRegistry;
 import com.datastax.driver.core.ParseUtils;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.core.exceptions.InvalidQueryException;
 import com.dbschema.codec.jbytes.BlobCodec;
 import com.dbschema.codec.jlong.*;
 import com.dbschema.codec.jsqldate.DateCodec;
@@ -49,18 +50,23 @@ public class CassandraJdbcDriver implements Driver {
                 registerCodecs(cluster);
                 String keyspace = clientURI.getKeyspace();
                 Session session;
-                if (keyspace != null && !keyspace.isEmpty()) {
-                    if (!ParseUtils.isDoubleQuoted(keyspace)) keyspace = ParseUtils.doubleQuote(keyspace);
-                    session = cluster.connect(keyspace);
-                } else {
-                    session = cluster.connect();
-                }
+                if (keyspace != null && !keyspace.isEmpty()) session = tryToConnect(cluster, keyspace);
+                else session = cluster.connect();
                 return new CassandraConnection(session, this);
             } catch (UnknownHostException e) {
                 throw new SQLException(e.getMessage(), e);
             }
         }
         return null;
+    }
+
+    private Session tryToConnect(Cluster cluster, String keyspace) throws SQLException {
+        if (!ParseUtils.isDoubleQuoted(keyspace)) keyspace = ParseUtils.doubleQuote(keyspace);
+        try {
+            return cluster.connect(keyspace);
+        } catch (InvalidQueryException e) {
+            throw new SQLException("Keyspace " + keyspace + " does not exist", e);
+        }
     }
 
     private void registerCodecs(Cluster cluster) {
@@ -97,7 +103,7 @@ public class CassandraJdbcDriver implements Driver {
     }
 
     String getVersion() {
-        return "1.2.6";
+        return "1.2.7-SNAPSHOT";
     }
 
     @Override
@@ -107,7 +113,7 @@ public class CassandraJdbcDriver implements Driver {
 
     @Override
     public int getMinorVersion() {
-        return 26;
+        return 27;
     }
 
     @Override
