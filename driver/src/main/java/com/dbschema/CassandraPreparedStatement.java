@@ -67,9 +67,9 @@ public class CassandraPreparedStatement extends CassandraBaseStatement implement
             }
             return 1;
         } catch (SyntaxError ex) {
-            throw new SQLSyntaxErrorException(ex);
+            throw new SQLSyntaxErrorException(ex.getMessage(), ex);
         } catch (Throwable t) {
-            throw new SQLException(t);
+            throw new SQLException(t.getLocalizedMessage(), t);
         }
     }
 
@@ -237,7 +237,11 @@ public class CassandraPreparedStatement extends CassandraBaseStatement implement
     @Override
     public boolean execute() throws SQLException {
         checkClosed();
-        return executeInner(session.execute(bindParameters()));
+        try {
+            return executeInner(session.execute(bindParameters()));
+        } catch (Throwable t) {
+            throw new SQLException(t.getMessage(), t);
+        }
     }
 
     private BoundStatement bindParameters() {
@@ -263,7 +267,7 @@ public class CassandraPreparedStatement extends CassandraBaseStatement implement
             }
             batchStatement.add(preparedStatement.bind(params == null ? new Object[]{} : params));
         } catch (Throwable t) {
-            throw new SQLException(t);
+            throw new SQLException(t.getMessage(), t);
         } finally {
             clearParameters();
         }

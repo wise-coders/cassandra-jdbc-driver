@@ -24,9 +24,9 @@ public class CassandraStatement extends CassandraBaseStatement {
             result = new CassandraResultSet(this, session.execute(sql));
             return result;
         } catch (SyntaxError ex) {
-            throw new SQLSyntaxErrorException(ex);
+            throw new SQLSyntaxErrorException(ex.getMessage(), ex);
         } catch (Throwable t) {
-            throw new SQLException(t);
+            throw new SQLException(t.getMessage(), t);
         }
     }
 
@@ -40,16 +40,20 @@ public class CassandraStatement extends CassandraBaseStatement {
             }
             return 1;
         } catch (SyntaxError ex) {
-            throw new SQLSyntaxErrorException(ex);
+            throw new SQLSyntaxErrorException(ex.getMessage(), ex);
         } catch (Throwable t) {
-            throw new SQLException(t);
+            throw new SQLException(t.getMessage(), t);
         }
     }
 
     @Override
     public boolean execute(String sql) throws SQLException {
         checkClosed();
-        return executeInner(session.execute(sql));
+        try {
+            return executeInner(session.execute(sql));
+        } catch (Throwable t) {
+            throw new SQLException(t.getMessage(), t);
+        }
     }
 
     @Override

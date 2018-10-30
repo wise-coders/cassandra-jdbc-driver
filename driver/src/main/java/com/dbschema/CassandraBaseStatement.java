@@ -44,9 +44,9 @@ public abstract class CassandraBaseStatement implements Statement {
             }
             return true;
         } catch (SyntaxError ex) {
-            throw new SQLSyntaxErrorException(ex);
+            throw new SQLSyntaxErrorException(ex.getMessage(), ex);
         } catch (Throwable t) {
-            throw new SQLException(t);
+            throw new SQLException(t.getMessage(), t);
         }
     }
 
@@ -69,7 +69,7 @@ public abstract class CassandraBaseStatement implements Statement {
         try {
             session.execute(batchStatement);
         } catch (Throwable t) {
-            throw new SQLException(t);
+            throw new SQLException(t.getMessage(), t);
         } finally {
             batchStatement = null;
         }
