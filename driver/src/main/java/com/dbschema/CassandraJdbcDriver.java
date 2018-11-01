@@ -5,7 +5,9 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.CodecRegistry;
 import com.datastax.driver.core.ParseUtils;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.core.exceptions.AuthenticationException;
 import com.datastax.driver.core.exceptions.InvalidQueryException;
+import com.datastax.driver.core.exceptions.NoHostAvailableException;
 import com.dbschema.codec.jbytes.BlobCodec;
 import com.dbschema.codec.jlong.*;
 import com.dbschema.codec.jsqldate.DateCodec;
@@ -50,8 +52,12 @@ public class CassandraJdbcDriver implements Driver {
                 registerCodecs(cluster);
                 String keyspace = clientURI.getKeyspace();
                 Session session;
-                if (keyspace != null && !keyspace.isEmpty()) session = tryToConnect(cluster, keyspace);
-                else session = cluster.connect();
+                try {
+                    if (keyspace != null && !keyspace.isEmpty()) session = tryToConnect(cluster, keyspace);
+                    else session = cluster.connect();
+                } catch (NoHostAvailableException | AuthenticationException | IllegalStateException e) {
+                    throw new SQLException(e.getMessage(), e);
+                }
                 return new CassandraConnection(session, this);
             } catch (UnknownHostException e) {
                 throw new SQLException(e.getMessage(), e);
