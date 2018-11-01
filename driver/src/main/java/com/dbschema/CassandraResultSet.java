@@ -169,8 +169,8 @@ public class CassandraResultSet implements ResultSet {
     public Time getTime(int columnIndex) throws SQLException {
         checkClosed();
         if (currentRow != null) {
-            long millis = currentRow.getTime(columnIndex - 1);
-            return new Time(millis);
+            long nanoseconds = currentRow.getTime(columnIndex - 1);
+            return new Time(nanoseconds / 1000000);
         }
         throw new SQLException("Exhausted ResultSet.");
     }

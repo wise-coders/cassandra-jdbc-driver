@@ -187,7 +187,7 @@ public class CassandraResultSetMetaData implements ResultSetMetaData {
             typeNameMap.put("tuple", "com.datastax.driver.core.TupleValue");
             typeNameMap.put("udt", "com.datastax.driver.core.UDTValue");
             typeNameMap.put("uuid", "java.util.UUID");
-            typeNameMap.put("time", "java.util.Date");
+            typeNameMap.put("time", "java.util.Time");
             typeNameMap.put("timeuuid", "java.util.UUID");
             typeNameMap.put("tinyint", "java.lang.Byte");
             typeNameMap.put("varchar", "java.lang.String");
