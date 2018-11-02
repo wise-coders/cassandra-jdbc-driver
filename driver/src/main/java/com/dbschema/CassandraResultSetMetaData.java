@@ -88,7 +88,7 @@ public class CassandraResultSetMetaData implements ResultSetMetaData {
 
     @Override
     public int getScale(int column) {
-        return 0; // todo
+        return columnMetaData.get(column - 1).getScale();
     }
 
     @Override
@@ -137,6 +137,7 @@ public class CassandraResultSetMetaData implements ResultSetMetaData {
 
         private static final Map<String, Integer> javaTypeMap = new HashMap<>();
         private static final Map<String, String> typeNameMap = new HashMap<>();
+        private static final Map<String, Integer> scaleMap = new HashMap<>();
 
         static {
             javaTypeMap.put("ascii", Types.VARCHAR);
@@ -192,6 +193,10 @@ public class CassandraResultSetMetaData implements ResultSetMetaData {
             typeNameMap.put("tinyint", "java.lang.Byte");
             typeNameMap.put("varchar", "java.lang.String");
             typeNameMap.put("varint", "java.math.BigInteger");
+
+            scaleMap.put("timestamp", 3);
+            scaleMap.put("time", 9);
+            scaleMap.put("duration", 9);
         }
 
         private final String name;
@@ -216,6 +221,12 @@ public class CassandraResultSetMetaData implements ResultSetMetaData {
             String lower = typeName.toLowerCase();
             if (typeNameMap.containsKey(lower)) return typeNameMap.get(lower);
             throw new IllegalArgumentException("Type name is not known: " + lower);
+        }
+
+        int getScale() {
+            String lower = typeName.toLowerCase();
+            if (scaleMap.containsKey(lower)) return scaleMap.get(lower);
+            return 0;
         }
     }
 }
