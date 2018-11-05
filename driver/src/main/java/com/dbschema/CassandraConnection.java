@@ -81,7 +81,7 @@ public class CassandraConnection implements Connection {
     @Override
     public boolean getAutoCommit() throws SQLException {
         checkClosed();
-        return true;
+        return false;
     }
 
     @Override
