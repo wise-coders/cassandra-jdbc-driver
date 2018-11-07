@@ -86,6 +86,7 @@ public class CassandraJdbcDriver implements Driver {
         myCodecRegistry.register(VarintCodec.INSTANCE);
         myCodecRegistry.register(BlobCodec.INSTANCE);
         myCodecRegistry.register(com.dbschema.codec.jdouble.FloatCodec.INSTANCE);
+        myCodecRegistry.register(com.dbschema.codec.jdouble.DecimalCodec.INSTANCE);
         myCodecRegistry.register(DateCodec.INSTANCE);
         myCodecRegistry.register(TimeCodec.INSTANCE);
         myCodecRegistry.register(com.dbschema.codec.juuid.StringCodec.INSTANCE);
