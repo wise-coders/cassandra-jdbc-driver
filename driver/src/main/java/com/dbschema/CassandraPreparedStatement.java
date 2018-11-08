@@ -10,7 +10,11 @@ import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+
+import static com.dbschema.DateUtil.*;
 
 public class CassandraPreparedStatement extends CassandraBaseStatement implements PreparedStatement {
 
@@ -307,19 +311,43 @@ public class CassandraPreparedStatement extends CassandraBaseStatement implement
     @Override
     public void setDate(int parameterIndex, Date x, Calendar cal) throws SQLException {
         checkClosed();
-        setObject(parameterIndex, x);
+        SimpleDateFormat dateFormat = getDateFormat(cal.getTimeZone());
+        dateFormat.setTimeZone(cal.getTimeZone());
+        String date = dateFormat.format(x);
+        try {
+            java.util.Date utilDate = utcDateFormat.parse(date);
+            setObject(parameterIndex, new Date(utilDate.getTime()));
+        } catch (ParseException e) {
+            throw new SQLException(e);
+        }
     }
 
     @Override
     public void setTime(int parameterIndex, Time x, Calendar cal) throws SQLException {
         checkClosed();
-        setObject(parameterIndex, x);
+        SimpleDateFormat timeFormat = getTimeFormat(cal.getTimeZone());
+        timeFormat.setTimeZone(cal.getTimeZone());
+        String time = timeFormat.format(x);
+        try {
+            java.util.Date utilDate = utcTimeFormat.parse(time);
+            setObject(parameterIndex, new Time(utilDate.getTime()));
+        } catch (ParseException e) {
+            throw new SQLException(e);
+        }
     }
 
     @Override
     public void setTimestamp(int parameterIndex, Timestamp x, Calendar cal) throws SQLException {
         checkClosed();
-        setObject(parameterIndex, x);
+        SimpleDateFormat dateTimeFormat = getDateTimeFormat(cal.getTimeZone());
+        dateTimeFormat.setTimeZone(cal.getTimeZone());
+        String timestamp = dateTimeFormat.format(x);
+        try {
+            java.util.Date utilDate = utcDateTimeFormat.parse(timestamp);
+            setObject(parameterIndex, new Timestamp(utilDate.getTime()));
+        } catch (ParseException e) {
+            throw new SQLException(e);
+        }
     }
 
     @Override

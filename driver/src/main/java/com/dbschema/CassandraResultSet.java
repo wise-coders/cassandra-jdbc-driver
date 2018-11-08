@@ -14,7 +14,10 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.sql.Date;
 import java.sql.*;
+import java.text.ParseException;
 import java.util.*;
+
+import static com.dbschema.DateUtil.*;
 
 public class CassandraResultSet implements ResultSet {
 
@@ -761,23 +764,44 @@ public class CassandraResultSet implements ResultSet {
     }
 
     public Date getDate(int columnIndex, Calendar cal) throws SQLException {
-        return getDate(columnIndex); // todo: properly implement
+        Date date = getDate(columnIndex);
+        String utc = utcDateFormat.format(date);
+        try {
+            java.util.Date utilDate = getDateFormat(cal.getTimeZone()).parse(utc);
+            return new Date(utilDate.getTime());
+        } catch (ParseException e) {
+            throw new SQLException(e);
+        }
+    }
+
+    public Time getTime(int columnIndex, Calendar cal) throws SQLException {
+        Time time = getTime(columnIndex);
+        String utc = utcTimeFormat.format(time);
+        try {
+            java.util.Date utilDate = getTimeFormat(cal.getTimeZone()).parse(utc);
+            return new Time(utilDate.getTime());
+        } catch (ParseException e) {
+            throw new SQLException(e);
+        }
+    }
+
+    public Timestamp getTimestamp(int columnIndex, Calendar cal) throws SQLException {
+        Timestamp timestamp = getTimestamp(columnIndex);
+        String utc = utcDateTimeFormat.format(timestamp);
+        try {
+            java.util.Date utilDate = getDateTimeFormat(cal.getTimeZone()).parse(utc);
+            return new Timestamp(utilDate.getTime());
+        } catch (ParseException e) {
+            throw new SQLException(e);
+        }
     }
 
     public Date getDate(String columnLabel, Calendar cal) throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 
-    public Time getTime(int columnIndex, Calendar cal) throws SQLException {
-        return getTime(columnIndex); // todo: properly implement
-    }
-
     public Time getTime(String columnLabel, Calendar cal) throws SQLException {
         throw new SQLFeatureNotSupportedException();
-    }
-
-    public Timestamp getTimestamp(int columnIndex, Calendar cal) throws SQLException {
-        return getTimestamp(columnIndex); // todo: properly implement
     }
 
     public Timestamp getTimestamp(String columnLabel, Calendar cal) throws SQLException {
