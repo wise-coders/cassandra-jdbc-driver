@@ -764,36 +764,15 @@ public class CassandraResultSet implements ResultSet {
     }
 
     public Date getDate(int columnIndex, Calendar cal) throws SQLException {
-        Date date = getDate(columnIndex);
-        String utc = utcDateFormat.format(date);
-        try {
-            java.util.Date utilDate = getDateFormat(cal.getTimeZone()).parse(utc);
-            return new Date(utilDate.getTime());
-        } catch (ParseException e) {
-            throw new SQLException(e);
-        }
+        return considerTimeZone(getDate(columnIndex), cal, Direction.FROM_UTC);
     }
 
     public Time getTime(int columnIndex, Calendar cal) throws SQLException {
-        Time time = getTime(columnIndex);
-        String utc = utcTimeFormat.format(time);
-        try {
-            java.util.Date utilDate = getTimeFormat(cal.getTimeZone()).parse(utc);
-            return new Time(utilDate.getTime());
-        } catch (ParseException e) {
-            throw new SQLException(e);
-        }
+        return considerTimeZone(getTime(columnIndex), cal, Direction.FROM_UTC);
     }
 
     public Timestamp getTimestamp(int columnIndex, Calendar cal) throws SQLException {
-        Timestamp timestamp = getTimestamp(columnIndex);
-        String utc = utcDateTimeFormat.format(timestamp);
-        try {
-            java.util.Date utilDate = getDateTimeFormat(cal.getTimeZone()).parse(utc);
-            return new Timestamp(utilDate.getTime());
-        } catch (ParseException e) {
-            throw new SQLException(e);
-        }
+        return DateUtil.considerTimeZone(getTimestamp(columnIndex), cal, Direction.FROM_UTC);
     }
 
     public Date getDate(String columnLabel, Calendar cal) throws SQLException {

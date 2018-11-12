@@ -10,11 +10,10 @@ import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.*;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-import static com.dbschema.DateUtil.*;
+import static com.dbschema.DateUtil.Direction;
+import static com.dbschema.DateUtil.considerTimeZone;
 
 public class CassandraPreparedStatement extends CassandraBaseStatement implements PreparedStatement {
 
@@ -311,43 +310,22 @@ public class CassandraPreparedStatement extends CassandraBaseStatement implement
     @Override
     public void setDate(int parameterIndex, Date x, Calendar cal) throws SQLException {
         checkClosed();
-        SimpleDateFormat dateFormat = getDateFormat(cal.getTimeZone());
-        dateFormat.setTimeZone(cal.getTimeZone());
-        String date = dateFormat.format(x);
-        try {
-            java.util.Date utilDate = utcDateFormat.parse(date);
-            setObject(parameterIndex, new Date(utilDate.getTime()));
-        } catch (ParseException e) {
-            throw new SQLException(e);
-        }
+        Date result = considerTimeZone(x, cal, Direction.TO_UTC);
+        setObject(parameterIndex, result);
     }
 
     @Override
     public void setTime(int parameterIndex, Time x, Calendar cal) throws SQLException {
         checkClosed();
-        SimpleDateFormat timeFormat = getTimeFormat(cal.getTimeZone());
-        timeFormat.setTimeZone(cal.getTimeZone());
-        String time = timeFormat.format(x);
-        try {
-            java.util.Date utilDate = utcTimeFormat.parse(time);
-            setObject(parameterIndex, new Time(utilDate.getTime()));
-        } catch (ParseException e) {
-            throw new SQLException(e);
-        }
+        Time result = considerTimeZone(x, cal, Direction.TO_UTC);
+        setObject(parameterIndex, result);
     }
 
     @Override
     public void setTimestamp(int parameterIndex, Timestamp x, Calendar cal) throws SQLException {
         checkClosed();
-        SimpleDateFormat dateTimeFormat = getDateTimeFormat(cal.getTimeZone());
-        dateTimeFormat.setTimeZone(cal.getTimeZone());
-        String timestamp = dateTimeFormat.format(x);
-        try {
-            java.util.Date utilDate = utcDateTimeFormat.parse(timestamp);
-            setObject(parameterIndex, new Timestamp(utilDate.getTime()));
-        } catch (ParseException e) {
-            throw new SQLException(e);
-        }
+        Timestamp result = considerTimeZone(x, cal, Direction.TO_UTC);
+        setObject(parameterIndex, result);
     }
 
     @Override
