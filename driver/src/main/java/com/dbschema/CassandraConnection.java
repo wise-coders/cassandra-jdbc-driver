@@ -21,7 +21,11 @@ public class CassandraConnection implements Connection {
 
     public String getCatalog() throws SQLException {
         checkClosed();
-        return session.getLoggedKeyspace();
+        try {
+            return session.getLoggedKeyspace();
+        } catch (Throwable t) {
+            throw new SQLException(t.getMessage(), t);
+        }
     }
 
     Session getSession() {
@@ -43,7 +47,11 @@ public class CassandraConnection implements Connection {
     @Override
     public Statement createStatement() throws SQLException {
         checkClosed();
-        return new CassandraStatement(session);
+        try {
+            return new CassandraStatement(session);
+        } catch (Throwable t) {
+            throw new SQLException(t.getMessage(), t);
+        }
     }
 
     @Override
@@ -59,7 +67,11 @@ public class CassandraConnection implements Connection {
     @Override
     public PreparedStatement prepareStatement(String sql) throws SQLException {
         checkClosed();
-        return new CassandraPreparedStatement(session, session.prepare(sql));
+        try {
+            return new CassandraPreparedStatement(session, session.prepare(sql));
+        } catch (Throwable t) {
+            throw new SQLException(t.getMessage(), t);
+        }
     }
 
     @Override
