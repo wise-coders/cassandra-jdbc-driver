@@ -1,8 +1,6 @@
 package com.dbschema;
 
 import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.policies.ConstantReconnectionPolicy;
-import com.datastax.driver.core.policies.DowngradingConsistencyRetryPolicy;
 
 import java.net.InetAddress;
 import java.util.*;
@@ -105,9 +103,7 @@ public class CassandraClientURI {
             builder.withPort( port );
 
         }
-        builder.withRetryPolicy(DowngradingConsistencyRetryPolicy.INSTANCE)
-                .withReconnectionPolicy(new ConstantReconnectionPolicy(100L));
-        if ( userName != null ){
+        if (userName != null && !userName.isEmpty() && password != null) {
             builder.withCredentials(userName, password);
             System.out.println("Using authentication as user '" + userName + "'");
         }
