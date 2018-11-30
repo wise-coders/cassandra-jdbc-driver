@@ -28,7 +28,8 @@ public class CassandraConnection implements Connection {
         }
     }
 
-    Session getSession() {
+    @SuppressWarnings("WeakerAccess")
+    public Session getSession() {
         return session;
     }
 
