@@ -4,8 +4,11 @@ import com.datastax.driver.core.Cluster;
 
 import java.net.InetAddress;
 import java.util.*;
+import java.util.logging.Logger;
 
 public class CassandraClientURI {
+
+    private static final Logger logger = Logger.getLogger("CassandraClientURILogger");
 
     static final String PREFIX = "jdbc:cassandra://";
 
@@ -15,6 +18,7 @@ public class CassandraClientURI {
     private final String uri;
     private final String userName;
     private final String password;
+    private final Boolean sslEnabled;
 
     public CassandraClientURI(String uri, Properties info) {
         this.uri = uri;
@@ -50,6 +54,9 @@ public class CassandraClientURI {
 
         this.userName = getOption(info, options, "user");
         this.password = getOption(info, options, "password");
+        String sslEnabledOption = getOption(info, options, "sslenabled");
+        this.sslEnabled = sslEnabledOption != null ? Boolean.valueOf(sslEnabledOption) : false;
+
 
         { // userName,password,hosts
             List<String> all = new LinkedList<String>();
@@ -98,6 +105,10 @@ public class CassandraClientURI {
                 host = host.substring( 0, idx ).trim();
             }
             builder.addContactPoints( InetAddress.getByName( host ) );
+            logger.info("sslenabled: " + sslEnabled.toString());
+            if (sslEnabled) {
+                builder.withSSL();
+            }
         }
         if ( port > -1 ){
             builder.withPort( port );
@@ -157,6 +168,15 @@ public class CassandraClientURI {
      */
     public String getPassword() {
         return password;
+    }
+
+    /**
+     * Gets the ssl enabled property
+     *
+     * @return the ssl enabled property
+     */
+    public Boolean getSslEnabled() {
+        return sslEnabled;
     }
 
     /**
