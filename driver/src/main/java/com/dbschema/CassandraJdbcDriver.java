@@ -8,6 +8,7 @@ import com.datastax.driver.core.Session;
 import com.datastax.driver.core.exceptions.AuthenticationException;
 import com.datastax.driver.core.exceptions.InvalidQueryException;
 import com.datastax.driver.core.exceptions.NoHostAvailableException;
+import com.dbschema.codec.jbiginteger.LongCodec;
 import com.dbschema.codec.jbytes.BlobCodec;
 import com.dbschema.codec.jlong.*;
 import com.dbschema.codec.jsqldate.DateCodec;
@@ -89,6 +90,7 @@ public class CassandraJdbcDriver implements Driver {
         myCodecRegistry.register(com.dbschema.codec.jdouble.DecimalCodec.INSTANCE);
         myCodecRegistry.register(DateCodec.INSTANCE);
         myCodecRegistry.register(TimeCodec.INSTANCE);
+        myCodecRegistry.register(LongCodec.INSTANCE);
         myCodecRegistry.register(com.dbschema.codec.juuid.StringCodec.INSTANCE);
         myCodecRegistry.register(com.dbschema.codec.jduration.StringCodec.INSTANCE);
         myCodecRegistry.register(com.dbschema.codec.jtimeuuid.StringCodec.INSTANCE);
@@ -110,7 +112,7 @@ public class CassandraJdbcDriver implements Driver {
     }
 
     String getVersion() {
-        return "1.3";
+        return "1.3.1";
     }
 
     @Override
