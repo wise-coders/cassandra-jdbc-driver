@@ -8,11 +8,15 @@ import com.datastax.driver.core.Session;
 import com.datastax.driver.core.exceptions.AuthenticationException;
 import com.datastax.driver.core.exceptions.InvalidQueryException;
 import com.datastax.driver.core.exceptions.NoHostAvailableException;
-import com.dbschema.codec.jbiginteger.LongCodec;
+import com.dbschema.codec.jbigdecimal.BigintCodec;
 import com.dbschema.codec.jbytes.BlobCodec;
+import com.dbschema.codec.jstring.InetCodec;
+import com.dbschema.codec.jstring.DurationCodec;
 import com.dbschema.codec.jlong.*;
 import com.dbschema.codec.jsqldate.DateCodec;
 import com.dbschema.codec.jsqltime.TimeCodec;
+import com.dbschema.codec.jstring.UuidCodec;
+import com.dbschema.codec.jstring.TimeuuidCodec;
 
 import java.net.UnknownHostException;
 import java.sql.*;
@@ -90,11 +94,11 @@ public class CassandraJdbcDriver implements Driver {
         myCodecRegistry.register(com.dbschema.codec.jdouble.DecimalCodec.INSTANCE);
         myCodecRegistry.register(DateCodec.INSTANCE);
         myCodecRegistry.register(TimeCodec.INSTANCE);
-        myCodecRegistry.register(LongCodec.INSTANCE);
-        myCodecRegistry.register(com.dbschema.codec.juuid.StringCodec.INSTANCE);
-        myCodecRegistry.register(com.dbschema.codec.jduration.StringCodec.INSTANCE);
-        myCodecRegistry.register(com.dbschema.codec.jtimeuuid.StringCodec.INSTANCE);
-        myCodecRegistry.register(com.dbschema.codec.jinet.StringCodec.INSTANCE);
+        myCodecRegistry.register(BigintCodec.INSTANCE);
+        myCodecRegistry.register(UuidCodec.INSTANCE);
+        myCodecRegistry.register(DurationCodec.INSTANCE);
+        myCodecRegistry.register(TimeuuidCodec.INSTANCE);
+        myCodecRegistry.register(InetCodec.INSTANCE);
     }
 
 

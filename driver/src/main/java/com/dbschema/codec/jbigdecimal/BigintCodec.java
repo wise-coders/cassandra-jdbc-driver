@@ -1,4 +1,4 @@
-package com.dbschema.codec.jbiginteger;
+package com.dbschema.codec.jbigdecimal;
 
 import com.datastax.driver.core.DataType;
 import com.datastax.driver.core.ProtocolVersion;
@@ -11,10 +11,10 @@ import java.nio.ByteBuffer;
 /**
  * @author Liudmila Kornilova
  **/
-public class LongCodec extends TypeCodec<BigDecimal> {
-    public static final LongCodec INSTANCE = new LongCodec();
+public class BigintCodec extends TypeCodec<BigDecimal> {
+    public static final BigintCodec INSTANCE = new BigintCodec();
 
-    private LongCodec() {
+    private BigintCodec() {
         super(DataType.bigint(), BigDecimal.class);
     }
 

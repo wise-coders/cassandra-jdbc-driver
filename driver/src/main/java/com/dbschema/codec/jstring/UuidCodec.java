@@ -1,4 +1,4 @@
-package com.dbschema.codec.juuid;
+package com.dbschema.codec.jstring;
 
 import com.datastax.driver.core.CodecRegistry;
 import com.datastax.driver.core.DataType;
@@ -12,11 +12,11 @@ import java.util.UUID;
 /**
  * @author Liudmila Kornilova
  **/
-public class StringCodec extends TypeCodec<String> {
-    public static final StringCodec INSTANCE = new StringCodec();
+public class UuidCodec extends TypeCodec<String> {
+    public static final UuidCodec INSTANCE = new UuidCodec();
     private final TypeCodec<UUID> uuidCodec = CodecRegistry.DEFAULT_INSTANCE.codecFor(DataType.uuid(), UUID.class);
 
-    private StringCodec() {
+    private UuidCodec() {
         super(DataType.uuid(), String.class);
     }
 

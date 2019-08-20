@@ -1,4 +1,4 @@
-package com.dbschema.codec.jinet;
+package com.dbschema.codec.jstring;
 
 import com.datastax.driver.core.CodecRegistry;
 import com.datastax.driver.core.DataType;
@@ -6,35 +6,30 @@ import com.datastax.driver.core.ProtocolVersion;
 import com.datastax.driver.core.TypeCodec;
 import com.datastax.driver.core.exceptions.InvalidTypeException;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.util.UUID;
 
 /**
  * @author Liudmila Kornilova
  **/
-public class StringCodec extends TypeCodec<String> {
-    public static final StringCodec INSTANCE = new StringCodec();
-    private final TypeCodec<InetAddress> inetCodec = CodecRegistry.DEFAULT_INSTANCE.codecFor(DataType.inet(), InetAddress.class);
+public class TimeuuidCodec extends TypeCodec<String> {
+    public static final TimeuuidCodec INSTANCE = new TimeuuidCodec();
+    private final TypeCodec<UUID> timeuuidCodec = CodecRegistry.DEFAULT_INSTANCE.codecFor(DataType.timeuuid(), UUID.class);
 
-    private StringCodec() {
-        super(DataType.inet(), String.class);
+    private TimeuuidCodec() {
+        super(DataType.timeuuid(), String.class);
     }
 
     @Override
     public ByteBuffer serialize(String value, ProtocolVersion protocolVersion) throws InvalidTypeException {
         if (value == null) return null;
-        try {
-            return inetCodec.serialize(InetAddress.getByName(value), protocolVersion);
-        } catch (UnknownHostException e) {
-            throw new InvalidTypeException(e.getMessage());
-        }
+        return timeuuidCodec.serialize(UUID.fromString(value), protocolVersion);
     }
 
     @Override
-    public String deserialize(ByteBuffer bytes, ProtocolVersion protocolVersion) throws InvalidTypeException {
+    public String  deserialize(ByteBuffer bytes, ProtocolVersion protocolVersion) throws InvalidTypeException {
         if (bytes == null) return null;
-        return inetCodec.deserialize(bytes, protocolVersion).getHostAddress();
+        return timeuuidCodec.deserialize(bytes, protocolVersion).toString();
     }
 
     @Override

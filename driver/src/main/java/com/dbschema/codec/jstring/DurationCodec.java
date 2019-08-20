@@ -1,4 +1,4 @@
-package com.dbschema.codec.jduration;
+package com.dbschema.codec.jstring;
 
 import com.datastax.driver.core.*;
 import com.datastax.driver.core.exceptions.InvalidTypeException;
@@ -8,11 +8,11 @@ import java.nio.ByteBuffer;
 /**
  * @author Liudmila Kornilova
  **/
-public class StringCodec extends TypeCodec<String> {
-    public static final StringCodec INSTANCE = new StringCodec();
+public class DurationCodec extends TypeCodec<String> {
+    public static final DurationCodec INSTANCE = new DurationCodec();
     private final TypeCodec<Duration> durationCodec = CodecRegistry.DEFAULT_INSTANCE.codecFor(DataType.duration(), Duration.class);
 
-    private StringCodec() {
+    private DurationCodec() {
         super(DataType.duration(), String.class);
     }
 
