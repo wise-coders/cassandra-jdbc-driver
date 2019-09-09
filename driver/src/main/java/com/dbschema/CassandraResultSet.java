@@ -71,7 +71,8 @@ public class CassandraResultSet implements ResultSet {
     public String getString(int columnIndex) throws SQLException {
         checkClosed();
         if (currentRow != null) {
-            return String.valueOf(currentRow.getObject(columnIndex - 1));
+            Object object = currentRow.getObject(columnIndex - 1);
+            return object == null ? null : String.valueOf(object);
         }
         throw new SQLException("Exhausted ResultSet.");
     }
