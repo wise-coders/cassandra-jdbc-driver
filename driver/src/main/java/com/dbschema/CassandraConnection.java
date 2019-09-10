@@ -9,14 +9,29 @@ import java.util.Properties;
 import java.util.concurrent.Executor;
 
 public class CassandraConnection implements Connection {
+    /**
+     * This query retrieves Cassandra 2.x columns in DataGrip.
+     * <p>
+     * DataGrip before 2019.3 version assumes that index_name column does not contain null values.
+     * Driver since v1.3.2 version returns null value if a string is null (used to return "null")
+     * It means that DataGrip <2019.3 and driver v1.3.2 are incompatible.
+     * <p>
+     * To make driver and DG compatible driver will return "null" strings instead of null values
+     * for this particular query in PreparedStatement.
+     * See also https://youtrack.jetbrains.com/issue/DBE-9091
+     */
+    private static final String SELECT_COLUMNS_INTRO_QUERY = "SELECT column_name as name,\n       validator,\n       columnfamily_name as table_name,\n       type,\n       index_name,\n       index_options,\n       index_type,\n       component_index as position\nFROM system.schema_columns\nWHERE keyspace_name = ?";
+
     private final Session session;
     private CassandraJdbcDriver driver;
+    private boolean returnNullStringsFromIntroQuery;
     private boolean isClosed = false;
     private boolean isReadOnly = false;
 
-    CassandraConnection(Session session, CassandraJdbcDriver cassandraJdbcDriver) {
+    CassandraConnection(Session session, CassandraJdbcDriver cassandraJdbcDriver, boolean returnNullStringsFromIntroQuery) {
         this.session = session;
         driver = cassandraJdbcDriver;
+        this.returnNullStringsFromIntroQuery = returnNullStringsFromIntroQuery;
     }
 
     public String getCatalog() throws SQLException {
@@ -69,7 +84,7 @@ public class CassandraConnection implements Connection {
     public PreparedStatement prepareStatement(String sql) throws SQLException {
         checkClosed();
         try {
-            return new CassandraPreparedStatement(session, session.prepare(sql));
+            return new CassandraPreparedStatement(session, session.prepare(sql), returnNullStringsFromIntroQuery || !SELECT_COLUMNS_INTRO_QUERY.equals(sql));
         } catch (Throwable t) {
             throw new SQLException(t.getMessage(), t);
         }

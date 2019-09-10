@@ -14,10 +14,10 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.sql.Date;
 import java.sql.*;
-import java.text.ParseException;
 import java.util.*;
 
-import static com.dbschema.DateUtil.*;
+import static com.dbschema.DateUtil.Direction;
+import static com.dbschema.DateUtil.considerTimeZone;
 
 public class CassandraResultSet implements ResultSet {
 
@@ -26,12 +26,18 @@ public class CassandraResultSet implements ResultSet {
     private final Statement statement;
     private final com.datastax.driver.core.ResultSet dsResultSet;
     private final Iterator<Row> iterator;
+    private final boolean returnNullStrings;
     private Row currentRow;
 
-    public CassandraResultSet(Statement statement, com.datastax.driver.core.ResultSet dsResultSet) {
+    CassandraResultSet(Statement statement, com.datastax.driver.core.ResultSet dsResultSet, boolean returnNullStrings) {
         this.statement = statement;
         this.dsResultSet = dsResultSet;
         this.iterator = dsResultSet.iterator();
+        this.returnNullStrings = returnNullStrings;
+    }
+
+    CassandraResultSet(Statement statement, com.datastax.driver.core.ResultSet dsResultSet) {
+        this(statement, dsResultSet, true);
     }
 
     @Override
@@ -70,11 +76,11 @@ public class CassandraResultSet implements ResultSet {
     @Override
     public String getString(int columnIndex) throws SQLException {
         checkClosed();
-        if (currentRow != null) {
-            Object object = currentRow.getObject(columnIndex - 1);
-            return object == null ? null : String.valueOf(object);
-        }
-        throw new SQLException("Exhausted ResultSet.");
+        if (currentRow == null) throw new SQLException("Exhausted ResultSet.");
+        Object o = currentRow.getObject(columnIndex - 1);
+        return o == null ?
+                returnNullStrings ? null : "" :
+                String.valueOf(o);
     }
 
     @Override

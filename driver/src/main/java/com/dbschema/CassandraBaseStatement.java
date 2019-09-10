@@ -35,9 +35,9 @@ public abstract class CassandraBaseStatement implements Statement {
         return isClosed;
     }
 
-    boolean executeInner(com.datastax.driver.core.ResultSet resultSet) throws SQLException {
+    boolean executeInner(com.datastax.driver.core.ResultSet resultSet, boolean returnNullStrings) throws SQLException {
         try {
-            result = new CassandraResultSet(this, resultSet);
+            result = new CassandraResultSet(this, resultSet, returnNullStrings);
             if (!result.isQuery()) {
                 result = null;
                 return false;

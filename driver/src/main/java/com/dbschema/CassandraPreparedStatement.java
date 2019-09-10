@@ -10,6 +10,7 @@ import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.*;
+import java.util.Arrays;
 import java.util.Calendar;
 
 import static com.dbschema.DateUtil.Direction;
@@ -18,11 +19,13 @@ import static com.dbschema.DateUtil.considerTimeZone;
 public class CassandraPreparedStatement extends CassandraBaseStatement implements PreparedStatement {
 
     private final com.datastax.driver.core.PreparedStatement preparedStatement;
+    private final boolean returnNullStrings;
     private Object[] params;
 
-    CassandraPreparedStatement(Session session, final com.datastax.driver.core.PreparedStatement preparedStatement) {
+    CassandraPreparedStatement(Session session, final com.datastax.driver.core.PreparedStatement preparedStatement, boolean returnNullStrings) {
         super(session);
         this.preparedStatement = preparedStatement;
+        this.returnNullStrings = returnNullStrings;
     }
 
     @Override
@@ -64,7 +67,7 @@ public class CassandraPreparedStatement extends CassandraBaseStatement implement
     public int executeUpdate() throws SQLException {
         checkClosed();
         try {
-            result = new CassandraResultSet(this, session.execute(bindParameters()));
+            result = new CassandraResultSet(this, session.execute(bindParameters()), returnNullStrings);
             if (result.isQuery()) {
                 throw new SQLException("Not an update statement");
             }
@@ -241,7 +244,7 @@ public class CassandraPreparedStatement extends CassandraBaseStatement implement
     public boolean execute() throws SQLException {
         checkClosed();
         try {
-            return executeInner(session.execute(bindParameters()));
+            return executeInner(session.execute(bindParameters()), returnNullStrings);
         } catch (Throwable t) {
             throw new SQLException(t.getMessage(), t);
         }
@@ -257,9 +260,7 @@ public class CassandraPreparedStatement extends CassandraBaseStatement implement
 
     private void clearParams() {
         if (params == null) return;
-        for (int i = 0; i < params.length; i++) {
-            params[i] = null;
-        }
+        Arrays.fill(params, null);
     }
 
     @Override

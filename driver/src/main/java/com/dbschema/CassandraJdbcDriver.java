@@ -35,6 +35,8 @@ import static com.dbschema.CassandraClientURI.PREFIX;
  */
 
 public class CassandraJdbcDriver implements Driver {
+    private static final String RETURN_NULL_STRINGS_FROM_INTRO_QUERY_KEY = "cassandra.jdbc.return.null.strings.from.intro.query";
+
     static {
         try {
             DriverManager.registerDriver(new CassandraJdbcDriver());
@@ -63,7 +65,8 @@ public class CassandraJdbcDriver implements Driver {
                 } catch (NoHostAvailableException | AuthenticationException | IllegalStateException e) {
                     throw new SQLException(e.getMessage(), e);
                 }
-                return new CassandraConnection(session, this);
+                boolean returnNullStringsFromIntroQuery = Boolean.parseBoolean(info.getProperty(RETURN_NULL_STRINGS_FROM_INTRO_QUERY_KEY));
+                return new CassandraConnection(session, this, returnNullStringsFromIntroQuery);
             } catch (UnknownHostException e) {
                 throw new SQLException(e.getMessage(), e);
             }
@@ -116,7 +119,7 @@ public class CassandraJdbcDriver implements Driver {
     }
 
     String getVersion() {
-        return "1.3.2";
+        return "1.3.3";
     }
 
     @Override

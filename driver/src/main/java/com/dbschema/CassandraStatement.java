@@ -50,7 +50,7 @@ public class CassandraStatement extends CassandraBaseStatement {
     public boolean execute(String sql) throws SQLException {
         checkClosed();
         try {
-            return executeInner(session.execute(sql));
+            return executeInner(session.execute(sql), true);
         } catch (Throwable t) {
             throw new SQLException(t.getMessage(), t);
         }
