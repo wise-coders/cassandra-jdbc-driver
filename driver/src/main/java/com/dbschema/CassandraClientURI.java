@@ -55,11 +55,11 @@ public class CassandraClientURI {
         this.userName = getOption(info, options, "user");
         this.password = getOption(info, options, "password");
         String sslEnabledOption = getOption(info, options, "sslenabled");
-        this.sslEnabled = sslEnabledOption != null ? Boolean.valueOf(sslEnabledOption) : false;
+        this.sslEnabled = Boolean.parseBoolean(sslEnabledOption);
 
 
         { // userName,password,hosts
-            List<String> all = new LinkedList<String>();
+            List<String> all = new LinkedList<>();
 
             Collections.addAll(all, serverPart.split(","));
 
@@ -132,14 +132,14 @@ public class CassandraClientURI {
     private Map<String, List<String>> parseOptions(String optionsPart) {
         Map<String, List<String>> optionsMap = new HashMap<>();
 
-        for (String _part : optionsPart.split("&|;")) {
+        for (String _part : optionsPart.split("[&;]")) {
             int idx = _part.indexOf("=");
             if (idx >= 0) {
-                String key = _part.substring(0, idx).toLowerCase();
+                String key = _part.substring(0, idx).toLowerCase(Locale.ENGLISH);
                 String value = _part.substring(idx + 1);
                 List<String> valueList = optionsMap.get(key);
                 if (valueList == null) {
-                    valueList = new ArrayList<String>(1);
+                    valueList = new ArrayList<>(1);
                 }
                 valueList.add(value);
                 optionsMap.put(key, valueList);

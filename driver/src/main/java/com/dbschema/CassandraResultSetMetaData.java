@@ -6,6 +6,7 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class CassandraResultSetMetaData implements ResultSetMetaData {
@@ -212,21 +213,25 @@ public class CassandraResultSetMetaData implements ResultSetMetaData {
         }
 
         int getJavaType() {
-            String lower = typeName.toLowerCase();
+            String lower = toLowerCase(typeName);
             if (javaTypeMap.containsKey(lower)) return javaTypeMap.get(lower);
             throw new IllegalArgumentException("Type name is not known: " + lower);
         }
 
         String getClassName() {
-            String lower = typeName.toLowerCase();
+            String lower = toLowerCase(typeName);
             if (typeNameMap.containsKey(lower)) return typeNameMap.get(lower);
             throw new IllegalArgumentException("Type name is not known: " + lower);
         }
 
         int getScale() {
-            String lower = typeName.toLowerCase();
+            String lower = toLowerCase(typeName);
             if (scaleMap.containsKey(lower)) return scaleMap.get(lower);
             return 0;
+        }
+
+        private String toLowerCase(String value) {
+            return value.toLowerCase(Locale.ENGLISH);
         }
     }
 }
