@@ -84,6 +84,8 @@ public class CassandraClientURI {
         warnOnUnsupportedOptions(optionsMap);
     }
 
+    private boolean showLog = true;
+
     Cluster createBuilder(){
         Cluster.Builder builder = Cluster.builder();
         if ( System.getProperty("javax.net.ssl.trustStore") != null ){
@@ -108,7 +110,10 @@ public class CassandraClientURI {
         if ( userName != null ){
             builder.withCredentials(userName, password);
         }
-        System.out.println( log );
+        if (showLog) {
+            System.out.println(log);
+            showLog = false;
+        }
         return builder.build();
     }
 

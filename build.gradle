@@ -24,7 +24,7 @@ dependencies {
 jar {
     archiveName ="cassandrajdbc${version}.jar"
     manifest {
-        attributes 'Main-Class': 'com.wisecoders.CassandraJdbcDriver'
+        attributes 'Main-Class': 'com.dbschema.CassandraJdbcDriver'
         attributes 'Specification-Version': "$version"
         attributes 'Specification-Vendor': "Wise Coders"
         attributes 'Implementation-Vendor-Id': "dbschema.com"
@@ -55,6 +55,7 @@ remotes {
     }
 }
 
+/*
 task uploadWeb {
     doLast {
         ssh.settings {
@@ -71,4 +72,4 @@ task uploadWeb {
         }
     }
 }
-
+*/

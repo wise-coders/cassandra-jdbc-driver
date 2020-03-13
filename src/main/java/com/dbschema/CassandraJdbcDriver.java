@@ -4,7 +4,6 @@ package com.dbschema;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
 
-import java.net.UnknownHostException;
 import java.sql.*;
 import java.util.Properties;
 import java.util.logging.Logger;

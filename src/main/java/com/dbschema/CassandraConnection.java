@@ -3,7 +3,6 @@ package com.dbschema;
 
 import com.datastax.driver.core.Session;
 
-import java.net.UnknownHostException;
 import java.sql.*;
 import java.util.Map;
 import java.util.Properties;

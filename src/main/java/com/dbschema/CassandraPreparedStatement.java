@@ -69,6 +69,8 @@ public class CassandraPreparedStatement implements PreparedStatement {
         } else if ( params != null ){
             com.datastax.driver.core.PreparedStatement dsps = connection.session.prepare( sql );
             BoundStatement boundStatement = new BoundStatement(dsps);
+            // INCREASE READ TIMEOUT AT USER REQUEST
+            boundStatement.setReadTimeoutMillis(65000);
             convertMapValuesToCassandraUdt(dsps);
             lastResultSet = new ResultSetWrapper( this, connection.session.execute( boundStatement.bind( params.toArray(new Object[params.size()]) )));
             params.clear();
@@ -79,17 +81,10 @@ public class CassandraPreparedStatement implements PreparedStatement {
     }
 
     private void convertMapValuesToCassandraUdt(com.datastax.driver.core.PreparedStatement dsps) {
-        System.out.println("Cassandra step 1 ");
         if ( dsps.getVariables() != null ){
-            System.out.println("Cassandra step 2 ");
             for ( int i = 0; i < dsps.getVariables().size(); i++) {
                 DataType type = dsps.getVariables().getType(i);
-                System.out.println("Cassandra step 3 " + type.getName() + " isMap=" + (params.get(i) instanceof Map));
-                for ( DataType st: type.getTypeArguments()){
-                    System.out.println("Cassandra 4 " + st.getName());
-                }
                 if (type instanceof UserType && params.get(i) instanceof Map) {
-                    System.out.println("Cassandra step 5 ");
 
                     UDTValue udtValue = ((UserType) type).newValue();
                     Map paramValue = (Map) params.get(i);
@@ -120,7 +115,7 @@ public class CassandraPreparedStatement implements PreparedStatement {
         }
     }
 
-    public static final SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+    private static final SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
     private ArrayResultSet explainPlan( String query ){
         final ArrayResultSet rs = new ArrayResultSet();
