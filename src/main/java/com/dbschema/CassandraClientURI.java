@@ -84,25 +84,25 @@ public class CassandraClientURI {
         warnOnUnsupportedOptions(optionsMap);
     }
 
-    private boolean showLog = true;
+    private static boolean showLog = true;
 
     Cluster createBuilder(){
         Cluster.Builder builder = Cluster.builder();
         if ( System.getProperty("javax.net.ssl.trustStore") != null ){
             builder = builder.withSSL();
         }
-        StringBuilder log = new StringBuilder();
-        log.append("DbSchemaCassandraJDBCDriver with contact points: ");
+        StringBuilder sb = new StringBuilder();
+        sb.append("CassandraJDBC Driver contact points: ");
         for ( String host : hosts ){
             int idx = host.indexOf(":");
             if ( idx > 0 ){
                 int port = Integer.parseInt( host.substring( idx +1).trim() );
                 host = host.substring( 0, idx ).trim();
                 builder.addContactPointsWithPorts( new InetSocketAddress(host, port ));
-                log.append( host ).append(":").append(port );
+                sb.append( host ).append(":").append(port );
             } else {
                 builder.addContactPointsWithPorts( new InetSocketAddress( host, 9042 ));
-                log.append("; ").append( host ).append(":9042" );
+                sb.append("; ").append( host ).append(":9042" );
             }
         }
         builder.withRetryPolicy(DowngradingConsistencyRetryPolicy.INSTANCE)
@@ -111,7 +111,7 @@ public class CassandraClientURI {
             builder.withCredentials(userName, password);
         }
         if (showLog) {
-            System.out.println(log);
+            System.out.println(sb);
             showLog = false;
         }
         return builder.build();
