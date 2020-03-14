@@ -13,10 +13,6 @@ The driver is provided and used by [DbSchema Cassandra GUI Tool](https://dbschem
 
 [Available here](https://dbschema.com/jdbc-drivers/CassandraJdbcDriver.zip). Unpack and include all jars in your classpath. 
 
-The driver can be tested by downloading and installing [DbSchema](http://www.dbschema.com). The tool has a 15 days trial period.
-In DbSchema Connection Dialog 'Use URI' you can set an URL as below, with different connection parameters.
-DbSchema will download the driver in the local user home folder .DbSchema/drivers/Cassandra ( C:\Users\YourUser\.DbSchema\drivers\Cassandra ).
-
 ## How to Configure the JDBC Driver
 
 * Java Driver Class: com.dbschema.CassandraJdbcDriver
@@ -62,7 +58,7 @@ Using the second tab you can enter a custom URL.
 
 DbSchema can reverse engineer the schema and represent it as diagrams.
 
-![Cassandra database diagrams](resources/images/dbschema-cassandra-connection-dialog-custom-url.png)
+![Cassandra database diagrams](resources/images/dbschema-cassandra-diagram-gui-tool.png)
 
 The Query Editor can be used for executing Cql Queries:
 
