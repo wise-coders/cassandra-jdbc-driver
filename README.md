@@ -62,14 +62,14 @@ DbSchema can reverse engineer the schema and represent it as diagrams.
 
 The Query Editor can be used for executing Cql Queries:
 
-![Cassandra database diagrams](resources/images/dbschema-cassandra-query-editor.png)
+![Cassandra Query Editor](resources/images/dbschema-cassandra-query-editor.png)
 
 DbSchema can create virtual foreign keys, which are saved to project file.
 They can be used in Relational Data Browse, to simply explore data from multiple tables.
 
-![Cassandra database diagrams](resources/images/dbschema-cassandra-relational-data-browse.png)
+![Relational Data Browse for Cassandra](resources/images/dbschema-cassandra-relational-data-browse.png)
 
 Also a random data generator for Cassandra is available:
 
-![Cassandra database diagrams](resources/images/dbschema-cassandra-random-data-generator.png )
+![Cassandra Random Data Generator](resources/images/dbschema-cassandra-random-data-generator.png )
 

@@ -164,15 +164,16 @@ public class CassandraPreparedStatement implements PreparedStatement {
     }
 
     @Override
-    public void setObject(int parameterIndex, Object value) throws SQLException {
+    public void setObject(int parameterIndex, Object value) {
         if ( params == null ){
             params = new ArrayList<Object>();
         }
         int idx = parameterIndex-1;
-        for ( int i = params.size(); i < idx; i++){
+        // FILL ALL PRECEDENT POSITIONS WITH NULL
+        for ( int i = params.size(); i <= idx; i++){
             params.add( i, null );
         }
-        params.add(idx, value);
+        params.set(idx, value);
     }
 
     @Override
@@ -400,6 +401,7 @@ public class CassandraPreparedStatement implements PreparedStatement {
 
     @Override
     public void setNull(int parameterIndex, int sqlType) throws SQLException {
+        setObject( parameterIndex, null);
     }
 
     @Override
@@ -453,8 +455,8 @@ public class CassandraPreparedStatement implements PreparedStatement {
     }
 
     @Override
-    public void setDate(int parameterIndex, Date x) throws SQLException {
-        setObject( parameterIndex, x );
+    public void setDate(int parameterIndex, Date date) throws SQLException {
+        setObject( parameterIndex, LocalDate.fromMillisSinceEpoch( date.getTime()) );
     }
 
     @Override
