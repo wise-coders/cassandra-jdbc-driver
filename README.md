@@ -1,4 +1,4 @@
-# Open Source Cassandra JDBC Driver
+# Cassandra JDBC Driver | DbSchema Cassandra Designer
 
 This is an open source JDBC Driver for Cassandra.
 The driver is provided and used by [DbSchema Cassandra GUI Tool](https://dbschema.com).
