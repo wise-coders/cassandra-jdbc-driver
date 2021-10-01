@@ -17,7 +17,7 @@ repositories {
 
 
 dependencies {
-    compile "com.datastax.cassandra:cassandra-driver-core:3.8.0"
+    compile "com.datastax.cassandra:cassandra-driver-core:3.11.0"
     testCompile 'junit:junit:4.12'
 }
 
