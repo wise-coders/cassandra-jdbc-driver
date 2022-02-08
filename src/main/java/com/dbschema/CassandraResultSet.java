@@ -1,8 +1,8 @@
 package com.dbschema;
 
-import com.datastax.driver.core.ColumnDefinitions.Definition;
-import com.datastax.driver.core.LocalDate;
-import com.datastax.driver.core.Row;
+import com.datastax.oss.driver.api.core.cql.ColumnDefinition;
+import com.datastax.oss.driver.api.core.cql.ColumnDefinitions;
+import com.datastax.oss.driver.api.core.cql.Row;
 import com.dbschema.CassandraResultSetMetaData.ColumnMetaData;
 import com.dbschema.types.ArrayImpl;
 import com.dbschema.types.BlobImpl;
@@ -14,6 +14,9 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.sql.Date;
 import java.sql.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 
 import static com.dbschema.DateUtil.Direction;
@@ -24,19 +27,19 @@ public class CassandraResultSet implements ResultSet {
     private boolean isClosed = false;
 
     private final Statement statement;
-    private final com.datastax.driver.core.ResultSet dsResultSet;
+    private final com.datastax.oss.driver.api.core.cql.ResultSet dsResultSet;
     private final Iterator<Row> iterator;
     private final boolean returnNullStrings;
     private Row currentRow;
 
-    CassandraResultSet(Statement statement, com.datastax.driver.core.ResultSet dsResultSet, boolean returnNullStrings) {
+    CassandraResultSet(Statement statement, com.datastax.oss.driver.api.core.cql.ResultSet dsResultSet, boolean returnNullStrings) {
         this.statement = statement;
         this.dsResultSet = dsResultSet;
         this.iterator = dsResultSet.iterator();
         this.returnNullStrings = returnNullStrings;
     }
 
-    CassandraResultSet(Statement statement, com.datastax.driver.core.ResultSet dsResultSet) {
+    CassandraResultSet(Statement statement, com.datastax.oss.driver.api.core.cql.ResultSet dsResultSet) {
         this(statement, dsResultSet, true);
     }
 
@@ -150,7 +153,7 @@ public class CassandraResultSet implements ResultSet {
     public BigDecimal getBigDecimal(int columnIndex, int scale) throws SQLException {
         checkClosed();
         if (currentRow != null) {
-            return currentRow.getDecimal(columnIndex - 1);
+            return currentRow.getBigDecimal(columnIndex - 1);
         }
         throw new SQLException("Exhausted ResultSet.");
     }
@@ -159,7 +162,7 @@ public class CassandraResultSet implements ResultSet {
     public byte[] getBytes(int columnIndex) throws SQLException {
         checkClosed();
         if (currentRow != null) {
-            final ByteBuffer bytes = currentRow.getBytes(columnIndex - 1);
+            final ByteBuffer bytes = currentRow.getByteBuffer(columnIndex - 1);
             return bytes != null ? bytes.array() : null;
         }
         throw new SQLException("Exhausted ResultSet.");
@@ -169,8 +172,8 @@ public class CassandraResultSet implements ResultSet {
     public Date getDate(int columnIndex) throws SQLException {
         checkClosed();
         if (currentRow != null) {
-            final LocalDate date = currentRow.getDate(columnIndex - 1);
-            return date != null ? new Date(date.getMillisSinceEpoch()) : null;
+            final LocalDate date = currentRow.getLocalDate(columnIndex - 1);
+            return date != null ? Date.valueOf( date ) : null;
         }
         throw new SQLException("Exhausted ResultSet.");
     }
@@ -179,8 +182,8 @@ public class CassandraResultSet implements ResultSet {
     public Time getTime(int columnIndex) throws SQLException {
         checkClosed();
         if (currentRow != null) {
-            long nanoseconds = currentRow.getTime(columnIndex - 1);
-            return new Time(nanoseconds / 1000000);
+            LocalTime time = currentRow.getLocalTime(columnIndex - 1);
+            return Time.valueOf( time );
         }
         throw new SQLException("Exhausted ResultSet.");
     }
@@ -189,8 +192,8 @@ public class CassandraResultSet implements ResultSet {
     public Timestamp getTimestamp(int columnIndex) throws SQLException {
         checkClosed();
         if (currentRow != null) {
-            final java.util.Date date = currentRow.getTimestamp(columnIndex - 1);
-            return date != null ? new Timestamp(date.getTime()) : null;
+            final LocalDateTime date = currentRow.getLocalDate(columnIndex - 1).atStartOfDay();
+            return date != null ? Timestamp.valueOf( date ) : null;
         }
         throw new SQLException("Exhausted ResultSet.");
     }
@@ -291,7 +294,7 @@ public class CassandraResultSet implements ResultSet {
     public byte[] getBytes(String columnLabel) throws SQLException {
         checkClosed();
         if (currentRow != null) {
-            ByteBuffer bytes = currentRow.getBytes(columnLabel);
+            ByteBuffer bytes = currentRow.getByteBuffer(columnLabel);
             return bytes == null ? null : bytes.array();
         }
         throw new SQLException("Result exhausted.");
@@ -350,10 +353,11 @@ public class CassandraResultSet implements ResultSet {
     @Override
     public ResultSetMetaData getMetaData() throws SQLException {
         checkClosed();
+        dsResultSet.getColumnDefinitions();
         List<ColumnMetaData> columnMetaData = new ArrayList<>();
-        for (Definition def : dsResultSet.getColumnDefinitions()) {
-            String typeName = def.getType().getName().name();
-            columnMetaData.add(new ColumnMetaData(def.getName(), def.getTable(), def.getKeyspace(), typeName));
+        for (Iterator<ColumnDefinition> itr = dsResultSet.getColumnDefinitions().iterator(); itr.hasNext(); ) {
+            ColumnDefinition def = itr.next();
+            columnMetaData.add(new ColumnMetaData(def.getName().toString(), def.getTable().toString(), def.getKeyspace().toString(), def.getType().toString() ));
         }
         return new CassandraResultSetMetaData(columnMetaData);
     }
@@ -379,7 +383,7 @@ public class CassandraResultSet implements ResultSet {
 
     @Override
     public int findColumn(String columnLabel) {
-        return dsResultSet.getColumnDefinitions().getIndexOf(columnLabel);
+        return dsResultSet.getColumnDefinitions().firstIndexOf(columnLabel);
     }
 
     @Override
@@ -709,7 +713,7 @@ public class CassandraResultSet implements ResultSet {
     public Blob getBlob(int columnIndex) throws SQLException {
         checkClosed();
         if (currentRow != null) {
-            ByteBuffer bytes = currentRow.getBytes(columnIndex - 1);
+            ByteBuffer bytes = currentRow.getByteBuffer(columnIndex - 1);
             return bytes == null ? null : new BlobImpl(bytes.array());
         }
         throw new SQLException("Exhausted ResultSet.");
@@ -749,7 +753,7 @@ public class CassandraResultSet implements ResultSet {
     public Blob getBlob(String columnLabel) throws SQLException {
         checkClosed();
         if (currentRow != null) {
-            ByteBuffer bytes = currentRow.getBytes(columnLabel);
+            ByteBuffer bytes = currentRow.getByteBuffer(columnLabel);
             return bytes == null ? null : new BlobImpl(bytes.array());
         }
         throw new SQLException("Exhausted ResultSet.");

@@ -17,7 +17,7 @@ repositories {
 
 
 dependencies {
-    compile "com.datastax.cassandra:cassandra-driver-core:3.11.0"
+    compile "com.datastax.oss:java-driver-core:4.13.0"
     testCompile 'junit:junit:4.12'
 }
 
@@ -47,29 +47,4 @@ task copyInUserHome(type: Copy,dependsOn:['clean','jar']) {
 }
 
 
-remotes {
-    webServer {
-        host = websiteHost
-        user = websiteUser
-        password = websitePassword
-    }
-}
 
-/*
-task uploadWeb {
-    doLast {
-        ssh.settings {
-            knownHosts = allowAnyHosts
-            fileTransfer = 'scp'
-        }
-        ssh.run {
-            session(remotes.webServer) {
-                fileTree("$buildDir/distributions").visit { FileVisitDetails details ->
-                    println "Copy $details.file.path ..."
-                    put from: "$details.file.path", into: 'web/jdbc-drivers'
-                }
-            }
-        }
-    }
-}
-*/

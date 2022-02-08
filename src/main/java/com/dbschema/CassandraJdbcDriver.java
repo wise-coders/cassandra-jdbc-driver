@@ -1,12 +1,14 @@
 
 package com.dbschema;
 
-import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.Session;
+import com.datastax.oss.driver.api.core.CqlSession;
 
+import java.net.UnknownHostException;
 import java.sql.*;
 import java.util.Properties;
 import java.util.logging.Logger;
+
+import static com.dbschema.CassandraClientURI.PREFIX;
 
 
 /**
@@ -18,10 +20,12 @@ import java.util.logging.Logger;
  */
 
 public class CassandraJdbcDriver implements Driver {
+    private static final String RETURN_NULL_STRINGS_FROM_INTRO_QUERY_KEY = "cassandra.jdbc.return.null.strings.from.intro.query";
+
     static {
         try {
-            DriverManager.registerDriver( new CassandraJdbcDriver());
-        } catch ( SQLException ex ){
+            DriverManager.registerDriver(new CassandraJdbcDriver());
+        } catch (SQLException ex) {
             ex.printStackTrace();
         }
     }
@@ -33,12 +37,20 @@ public class CassandraJdbcDriver implements Driver {
      * The URL excepting the jdbc: prefix is passed as it is to the Cassandra native Java driver.
      */
     public Connection connect(String url, Properties info) throws SQLException {
-        if ( url != null && acceptsURL( url )){
-            CassandraClientURI clientURI = new CassandraClientURI( url, info );
-            Cluster cluster = clientURI.createBuilder();
-            Session session = cluster.connect( clientURI.getDatabase() );
-
-            return new CassandraConnection(session);
+        if (url != null && acceptsURL(url)) {
+            CassandraClientURI clientURI = new CassandraClientURI(url, info);
+            try {
+                CqlSession session = clientURI.createCqlSession();
+                try {
+                    session.execute("SELECT cql_version FROM system.local");
+                } catch (Throwable e) {
+                    throw new SQLException(e.getMessage(), e);
+                }
+                boolean returnNullStringsFromIntroQuery = Boolean.parseBoolean(info.getProperty(RETURN_NULL_STRINGS_FROM_INTRO_QUERY_KEY));
+                return new CassandraConnection(session, this, returnNullStringsFromIntroQuery);
+            } catch (UnknownHostException e) {
+                throw new SQLException(e.getMessage(), e);
+            }
         }
         return null;
     }
@@ -46,44 +58,31 @@ public class CassandraJdbcDriver implements Driver {
 
     /**
      * URLs accepted are of the form: jdbc:cassandra://host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[keyspace][?options]]
-     *
-     * @see java.sql.Driver#acceptsURL(java.lang.String)
      */
     @Override
     public boolean acceptsURL(String url) {
-        return url.startsWith("jdbc:cassandra:");
+        return url.startsWith(PREFIX);
     }
 
-    /**
-     * @see java.sql.Driver#getPropertyInfo(java.lang.String, java.util.Properties)
-     */
     @Override
-    public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) throws SQLException
-    {
+    public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) {
         return null;
     }
 
-    /**
-     * @see java.sql.Driver#getMajorVersion()
-     */
+    String getVersion() {
+        return "1.3.4";
+    }
+
     @Override
-    public int getMajorVersion()
-    {
+    public int getMajorVersion() {
         return 1;
     }
 
-    /**
-     * @see java.sql.Driver#getMinorVersion()
-     */
     @Override
-    public int getMinorVersion()
-    {
-        return 0;
+    public int getMinorVersion() {
+        return 3;
     }
 
-    /**
-     * @see java.sql.Driver#jdbcCompliant()
-     */
     @Override
     public boolean jdbcCompliant() {
         return true;
@@ -91,7 +90,7 @@ public class CassandraJdbcDriver implements Driver {
 
     @Override
     public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-        return null;
+        throw new SQLFeatureNotSupportedException();
     }
 
 }

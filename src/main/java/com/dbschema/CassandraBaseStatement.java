@@ -1,8 +1,8 @@
 package com.dbschema;
 
-import com.datastax.driver.core.BatchStatement;
-import com.datastax.driver.core.Session;
-import com.datastax.driver.core.exceptions.SyntaxError;
+import com.datastax.oss.driver.api.core.CqlSession;
+import com.datastax.oss.driver.api.core.cql.BatchStatementBuilder;
+import com.datastax.oss.driver.api.core.servererrors.SyntaxError;
 
 import java.sql.*;
 
@@ -10,12 +10,12 @@ import java.sql.*;
  * @author Liudmila Kornilova
  **/
 public abstract class CassandraBaseStatement implements Statement {
-    final com.datastax.driver.core.Session session;
-    BatchStatement batchStatement = null;
+    final CqlSession session;
+    BatchStatementBuilder batchStatementBuilder = null;
     private boolean isClosed = false;
     CassandraResultSet result;
 
-    CassandraBaseStatement(Session session) {
+    CassandraBaseStatement(CqlSession session) {
         this.session = session;
     }
 
@@ -35,7 +35,7 @@ public abstract class CassandraBaseStatement implements Statement {
         return isClosed;
     }
 
-    boolean executeInner(com.datastax.driver.core.ResultSet resultSet, boolean returnNullStrings) throws SQLException {
+    boolean executeInner(com.datastax.oss.driver.api.core.cql.ResultSet resultSet, boolean returnNullStrings) throws SQLException {
         try {
             result = new CassandraResultSet(this, resultSet, returnNullStrings);
             if (!result.isQuery()) {
@@ -64,14 +64,14 @@ public abstract class CassandraBaseStatement implements Statement {
 
     @Override
     public int[] executeBatch() throws SQLException {
-        if (batchStatement == null) throw new SQLException("No batch statements were submitted");
-        int statementsCount = batchStatement.size();
+        if (batchStatementBuilder == null) throw new SQLException("No batch statements were submitted");
+        int statementsCount = batchStatementBuilder.getStatementsCount();
         try {
-            session.execute(batchStatement);
+            session.execute(batchStatementBuilder.build());
         } catch (Throwable t) {
             throw new SQLException(t.getMessage(), t);
         } finally {
-            batchStatement = null;
+            batchStatementBuilder = null;
         }
         int[] res = new int[statementsCount];
         for (int i = 0; i < statementsCount; i++) {

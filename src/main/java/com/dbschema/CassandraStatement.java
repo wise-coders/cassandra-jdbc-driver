@@ -1,9 +1,10 @@
 package com.dbschema;
 
-import com.datastax.driver.core.BatchStatement;
-import com.datastax.driver.core.Session;
-import com.datastax.driver.core.SimpleStatement;
-import com.datastax.driver.core.exceptions.SyntaxError;
+import com.datastax.oss.driver.api.core.CqlSession;
+import com.datastax.oss.driver.api.core.cql.BatchStatement;
+import com.datastax.oss.driver.api.core.cql.BatchType;
+import com.datastax.oss.driver.api.core.cql.SimpleStatement;
+import com.datastax.oss.driver.api.core.servererrors.SyntaxError;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,7 +14,7 @@ import java.sql.SQLSyntaxErrorException;
 public class CassandraStatement extends CassandraBaseStatement {
 
 
-    CassandraStatement(Session session) {
+    CassandraStatement( CqlSession session) {
         super(session);
     }
 
@@ -64,15 +65,15 @@ public class CassandraStatement extends CassandraBaseStatement {
 
     @Override
     public void addBatch(String sql) {
-        if (batchStatement == null) {
-            batchStatement = new BatchStatement();
+        if (batchStatementBuilder == null) {
+            batchStatementBuilder = BatchStatement.builder(BatchType.LOGGED);
         }
-        batchStatement.add(new SimpleStatement(sql));
+        batchStatementBuilder.addStatement(SimpleStatement.newInstance(sql));
     }
 
     @Override
     public void clearBatch() {
-        batchStatement = null;
+        batchStatementBuilder = null;
     }
 
     @Override
