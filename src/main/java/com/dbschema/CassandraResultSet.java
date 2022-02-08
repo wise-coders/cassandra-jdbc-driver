@@ -1,7 +1,6 @@
 package com.dbschema;
 
 import com.datastax.oss.driver.api.core.cql.ColumnDefinition;
-import com.datastax.oss.driver.api.core.cql.ColumnDefinitions;
 import com.datastax.oss.driver.api.core.cql.Row;
 import com.dbschema.CassandraResultSetMetaData.ColumnMetaData;
 import com.dbschema.types.ArrayImpl;

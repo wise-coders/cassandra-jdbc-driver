@@ -11,9 +11,7 @@ import java.util.Date;
 import java.util.TimeZone;
 import java.util.function.Function;
 
-/**
- * @author Liudmila Kornilova
- **/
+
 class DateUtil {
     private static final SimpleDateFormat utcDateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private static final SimpleDateFormat utcTimeFormat = new SimpleDateFormat("HH:mm:ss.SSS");

@@ -5,16 +5,12 @@ buildscript {
         jcenter()
     }
 }
-plugins{
-    id 'org.hidetake.ssh' version '2.7.1'
-}
 apply plugin: 'application'
 apply plugin: 'distribution'
 
 repositories {
     mavenCentral() 
 }
-
 
 dependencies {
     compile "com.datastax.oss:java-driver-core:4.13.0"

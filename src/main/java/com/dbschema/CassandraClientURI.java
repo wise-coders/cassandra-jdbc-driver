@@ -15,6 +15,7 @@ public class CassandraClientURI {
 
     private final List<String> hosts;
     private final String keyspace;
+    private final String dataCenter;
     private final String collection;
     private final String uri;
     private final String userName;
@@ -55,6 +56,7 @@ public class CassandraClientURI {
 
         this.userName = getOption(info, options, "user");
         this.password = getOption(info, options, "password");
+        this.dataCenter = getOption(info, options, "datacenter");
         String sslEnabledOption = getOption(info, options, "sslenabled");
         this.sslEnabled = Boolean.parseBoolean(sslEnabledOption);
 
@@ -105,12 +107,13 @@ public class CassandraClientURI {
                 port = Integer.parseInt( host.substring( idx +1).trim() );
                 host = host.substring( 0, idx ).trim();
             }
-            builder.addContactPoint( InetSocketAddress.createUnresolved( host, port ) );
+            builder.addContactPoint( new InetSocketAddress( host, port ) );
             logger.info("sslenabled: " + sslEnabled.toString());
             if (sslEnabled) {
                 //builder.withSSL();
             }
         }
+        builder.withLocalDatacenter(dataCenter != null ? dataCenter : "datacenter1");
         if (userName != null && !userName.isEmpty() && password != null) {
             builder.withAuthCredentials(userName, password);
             System.out.println("Using authentication as user '" + userName + "'");

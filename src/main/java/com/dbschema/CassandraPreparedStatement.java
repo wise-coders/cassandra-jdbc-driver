@@ -31,8 +31,8 @@ public class CassandraPreparedStatement extends CassandraBaseStatement implement
     }
 
     @Override
-    public ResultSet executeQuery() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+    public ResultSet executeQuery() {
+        return new CassandraResultSet(this, session.execute(bindParameters()), returnNullStrings);
     }
 
     @Override

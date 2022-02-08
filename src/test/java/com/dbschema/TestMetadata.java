@@ -11,13 +11,21 @@ public class TestMetadata {
 
     private static final String urlWithoutAuth = "jdbc:cassandra://localhost/system?expand=true";
 
+    // THIS TESTS ARE USING A LOCAL INSTALLED CASSANDRA (I USE DOCKER)
     @Before
     public void setUp() throws ClassNotFoundException, SQLException {
         Class.forName("com.dbschema.CassandraJdbcDriver");
-        con = DriverManager.getConnection( urlWithoutAuth, null, null);
+        con = DriverManager.getConnection( urlWithoutAuth, "cassandra", "cassandra");
         Statement stmt = con.createStatement();
         stmt.execute("SELECT cql_version FROM system.local");
         stmt.close();
+    }
+
+
+    @Test
+    public void testMetaData() throws Exception {
+        printResultSet( con.getMetaData().getCatalogs() );
+        printResultSet( con.getMetaData().getTables("dbschema", null, null, null ));
     }
 
     @Test
@@ -25,6 +33,13 @@ public class TestMetadata {
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery("SELECT cql_version FROM system.local");
         printResultSet( rs );
+        stmt.close();
+    }
+
+    @Test
+    public void testDescribe() throws Exception {
+        Statement stmt = con.createStatement();
+        printResultSet( stmt.executeQuery("DESC dbschema") );
         stmt.close();
     }
 

@@ -6,9 +6,7 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.Map;
 
-/**
- * @author Liudmila Kornilova
- **/
+
 public class ArrayImpl implements Array {
     private Object[] array;
 

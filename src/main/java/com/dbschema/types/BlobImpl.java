@@ -6,9 +6,7 @@ import java.sql.Blob;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 
-/**
- * @author Liudmila Kornilova
- **/
+
 public class BlobImpl implements Blob {
     private byte[] bytes;
 

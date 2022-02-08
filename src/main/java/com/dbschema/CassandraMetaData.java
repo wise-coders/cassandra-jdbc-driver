@@ -1,6 +1,12 @@
 package com.dbschema;
 
+import com.datastax.oss.driver.api.core.CqlIdentifier;
+import com.datastax.oss.driver.api.core.metadata.schema.KeyspaceMetadata;
+import com.datastax.oss.driver.api.core.metadata.schema.TableMetadata;
+import com.dbschema.types.ArrayResultSet;
+
 import java.sql.*;
+import java.util.Map;
 
 /**
  * Cassandra databases are equivalent to catalogs for this driver. Schemas aren't used. Cassandra collections are
@@ -18,17 +24,41 @@ public class CassandraMetaData implements DatabaseMetaData {
 
     @Override
     public ResultSet getSchemas() {
-        return null;
+        return new ArrayResultSet("TABLE_SCHEMA", "TABLE_CATALOG");
     }
 
     @Override
-    public ResultSet getCatalogs() {
-        return null;
+    public ResultSet getCatalogs() throws SQLException {
+        return this.connection.createStatement().executeQuery("DESCRIBE KEYSPACES");
     }
 
-    public ResultSet getTables(String catalogName, String schemaPattern,
-                               String tableNamePattern, String[] types) {
-        return null;
+    public ResultSet getTables(String catalogName, String schemaPattern, String tableNamePattern, String[] types) throws SQLException {
+        ArrayResultSet resultSet = new ArrayResultSet();
+        resultSet.setColumnNames(new String[]{"TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME",
+                "TABLE_TYPE", "REMARKS", "TYPE_CAT", "TYPE_SCHEM", "TYPE_NAME", "SELF_REFERENCING_COL_NAME",
+                "REF_GENERATION"});
+
+        this.connection.getSession().getMetadata().getKeyspace(catalogName).ifPresent( metadata -> {
+            for (Map.Entry<CqlIdentifier, TableMetadata> entry: metadata.getTables().entrySet()){
+                CqlIdentifier cqlIdentifier = entry.getKey();
+
+                String[] data = new String[10];
+                data[0] = catalogName; // TABLE_CAT
+                data[1] = ""; // TABLE_SCHEM
+                data[2] = cqlIdentifier.toString(); // TABLE_NAME
+                data[3] = "TABLE"; // TABLE_TYPE
+                data[4] = null; // REMARKS
+                data[5] = ""; // TYPE_CAT
+                data[6] = ""; // TYPE_SCHEM
+                data[7] = ""; // TYPE_NAME
+                data[8] = ""; // SELF_REFERENCING_COL_NAME
+                data[9] = ""; // REF_GENERATION
+
+                resultSet.addRow( data );
+            }
+        });
+
+        return resultSet;
     }
 
     public ResultSet getColumns(String catalogName, String schemaName,
