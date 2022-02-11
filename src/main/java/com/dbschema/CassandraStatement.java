@@ -11,6 +11,11 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLSyntaxErrorException;
 
+/**
+ * Free to use, code improvements allowed only to the repository https://github.com/wise-coders/cassandra-jdbc-driver
+ * Please create pull requests or issues.
+ */
+
 public class CassandraStatement extends CassandraBaseStatement {
 
 

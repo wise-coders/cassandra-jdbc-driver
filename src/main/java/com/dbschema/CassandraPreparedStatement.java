@@ -18,6 +18,10 @@ import java.util.Calendar;
 import static com.dbschema.DateUtil.Direction;
 import static com.dbschema.DateUtil.considerTimeZone;
 
+/**
+ * Free to use, code improvements allowed only to the repository https://github.com/wise-coders/cassandra-jdbc-driver
+ * Please create pull requests or issues.
+ */
 public class CassandraPreparedStatement extends CassandraBaseStatement implements java.sql.PreparedStatement {
 
     private final PreparedStatement preparedStatement;

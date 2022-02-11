@@ -6,7 +6,10 @@ import com.datastax.oss.driver.api.core.servererrors.SyntaxError;
 
 import java.sql.*;
 
-
+/**
+ * Free to use, code improvements allowed only to the repository https://github.com/wise-coders/cassandra-jdbc-driver
+ * Please create pull requests or issues.
+ */
 public abstract class CassandraBaseStatement implements Statement {
     final CqlSession session;
     BatchStatementBuilder batchStatementBuilder = null;

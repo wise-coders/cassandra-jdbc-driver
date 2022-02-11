@@ -9,6 +9,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * Free to use, code improvements allowed only to the repository https://github.com/wise-coders/cassandra-jdbc-driver
+ * Please create pull requests or issues.
+ */
 public class CassandraResultSetMetaData implements ResultSetMetaData {
 
     private final List<ColumnMetaData> columnMetaData;

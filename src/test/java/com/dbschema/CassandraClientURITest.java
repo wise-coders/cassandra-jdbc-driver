@@ -7,15 +7,7 @@ import java.util.Properties;
 
 import static org.junit.Assert.*;
 
-/**
- * @author Liudmila Kornilova
- **/
 public class CassandraClientURITest {
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testUriForDifferentDb() {
-        new CassandraClientURI("jdbc:postgresql://localhost:54332/guest", null);
-    }
 
     @Test(expected = IllegalArgumentException.class)
     public void testUriWithInvalidParameters() {

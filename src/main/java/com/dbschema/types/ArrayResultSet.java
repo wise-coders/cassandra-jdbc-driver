@@ -1,7 +1,6 @@
 package com.dbschema.types;
 
 import com.dbschema.CassandraPreparedStatement;
-import com.dbschema.CassandraResultSetMetaData;
 
 import java.io.InputStream;
 import java.io.Reader;

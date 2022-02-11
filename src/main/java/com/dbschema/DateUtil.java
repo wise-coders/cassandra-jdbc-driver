@@ -11,6 +11,10 @@ import java.util.Date;
 import java.util.TimeZone;
 import java.util.function.Function;
 
+/**
+ * Free to use, code improvements allowed only to the repository https://github.com/wise-coders/cassandra-jdbc-driver
+ * Please create pull requests or issues.
+ */
 
 class DateUtil {
     private static final SimpleDateFormat utcDateFormat = new SimpleDateFormat("yyyy-MM-dd");

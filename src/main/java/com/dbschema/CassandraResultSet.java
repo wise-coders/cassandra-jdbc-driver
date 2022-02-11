@@ -13,6 +13,7 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.sql.Date;
 import java.sql.*;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -191,8 +192,8 @@ public class CassandraResultSet implements ResultSet {
     public Timestamp getTimestamp(int columnIndex) throws SQLException {
         checkClosed();
         if (currentRow != null) {
-            final LocalDateTime date = currentRow.getLocalDate(columnIndex - 1).atStartOfDay();
-            return date != null ? Timestamp.valueOf( date ) : null;
+            final Instant instant = currentRow.getInstant(columnIndex - 1);
+            return instant != null ? Timestamp.from( instant ) : null;
         }
         throw new SQLException("Exhausted ResultSet.");
     }

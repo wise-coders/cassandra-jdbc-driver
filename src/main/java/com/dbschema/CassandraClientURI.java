@@ -7,6 +7,11 @@ import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.logging.Logger;
 
+/**
+ * Free to use, code improvements allowed only to the repository https://github.com/wise-coders/cassandra-jdbc-driver
+ * Please create pull requests or issues.
+ */
+
 public class CassandraClientURI {
 
     private static final Logger logger = Logger.getLogger("CassandraClientURILogger");

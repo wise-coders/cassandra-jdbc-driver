@@ -1,7 +1,6 @@
 package com.dbschema;
 
 import com.datastax.oss.driver.api.core.CqlIdentifier;
-import com.datastax.oss.driver.api.core.metadata.schema.KeyspaceMetadata;
 import com.datastax.oss.driver.api.core.metadata.schema.TableMetadata;
 import com.dbschema.types.ArrayResultSet;
 
@@ -11,6 +10,9 @@ import java.util.Map;
 /**
  * Cassandra databases are equivalent to catalogs for this driver. Schemas aren't used. Cassandra collections are
  * equivalent to tables, in that each collection is a table.
+ *
+ * Free to use, code improvements allowed only to the repository https://github.com/wise-coders/cassandra-jdbc-driver
+ * Please create pull requests or issues.
  */
 public class CassandraMetaData implements DatabaseMetaData {
 
@@ -32,7 +34,7 @@ public class CassandraMetaData implements DatabaseMetaData {
         return this.connection.createStatement().executeQuery("DESCRIBE KEYSPACES");
     }
 
-    public ResultSet getTables(String catalogName, String schemaPattern, String tableNamePattern, String[] types) throws SQLException {
+    public ResultSet getTables(String catalogName, String schemaPattern, String tableNamePattern, String[] types) {
         ArrayResultSet resultSet = new ArrayResultSet();
         resultSet.setColumnNames(new String[]{"TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME",
                 "TABLE_TYPE", "REMARKS", "TYPE_CAT", "TYPE_SCHEM", "TYPE_NAME", "SELF_REFERENCING_COL_NAME",

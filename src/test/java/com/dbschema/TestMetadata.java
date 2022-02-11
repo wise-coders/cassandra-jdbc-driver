@@ -5,6 +5,10 @@ import org.junit.Test;
 
 import java.sql.*;
 
+
+/**
+ * This test are working with a local docker container.
+ **/
 public class TestMetadata {
 
     private Connection con;
@@ -26,6 +30,14 @@ public class TestMetadata {
     public void testMetaData() throws Exception {
         printResultSet( con.getMetaData().getCatalogs() );
         printResultSet( con.getMetaData().getTables("dbschema", null, null, null ));
+    }
+
+    @Test
+    public void testReadTimestamp() throws Exception {
+        Statement stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT name, videoID, added_date FROM killrvideo.user_videos");
+        printResultSet( rs );
+        stmt.close();
     }
 
     @Test

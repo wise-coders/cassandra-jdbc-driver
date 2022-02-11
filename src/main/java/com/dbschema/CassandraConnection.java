@@ -8,23 +8,15 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
+/**
+ * Free to use, code improvements allowed only to the repository https://github.com/wise-coders/cassandra-jdbc-driver
+ * Please create pull requests or issues.
+ */
 public class CassandraConnection implements Connection {
-    /**
-     * This query retrieves Cassandra 2.x columns in DataGrip.
-     * <p>
-     * DataGrip before 2019.3 version assumes that index_name column does not contain null values.
-     * Driver since v1.3.2 version returns null value if a string is null (used to return "null")
-     * It means that DataGrip <2019.3 and driver v1.3.2 are incompatible.
-     * <p>
-     * To make driver and DG compatible driver will return "null" strings instead of null values
-     * for this particular query in PreparedStatement.
-     * See also https://youtrack.jetbrains.com/issue/DBE-9091
-     */
-    private static final String SELECT_COLUMNS_INTRO_QUERY = "SELECT column_name as name,\n       validator,\n       columnfamily_name as table_name,\n       type,\n       index_name,\n       index_options,\n       index_type,\n       component_index as position\nFROM system.schema_columns\nWHERE keyspace_name = ?";
 
     private final CqlSession session;
-    private CassandraJdbcDriver driver;
-    private boolean returnNullStringsFromIntroQuery;
+    private final CassandraJdbcDriver driver;
+    private final boolean returnNullStringsFromIntroQuery;
     private boolean isClosed = false;
     private boolean isReadOnly = false;
 
@@ -79,6 +71,8 @@ public class CassandraConnection implements Connection {
     public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
+
+    private static final String SELECT_COLUMNS_INTRO_QUERY = "SELECT column_name as name,\n       validator,\n       columnfamily_name as table_name,\n       type,\n       index_name,\n       index_options,\n       index_type,\n       component_index as position\nFROM system.schema_columns\nWHERE keyspace_name = ?";
 
     @Override
     public PreparedStatement prepareStatement(String sql) throws SQLException {

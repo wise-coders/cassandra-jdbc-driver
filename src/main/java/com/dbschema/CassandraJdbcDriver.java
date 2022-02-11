@@ -17,6 +17,9 @@ import static com.dbschema.CassandraClientURI.PREFIX;
  * Connect to the database using a URL like :
  * jdbc:cassandra://host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[keyspace][?options]]
  * The URL excepting the jdbc: prefix is passed as it is to the Cassandra native Java driver.
+ *
+ * Free to use, code improvements allowed only to the repository https://github.com/wise-coders/cassandra-jdbc-driver
+ * Please create pull requests or issues.
  */
 
 public class CassandraJdbcDriver implements Driver {
