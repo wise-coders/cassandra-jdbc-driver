@@ -11,9 +11,11 @@ import java.util.Map;
  * Cassandra databases are equivalent to catalogs for this driver. Schemas aren't used. Cassandra collections are
  * equivalent to tables, in that each collection is a table.
  *
- * Free to use, code improvements allowed only to the repository https://github.com/wise-coders/cassandra-jdbc-driver
- * Please create pull requests or issues.
+ * Copyright Wise Coders GmbH. The Cassandra JDBC driver is build to be used with DbSchema Database Designer https://dbschema.com
+ * Free to use by everyone, code modifications allowed only to
+ * the public repository https://github.com/wise-coders/cassandra-jdbc-driver
  */
+
 public class CassandraMetaData implements DatabaseMetaData {
 
     private final CassandraConnection connection;

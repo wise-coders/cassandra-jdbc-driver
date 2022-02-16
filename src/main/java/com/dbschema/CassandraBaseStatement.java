@@ -7,8 +7,9 @@ import com.datastax.oss.driver.api.core.servererrors.SyntaxError;
 import java.sql.*;
 
 /**
- * Free to use, code improvements allowed only to the repository https://github.com/wise-coders/cassandra-jdbc-driver
- * Please create pull requests or issues.
+ * Copyright Wise Coders GmbH. The Cassandra JDBC driver is build to be used with DbSchema Database Designer https://dbschema.com
+ * Free to use by everyone, code modifications allowed only to
+ * the public repository https://github.com/wise-coders/cassandra-jdbc-driver
  */
 public abstract class CassandraBaseStatement implements Statement {
     final CqlSession session;

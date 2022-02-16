@@ -8,8 +8,9 @@ import java.util.*;
 import java.util.logging.Logger;
 
 /**
- * Free to use, code improvements allowed only to the repository https://github.com/wise-coders/cassandra-jdbc-driver
- * Please create pull requests or issues.
+ * Copyright Wise Coders GmbH. The Cassandra JDBC driver is build to be used with DbSchema Database Designer https://dbschema.com
+ * Free to use by everyone, code modifications allowed only to
+ * the public repository https://github.com/wise-coders/cassandra-jdbc-driver
  */
 
 public class CassandraClientURI {

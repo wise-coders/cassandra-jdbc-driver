@@ -6,9 +6,11 @@ The code is using few improvements done to the original code by DataGrip.
 
 ## Licensing
 
-The driver is free to be used by everybody. Code changes are allowed only to this repository. Please improve the code and create pull requests, we will review and merge them in short time.
-Alternatively you can create issues.
 
+[GPL-3 dual license](https://opensource.org/licenses/GPL-3.0).
+The driver is free to use by everyone.
+Code modifications allowed only to the current repository as pull requests
+https://github.com/wise-coders/cassandra-jdbc-driver
 
 ## Features
 

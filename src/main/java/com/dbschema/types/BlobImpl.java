@@ -6,6 +6,11 @@ import java.sql.Blob;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 
+/**
+ * Copyright Wise Coders GmbH. The Cassandra JDBC driver is build to be used with DbSchema Database Designer https://dbschema.com
+ * Free to use by everyone, code modifications allowed only to
+ * the public repository https://github.com/wise-coders/cassandra-jdbc-driver
+ */
 
 public class BlobImpl implements Blob {
     private byte[] bytes;
