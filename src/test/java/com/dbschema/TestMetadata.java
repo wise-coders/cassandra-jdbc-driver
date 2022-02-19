@@ -29,6 +29,8 @@ public class TestMetadata {
         stmt.executeQuery("CREATE KEYSPACE IF NOT EXISTS dbschema WITH REPLICATION = { 'class' : 'NetworkTopologyStrategy', 'datacenter1' : 3 } AND DURABLE_WRITES = false");
         stmt.executeQuery( "CREATE TABLE IF NOT EXISTS dbschema.cyclist_category ( category text, points int, id UUID, lastname text, PRIMARY KEY (category, points)) WITH CLUSTERING ORDER BY (points DESC)");
         stmt.executeQuery( "CREATE TABLE IF NOT EXISTS dbschema.rank_by_year_and_name ( race_year int, race_name text,  cyclist_name text, rank int,  PRIMARY KEY ((race_year, race_name), rank) )");
+        stmt.executeQuery("CREATE TYPE IF NOT EXISTS dbschema.basic_info ( birthday timestamp,  nationality text, weight text, height text)");
+        stmt.executeQuery("CREATE TABLE IF NOT EXISTS dbschema.cyclist_stats ( id uuid PRIMARY KEY, lastname text, basics FROZEN<basic_info>) ");
         stmt.close();
     }
 

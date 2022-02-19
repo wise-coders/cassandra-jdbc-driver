@@ -2,11 +2,16 @@ package com.dbschema;
 
 
 import com.datastax.oss.driver.api.core.CqlSession;
+import com.datastax.oss.driver.api.core.servererrors.SyntaxError;
+import com.dbschema.types.ArrayResultSet;
+import com.dbschema.types.BlindPreparedStatement;
 
 import java.sql.*;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Copyright Wise Coders GmbH. The Cassandra JDBC driver is build to be used with DbSchema Database Designer https://dbschema.com
@@ -37,6 +42,35 @@ public class CassandraConnection implements Connection {
         }
     }
 
+    private static final Pattern describeTable = Pattern.compile("DESC (.*)\\.(.*)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern describeKeyspace = Pattern.compile("DESC (.*)", Pattern.CASE_INSENSITIVE );
+
+
+    public ResultSet executeDescrCommand( String sql ){
+        final ArrayResultSet rs = new ArrayResultSet("KEYSPACE", "CAT", "OBJECT", "DESC");
+        {
+            final Matcher matcher = describeTable.matcher(sql);
+            if (matcher.matches()) {
+                session.getMetadata().getKeyspace(matcher.group(1)).ifPresent(keyspaceMetadata -> {
+                    keyspaceMetadata.getTable(matcher.group(2)).ifPresent(tableMetadata -> {
+                        rs.addRow(new String[]{String.valueOf(keyspaceMetadata.getName()), null, matcher.group(1), tableMetadata.describeWithChildren(true)});
+                    });
+                });
+                return rs;
+            }
+        }
+        {
+            final Matcher matcher = describeKeyspace.matcher(sql);
+            if (matcher.matches()) {
+                session.getMetadata().getKeyspace(matcher.group(1)).ifPresent(keyspaceMetadata -> {
+                    rs.addRow(new String[]{String.valueOf(keyspaceMetadata.getName()), null, matcher.group(1), keyspaceMetadata.describeWithChildren(true)});
+                });
+                return rs;
+            }
+        }
+        return null;
+    }
+
     @SuppressWarnings("WeakerAccess")
     public CqlSession getSession() {
         return session;
@@ -58,7 +92,7 @@ public class CassandraConnection implements Connection {
     public Statement createStatement() throws SQLException {
         checkClosed();
         try {
-            return new CassandraStatement(session);
+            return new CassandraStatement(this);
         } catch (Throwable t) {
             throw new SQLException(t.getMessage(), t);
         }
@@ -81,6 +115,12 @@ public class CassandraConnection implements Connection {
         checkClosed();
         try {
             return new CassandraPreparedStatement(session, session.prepare(sql), returnNullStringsFromIntroQuery || !SELECT_COLUMNS_INTRO_QUERY.equals(sql));
+        } catch ( SyntaxError error ) {
+            ResultSet rs = executeDescrCommand( sql );
+            if ( rs != null ){
+                return new BlindPreparedStatement(rs );
+            }
+            throw new SQLSyntaxErrorException(error.getMessage(), error);
         } catch (Throwable t) {
             throw new SQLException(t.getMessage(), t);
         }

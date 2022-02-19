@@ -23,13 +23,13 @@ import java.util.regex.Pattern;
 
 public class CassandraStatement extends CassandraBaseStatement {
 
+    private final CassandraConnection connection;
 
-    CassandraStatement( CqlSession session) {
-        super(session);
+    CassandraStatement( CassandraConnection connection) {
+        super(connection.getSession());
+        this.connection = connection;
     }
 
-    Pattern describeTable = Pattern.compile("DESC (.*)\\.(.*)", Pattern.CASE_INSENSITIVE);
-    Pattern describeKeyspace = Pattern.compile("DESC (.*)", Pattern.CASE_INSENSITIVE );
 
     @Override
     public ResultSet executeQuery(String sql) throws SQLException {
@@ -38,21 +38,8 @@ public class CassandraStatement extends CassandraBaseStatement {
             result = new CassandraResultSet(this, session.execute(sql));
             return result;
         } catch (SyntaxError ex) {
-            final ArrayResultSet rs = new ArrayResultSet("DESC");
-            final Matcher matchTable = describeTable.matcher(sql);
-            if ( matchTable.matches() ){
-                session.getMetadata().getKeyspace( matchTable.group(1)).ifPresent(keyspaceMetadata -> {
-                    keyspaceMetadata.getTable( matchTable.group(2)).ifPresent(tableMetadata -> {
-                        rs.addRow( new String[]{ tableMetadata.describeWithChildren(true) });
-                    });
-                });
-                return rs;
-            }
-            final Matcher matchKeyspace = describeKeyspace.matcher( sql );
-            if ( matchKeyspace.matches() ){
-                session.getMetadata().getKeyspace( matchKeyspace.group(1)).ifPresent(keyspaceMetadata -> {
-                    rs.addRow( new String[]{ keyspaceMetadata.describeWithChildren(true) });
-                });
+            ResultSet rs = connection.executeDescrCommand( sql );
+            if ( rs != null ){
                 return rs;
             }
             throw new SQLSyntaxErrorException(ex.getMessage(), ex);
