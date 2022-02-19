@@ -1,10 +1,14 @@
 package com.dbschema;
 
 import com.datastax.oss.driver.api.core.CqlIdentifier;
+import com.datastax.oss.driver.api.core.metadata.schema.ClusteringOrder;
+import com.datastax.oss.driver.api.core.metadata.schema.ColumnMetadata;
 import com.datastax.oss.driver.api.core.metadata.schema.TableMetadata;
 import com.dbschema.types.ArrayResultSet;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,9 +35,18 @@ public class CassandraMetaData implements DatabaseMetaData {
         return new ArrayResultSet("TABLE_SCHEMA", "TABLE_CATALOG");
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getCatalogs()
+     */
     @Override
-    public ResultSet getCatalogs() throws SQLException {
-        return this.connection.createStatement().executeQuery("DESCRIBE KEYSPACES");
+    public ResultSet getCatalogs()
+    {
+        ArrayResultSet retVal = new ArrayResultSet();
+        retVal.setColumnNames(new String[]{"TABLE_CAT"});
+        for ( CqlIdentifier identifier : connection.getSession().getMetadata().getKeyspaces().keySet() ){
+            retVal.addRow(new String[] { identifier.toString() });
+        }
+        return retVal;
     }
 
     public ResultSet getTables(String catalogName, String schemaPattern, String tableNamePattern, String[] types) {
@@ -65,21 +78,171 @@ public class CassandraMetaData implements DatabaseMetaData {
         return resultSet;
     }
 
-    public ResultSet getColumns(String catalogName, String schemaName,
-                                String tableNamePattern, String columnNamePattern) {
-        return null;
+
+    /**
+     * @see java.sql.DatabaseMetaData#getColumns(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+     */
+    public ResultSet getColumns(String catalogName, String schemaName, String tableNamePattern, String columnNamePattern) {
+
+        final ArrayResultSet result = new ArrayResultSet();
+        result.setColumnNames(new String[] { "TABLE_CAT", "TABLE_SCHEMA", "TABLE_NAME", "COLUMN_NAME",
+                "DATA_TYPE", "TYPE_NAME", "COLUMN_SIZE", "BUFFER_LENGTH", "DECIMAL_DIGITS", "NUM_PREC_RADIX",
+                "NULLABLE", "REMARKS", "COLUMN_DEF", "SQL_DATA_TYPE", "SQL_DATETIME_SUB", "CHAR_OCTET_LENGTH",
+                "ORDINAL_POSITION", "IS_NULLABLE", "SCOPE_CATALOG", "SCOPE_SCHEMA", "SCOPE_TABLE",
+                "SOURCE_DATA_TYPE", "IS_AUTOINCREMENT", "OPTIONS" });
+
+        connection.getSession().getMetadata().getKeyspace( catalogName ).ifPresent( metadata -> {
+            if ( tableNamePattern == null ){
+                for ( TableMetadata tableMetadata : metadata.getTables().values() ){
+                    for ( ColumnMetadata field : tableMetadata.getColumns().values() ){
+                        if ( columnNamePattern == null || columnNamePattern.equals( String.valueOf( field ))){
+                            exportColumnsRecursive( tableMetadata, result, field);
+                        }
+                    }
+                }
+            } else {
+                metadata.getTable( tableNamePattern ).ifPresent( tableMetadata -> {
+                    for (ColumnMetadata field : tableMetadata.getColumns().values() ) {
+                        if (columnNamePattern == null || columnNamePattern.equals(String.valueOf( field ))) {
+                            exportColumnsRecursive(tableMetadata, result, field);
+                        }
+                    }
+                } );
+            }
+        } );
+        return result;
     }
 
+    private void exportColumnsRecursive( TableMetadata tableMetadata, ArrayResultSet result, ColumnMetadata columnMetadata) {
+        StringBuilder sb = new StringBuilder();
+        /*
+        TableOptionsMetadata options = tableMetadata.getOptions();
+        if( options != null ){
+            sb.append("bloom_filter_fp_chance = " ).append(options.getBloomFilterFalsePositiveChance() ).
+                    append("\n AND caching = '").append( options.getCaching()).append("'").
+                    append("\n  AND comment = '").append( options.getComment()).append("'").
+                    append("\n  AND compaction = ").append( options.getCompaction()).
+                    append("\n  AND compression = ").append( options.getCompression()).
+                    append("\n  AND dclocal_read_repair_chance = " ).append(options.getLocalReadRepairChance() ).
+                    append("\n  AND default_time_to_live = " ).append(options.getDefaultTimeToLive() ).
+                    append("\n  AND gc_grace_seconds = " ).append(options.getGcGraceInSeconds() ).
+                    append("\n  AND max_index_interval = " ).append(options.getMaxIndexInterval() ).
+                    append("\n  AND memtable_flush_period_in_ms = " ).append(options.getMemtableFlushPeriodInMs() ).
+                    append("\n  AND min_index_interval = " ).append(options.getMinIndexInterval() ).
+                    append("\n  AND read_repair_chance = " ).append(options.getReadRepairChance() ).
+                    append("\n  AND speculative_retry = '").append(options.getSpeculativeRetry() ).append("'");
+        }*/
+
+        result.addRow(new String[] {
+                String.valueOf(tableMetadata.getKeyspace()), // "TABLE_CAT",
+                null, // "TABLE_SCHEMA",
+                String.valueOf( tableMetadata ), // "TABLE_NAME", (i.e. Cassandra Collection Name)
+                String.valueOf( columnMetadata ), // "COLUMN_NAME",
+                "" + columnMetadata.getType(), // "DATA_TYPE",
+                "" + columnMetadata.getType(), // "TYPE_NAME", -- I LET THIS INTENTIONALLY TO USE .toString() BECAUSE OF USER DEFINED TYPES.
+                "800", // "COLUMN_SIZE",
+                "0", // "BUFFER_LENGTH", (not used)
+                "0", // "DECIMAL_DIGITS",
+                "10", // "NUM_PREC_RADIX",
+                "0", // "NULLABLE", // I RETREIVE HERE IF IS FROZEN ( MANDATORY ) OR NOT ( NULLABLE )
+                "", // "REMARKS",
+                "", // "COLUMN_DEF",
+                "0", // "SQL_DATA_TYPE", (not used)
+                "0", // "SQL_DATETIME_SUB", (not used)
+                "800", // "CHAR_OCTET_LENGTH",
+                "1", // "ORDINAL_POSITION",
+                "NO", // "IS_NULLABLE",
+                null, // "SCOPE_CATLOG", (not a REF type)
+                null, // "SCOPE_SCHEMA", (not a REF type)
+                null, // "SCOPE_TABLE", (not a REF type)
+                null, // "SOURCE_DATA_TYPE", (not a DISTINCT or REF type)
+                "NO", // "IS_AUTOINCREMENT" (can be auto-generated, but can also be specified)
+                sb.toString() // TABLE_OPTIONS
+        });
+    }
+
+
+    /**
+     * @see java.sql.DatabaseMetaData#getPrimaryKeys(java.lang.String, java.lang.String, java.lang.String)
+     */
     public ResultSet getPrimaryKeys(String catalogName, String schemaName, String tableNamePattern) {
-        return null;
+
+        final ArrayResultSet result = new ArrayResultSet();
+        result.setColumnNames(new String[] { "TABLE_CAT", "TABLE_SCHEMA", "TABLE_NAME", "COLUMN_NAME", "KEY_SEQ", "PK_NAME" });
+
+        connection.getSession().getMetadata().getKeyspace( catalogName ).ifPresent( keyspaceMetadata -> {
+            keyspaceMetadata.getTable( tableNamePattern ).ifPresent( tableMetadata -> {
+                int seq = 0;
+                for ( ColumnMetadata columnMetadata : tableMetadata.getPrimaryKey() ){
+                    result.addRow(new String[]{
+                            String.valueOf( keyspaceMetadata), // "TABLE_CAT",
+                            null, // "TABLE_SCHEMA",
+                            String.valueOf( tableMetadata), // "TABLE_NAME", (i.e. Cassandra Collection Name)
+                            String.valueOf(columnMetadata), // "COLUMN_NAME",
+                            "" + seq++, // "ORDINAL_POSITION"
+                            "PRIMARY KEY" // "PK_NAME"
+                    });
+                }
+            });
+        });
+        return result;
     }
 
-    public ResultSet getIndexInfo(String catalogName, String schemaName, String tableNamePattern, boolean unique,
-                                  boolean approximate) {
-        return null;
+    /**
+     * @see java.sql.DatabaseMetaData#getIndexInfo(java.lang.String, java.lang.String, java.lang.String,
+     *      boolean, boolean)
+     */
+    public ResultSet getIndexInfo(String catalogName, String schemaName, String tableNamePattern, boolean unique,  boolean approximate) {
+        final ArrayResultSet result = new ArrayResultSet();
+        result.setColumnNames(new String[]{"TABLE_CAT", "TABLE_SCHEMA", "TABLE_NAME", "NON_UNIQUE",
+                "INDEX_QUALIFIER", "INDEX_NAME", "TYPE", "ORDINAL_POSITION", "COLUMN_NAME", "ASC_OR_DESC",
+                "CARDINALITY", "PAGES", "FILTER_CONDITION"});
+
+        connection.getSession().getMetadata().getKeyspace( catalogName ).ifPresent( keyspaceMetadata -> {
+            keyspaceMetadata.getTable( tableNamePattern ).ifPresent( tableMetadata -> {
+                int seq = 0;
+                for ( Map.Entry<ColumnMetadata, ClusteringOrder> entry : tableMetadata.getClusteringColumns().entrySet() ) {
+                    result.addRow(new String[]{
+                            String.valueOf(keyspaceMetadata), // "TABLE_CAT",
+                            null, // "TABLE_SCHEMA",
+                            String.valueOf( tableMetadata.getName() ), // "TABLE_NAME", (i.e. Cassandra Collection Name)
+                            "FALSE", // "NON-UNIQUE",
+                            String.valueOf( entry.getKey().getName()), // "INDEX QUALIFIER",
+                            "CLUSTER KEY", // "INDEX_NAME",
+                            "0", // "TYPE",
+                            "" + seq++ , // "ORDINAL_POSITION"
+                            String.valueOf( entry.getKey().getName() ), // "COLUMN_NAME",
+                            entry.getValue() == ClusteringOrder.ASC ? "A" : "D", // "ASC_OR_DESC",
+                            "0", // "CARDINALITY",
+                            "0", // "PAGES",
+                            "" // "FILTER_CONDITION",
+                    });
+                }
+        });
+        });
+        return result;
     }
 
-    public ResultSet getTypeInfo() {
+    private List<String> listColumnNames(String query ){
+        final List<String> ret = new ArrayList<String>();
+        if ( query != null ){
+            int idx = query.indexOf("(");
+            if ( idx > 0 ) query = query.substring( idx+1 );
+            idx = query.lastIndexOf(")");
+            if ( idx > 0 ) query = query.substring( 0, idx );
+            for ( String term : query.split(",")){
+                term = term.trim();
+                if ( term.length() > 0 ){
+                    ret.add( term );
+                }
+            }
+        }
+        return ret;
+    }
+
+
+    @Override
+    public ResultSet getTypeInfo() throws SQLException {
         return null;
     }
 
@@ -121,6 +284,7 @@ public class CassandraMetaData implements DatabaseMetaData {
 
     public boolean nullsAreSortedAtStart() throws SQLException {
         throw new SQLFeatureNotSupportedException();
+
     }
 
     public boolean nullsAreSortedAtEnd() throws SQLException {

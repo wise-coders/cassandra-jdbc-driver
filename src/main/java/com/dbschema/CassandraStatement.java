@@ -5,11 +5,14 @@ import com.datastax.oss.driver.api.core.cql.BatchStatement;
 import com.datastax.oss.driver.api.core.cql.BatchType;
 import com.datastax.oss.driver.api.core.cql.SimpleStatement;
 import com.datastax.oss.driver.api.core.servererrors.SyntaxError;
+import com.dbschema.types.ArrayResultSet;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLSyntaxErrorException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Copyright Wise Coders GmbH. The Cassandra JDBC driver is build to be used with DbSchema Database Designer https://dbschema.com
@@ -25,6 +28,9 @@ public class CassandraStatement extends CassandraBaseStatement {
         super(session);
     }
 
+    Pattern describeTable = Pattern.compile("DESC (.*)\\.(.*)", Pattern.CASE_INSENSITIVE);
+    Pattern describeKeyspace = Pattern.compile("DESC (.*)", Pattern.CASE_INSENSITIVE );
+
     @Override
     public ResultSet executeQuery(String sql) throws SQLException {
         checkClosed();
@@ -32,6 +38,23 @@ public class CassandraStatement extends CassandraBaseStatement {
             result = new CassandraResultSet(this, session.execute(sql));
             return result;
         } catch (SyntaxError ex) {
+            final ArrayResultSet rs = new ArrayResultSet("DESC");
+            final Matcher matchTable = describeTable.matcher(sql);
+            if ( matchTable.matches() ){
+                session.getMetadata().getKeyspace( matchTable.group(1)).ifPresent(keyspaceMetadata -> {
+                    keyspaceMetadata.getTable( matchTable.group(2)).ifPresent(tableMetadata -> {
+                        rs.addRow( new String[]{ tableMetadata.describeWithChildren(true) });
+                    });
+                });
+                return rs;
+            }
+            final Matcher matchKeyspace = describeKeyspace.matcher( sql );
+            if ( matchKeyspace.matches() ){
+                session.getMetadata().getKeyspace( matchKeyspace.group(1)).ifPresent(keyspaceMetadata -> {
+                    rs.addRow( new String[]{ keyspaceMetadata.describeWithChildren(true) });
+                });
+                return rs;
+            }
             throw new SQLSyntaxErrorException(ex.getMessage(), ex);
         } catch (Throwable t) {
             throw new SQLException(t.getMessage(), t);

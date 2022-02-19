@@ -26,6 +26,9 @@ public class TestMetadata {
         con = DriverManager.getConnection( urlWithoutAuth, "cassandra", "cassandra");
         Statement stmt = con.createStatement();
         stmt.execute("SELECT cql_version FROM system.local");
+        stmt.executeQuery("CREATE KEYSPACE IF NOT EXISTS dbschema WITH REPLICATION = { 'class' : 'NetworkTopologyStrategy', 'datacenter1' : 3 } AND DURABLE_WRITES = false");
+        stmt.executeQuery( "CREATE TABLE IF NOT EXISTS dbschema.cyclist_category ( category text, points int, id UUID, lastname text, PRIMARY KEY (category, points)) WITH CLUSTERING ORDER BY (points DESC)");
+        stmt.executeQuery( "CREATE TABLE IF NOT EXISTS dbschema.rank_by_year_and_name ( race_year int, race_name text,  cyclist_name text, rank int,  PRIMARY KEY ((race_year, race_name), rank) )");
         stmt.close();
     }
 
@@ -56,6 +59,7 @@ public class TestMetadata {
     public void testDescribe() throws Exception {
         Statement stmt = con.createStatement();
         printResultSet( stmt.executeQuery("DESC dbschema") );
+        printResultSet( stmt.executeQuery("DESC dbschema.cyclist_category") );
         stmt.close();
     }
 
