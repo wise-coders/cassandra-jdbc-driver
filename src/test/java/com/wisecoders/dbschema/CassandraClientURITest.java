@@ -1,4 +1,4 @@
-package com.dbschema;
+package com.wisecoders.dbschema;
 
 import org.junit.Test;
 

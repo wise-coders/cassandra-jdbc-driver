@@ -1,4 +1,4 @@
-package com.dbschema.types;
+package com.wisecoders.dbschema.types;
 
 import java.io.InputStream;
 import java.io.Reader;

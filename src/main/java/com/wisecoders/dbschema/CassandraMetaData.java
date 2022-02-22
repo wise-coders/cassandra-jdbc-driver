@@ -1,10 +1,10 @@
-package com.dbschema;
+package com.wisecoders.dbschema;
 
 import com.datastax.oss.driver.api.core.CqlIdentifier;
 import com.datastax.oss.driver.api.core.metadata.schema.ClusteringOrder;
 import com.datastax.oss.driver.api.core.metadata.schema.ColumnMetadata;
 import com.datastax.oss.driver.api.core.metadata.schema.TableMetadata;
-import com.dbschema.types.ArrayResultSet;
+import com.wisecoders.dbschema.types.ArrayResultSet;
 
 import java.sql.*;
 import java.util.ArrayList;

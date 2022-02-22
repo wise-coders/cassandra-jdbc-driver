@@ -1,4 +1,4 @@
-package com.dbschema;
+package com.wisecoders.dbschema;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.BatchStatement;
@@ -15,8 +15,7 @@ import java.sql.*;
 import java.util.Arrays;
 import java.util.Calendar;
 
-import static com.dbschema.DateUtil.Direction;
-import static com.dbschema.DateUtil.considerTimeZone;
+import static com.wisecoders.dbschema.DateUtil.considerTimeZone;
 
 /**
  * Copyright Wise Coders GmbH. The Cassandra JDBC driver is build to be used with DbSchema Database Designer https://dbschema.com
@@ -319,21 +318,21 @@ public class CassandraPreparedStatement extends CassandraBaseStatement implement
     @Override
     public void setDate(int parameterIndex, Date x, Calendar cal) throws SQLException {
         checkClosed();
-        Date result = considerTimeZone(x, cal, Direction.TO_UTC);
+        Date result = DateUtil.considerTimeZone(x, cal, DateUtil.Direction.TO_UTC);
         setObject(parameterIndex, result);
     }
 
     @Override
     public void setTime(int parameterIndex, Time x, Calendar cal) throws SQLException {
         checkClosed();
-        Time result = considerTimeZone(x, cal, Direction.TO_UTC);
+        Time result = DateUtil.considerTimeZone(x, cal, DateUtil.Direction.TO_UTC);
         setObject(parameterIndex, result);
     }
 
     @Override
     public void setTimestamp(int parameterIndex, Timestamp x, Calendar cal) throws SQLException {
         checkClosed();
-        Timestamp result = considerTimeZone(x, cal, Direction.TO_UTC);
+        Timestamp result = DateUtil.considerTimeZone(x, cal, DateUtil.Direction.TO_UTC);
         setObject(parameterIndex, result);
     }
 

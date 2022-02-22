@@ -1,5 +1,5 @@
 
-package com.dbschema;
+package com.wisecoders.dbschema;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 
@@ -8,7 +8,7 @@ import java.sql.*;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-import static com.dbschema.CassandraClientURI.PREFIX;
+import static com.wisecoders.dbschema.CassandraClientURI.PREFIX;
 
 
 /**

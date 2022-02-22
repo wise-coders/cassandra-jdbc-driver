@@ -24,7 +24,7 @@ https://github.com/wise-coders/cassandra-jdbc-driver
 
 ## How to Configure the JDBC Driver
 
-* Java Driver Class: com.dbschema.CassandraJdbcDriver
+* Java Driver Class: CassandraJdbcDriver
 * JDBC URL: jdbc:cassandra://host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[keyspace][?options]]
 * Website: [DbSchema](https://dbschema.com/cassandra-designer-tool.html)
 

@@ -1,10 +1,10 @@
-package com.dbschema;
+package com.wisecoders.dbschema;
 
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.servererrors.SyntaxError;
-import com.dbschema.types.ArrayResultSet;
-import com.dbschema.types.BlindPreparedStatement;
+import com.wisecoders.dbschema.types.ArrayResultSet;
+import com.wisecoders.dbschema.types.BlindPreparedStatement;
 
 import java.sql.*;
 import java.util.Map;

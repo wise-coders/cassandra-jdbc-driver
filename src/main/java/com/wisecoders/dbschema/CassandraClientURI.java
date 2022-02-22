@@ -1,4 +1,4 @@
-package com.dbschema;
+package com.wisecoders.dbschema;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.CqlSessionBuilder;

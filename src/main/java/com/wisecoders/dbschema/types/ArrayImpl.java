@@ -1,4 +1,4 @@
-package com.dbschema.types;
+package com.wisecoders.dbschema.types;
 
 import java.sql.Array;
 import java.sql.ResultSet;

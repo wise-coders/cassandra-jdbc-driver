@@ -1,10 +1,9 @@
-package com.dbschema;
+package com.wisecoders.dbschema;
 
 import com.datastax.oss.driver.api.core.cql.ColumnDefinition;
 import com.datastax.oss.driver.api.core.cql.Row;
-import com.dbschema.CassandraResultSetMetaData.ColumnMetaData;
-import com.dbschema.types.ArrayImpl;
-import com.dbschema.types.BlobImpl;
+import com.wisecoders.dbschema.types.ArrayImpl;
+import com.wisecoders.dbschema.types.BlobImpl;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -15,12 +14,10 @@ import java.sql.Date;
 import java.sql.*;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 
-import static com.dbschema.DateUtil.Direction;
-import static com.dbschema.DateUtil.considerTimeZone;
+import static com.wisecoders.dbschema.DateUtil.considerTimeZone;
 
 /**
  * Copyright Wise Coders GmbH. The Cassandra JDBC driver is build to be used with DbSchema Database Designer https://dbschema.com
@@ -360,10 +357,10 @@ public class CassandraResultSet implements ResultSet {
     public ResultSetMetaData getMetaData() throws SQLException {
         checkClosed();
         dsResultSet.getColumnDefinitions();
-        List<ColumnMetaData> columnMetaData = new ArrayList<>();
+        List<CassandraResultSetMetaData.ColumnMetaData> columnMetaData = new ArrayList<>();
         for (Iterator<ColumnDefinition> itr = dsResultSet.getColumnDefinitions().iterator(); itr.hasNext(); ) {
             ColumnDefinition def = itr.next();
-            columnMetaData.add(new ColumnMetaData(def.getName().toString(), def.getTable().toString(), def.getKeyspace().toString(), def.getType().toString() ));
+            columnMetaData.add(new CassandraResultSetMetaData.ColumnMetaData(def.getName().toString(), def.getTable().toString(), def.getKeyspace().toString(), def.getType().toString() ));
         }
         return new CassandraResultSetMetaData(columnMetaData);
     }
@@ -781,15 +778,15 @@ public class CassandraResultSet implements ResultSet {
     }
 
     public Date getDate(int columnIndex, Calendar cal) throws SQLException {
-        return considerTimeZone(getDate(columnIndex), cal, Direction.FROM_UTC);
+        return DateUtil.considerTimeZone(getDate(columnIndex), cal, DateUtil.Direction.FROM_UTC);
     }
 
     public Time getTime(int columnIndex, Calendar cal) throws SQLException {
-        return considerTimeZone(getTime(columnIndex), cal, Direction.FROM_UTC);
+        return DateUtil.considerTimeZone(getTime(columnIndex), cal, DateUtil.Direction.FROM_UTC);
     }
 
     public Timestamp getTimestamp(int columnIndex, Calendar cal) throws SQLException {
-        return DateUtil.considerTimeZone(getTimestamp(columnIndex), cal, Direction.FROM_UTC);
+        return DateUtil.considerTimeZone(getTimestamp(columnIndex), cal, DateUtil.Direction.FROM_UTC);
     }
 
     public Date getDate(String columnLabel, Calendar cal) throws SQLException {
