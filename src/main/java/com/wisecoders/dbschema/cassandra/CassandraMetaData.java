@@ -1,10 +1,10 @@
-package com.wisecoders.dbschema;
+package com.wisecoders.dbschema.cassandra;
 
 import com.datastax.oss.driver.api.core.CqlIdentifier;
 import com.datastax.oss.driver.api.core.metadata.schema.ClusteringOrder;
 import com.datastax.oss.driver.api.core.metadata.schema.ColumnMetadata;
 import com.datastax.oss.driver.api.core.metadata.schema.TableMetadata;
-import com.wisecoders.dbschema.types.ArrayResultSet;
+import com.wisecoders.dbschema.cassandra.types.ArrayResultSet;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -23,9 +23,9 @@ import java.util.Map;
 public class CassandraMetaData implements DatabaseMetaData {
 
     private final CassandraConnection connection;
-    private CassandraJdbcDriver driver;
+    private JdbcDriver driver;
 
-    CassandraMetaData(CassandraConnection connection, CassandraJdbcDriver driver) {
+    CassandraMetaData(CassandraConnection connection, JdbcDriver driver) {
         this.connection = connection;
         this.driver = driver;
     }

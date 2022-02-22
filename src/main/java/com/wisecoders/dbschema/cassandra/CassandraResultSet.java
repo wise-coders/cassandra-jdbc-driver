@@ -1,9 +1,9 @@
-package com.wisecoders.dbschema;
+package com.wisecoders.dbschema.cassandra;
 
 import com.datastax.oss.driver.api.core.cql.ColumnDefinition;
 import com.datastax.oss.driver.api.core.cql.Row;
-import com.wisecoders.dbschema.types.ArrayImpl;
-import com.wisecoders.dbschema.types.BlobImpl;
+import com.wisecoders.dbschema.cassandra.types.ArrayImpl;
+import com.wisecoders.dbschema.cassandra.types.BlobImpl;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -17,7 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
 
-import static com.wisecoders.dbschema.DateUtil.considerTimeZone;
+import static com.wisecoders.dbschema.cassandra.DateUtil.considerTimeZone;
 
 /**
  * Copyright Wise Coders GmbH. The Cassandra JDBC driver is build to be used with DbSchema Database Designer https://dbschema.com

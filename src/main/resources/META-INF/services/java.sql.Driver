@@ -1,1 +1,1 @@
-com.wisecoders.dbschema.CassandraJdbcDriver
+com.wisecoders.dbschema.cassandra.JdbcDriver

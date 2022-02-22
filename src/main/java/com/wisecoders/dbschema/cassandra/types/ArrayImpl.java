@@ -1,4 +1,4 @@
-package com.wisecoders.dbschema.types;
+package com.wisecoders.dbschema.cassandra.types;
 
 import java.sql.Array;
 import java.sql.ResultSet;

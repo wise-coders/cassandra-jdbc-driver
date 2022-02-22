@@ -1,4 +1,4 @@
-package com.wisecoders.dbschema;
+package com.wisecoders.dbschema.cassandra;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.BatchStatement;
@@ -15,7 +15,7 @@ import java.sql.*;
 import java.util.Arrays;
 import java.util.Calendar;
 
-import static com.wisecoders.dbschema.DateUtil.considerTimeZone;
+import static com.wisecoders.dbschema.cassandra.DateUtil.considerTimeZone;
 
 /**
  * Copyright Wise Coders GmbH. The Cassandra JDBC driver is build to be used with DbSchema Database Designer https://dbschema.com

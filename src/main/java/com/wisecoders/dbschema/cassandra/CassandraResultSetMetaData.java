@@ -1,4 +1,4 @@
-package com.wisecoders.dbschema;
+package com.wisecoders.dbschema.cassandra;
 
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;

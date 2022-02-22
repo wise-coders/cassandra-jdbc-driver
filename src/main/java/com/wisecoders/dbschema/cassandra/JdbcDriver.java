@@ -1,5 +1,5 @@
 
-package com.wisecoders.dbschema;
+package com.wisecoders.dbschema.cassandra;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 
@@ -8,7 +8,7 @@ import java.sql.*;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-import static com.wisecoders.dbschema.CassandraClientURI.PREFIX;
+import static com.wisecoders.dbschema.cassandra.CassandraClientURI.PREFIX;
 
 
 /**
@@ -24,12 +24,12 @@ import static com.wisecoders.dbschema.CassandraClientURI.PREFIX;
  */
 
 
-public class CassandraJdbcDriver implements Driver {
+public class JdbcDriver implements Driver {
     private static final String RETURN_NULL_STRINGS_FROM_INTRO_QUERY_KEY = "cassandra.jdbc.return.null.strings.from.intro.query";
 
     static {
         try {
-            DriverManager.registerDriver(new CassandraJdbcDriver());
+            DriverManager.registerDriver(new JdbcDriver());
         } catch (SQLException ex) {
             ex.printStackTrace();
         }

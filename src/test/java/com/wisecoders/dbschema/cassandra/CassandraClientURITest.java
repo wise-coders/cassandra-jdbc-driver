@@ -1,4 +1,4 @@
-package com.wisecoders.dbschema;
+package com.wisecoders.dbschema.cassandra;
 
 import org.junit.Test;
 

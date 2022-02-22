@@ -1,10 +1,10 @@
-package com.wisecoders.dbschema;
+package com.wisecoders.dbschema.cassandra;
 
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.servererrors.SyntaxError;
-import com.wisecoders.dbschema.types.ArrayResultSet;
-import com.wisecoders.dbschema.types.BlindPreparedStatement;
+import com.wisecoders.dbschema.cassandra.types.ArrayResultSet;
+import com.wisecoders.dbschema.cassandra.types.BlindPreparedStatement;
 
 import java.sql.*;
 import java.util.Map;
@@ -22,14 +22,14 @@ import java.util.regex.Pattern;
 public class CassandraConnection implements Connection {
 
     private final CqlSession session;
-    private final CassandraJdbcDriver driver;
+    private final JdbcDriver driver;
     private final boolean returnNullStringsFromIntroQuery;
     private boolean isClosed = false;
     private boolean isReadOnly = false;
 
-    CassandraConnection(CqlSession session, CassandraJdbcDriver cassandraJdbcDriver, boolean returnNullStringsFromIntroQuery) {
+    CassandraConnection(CqlSession session, JdbcDriver jdbcDriver, boolean returnNullStringsFromIntroQuery) {
         this.session = session;
-        driver = cassandraJdbcDriver;
+        driver = jdbcDriver;
         this.returnNullStringsFromIntroQuery = returnNullStringsFromIntroQuery;
     }
 

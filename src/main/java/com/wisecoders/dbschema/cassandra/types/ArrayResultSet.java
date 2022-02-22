@@ -1,6 +1,6 @@
-package com.wisecoders.dbschema.types;
+package com.wisecoders.dbschema.cassandra.types;
 
-import com.wisecoders.dbschema.CassandraPreparedStatement;
+import com.wisecoders.dbschema.cassandra.CassandraPreparedStatement;
 
 import java.io.InputStream;
 import java.io.Reader;

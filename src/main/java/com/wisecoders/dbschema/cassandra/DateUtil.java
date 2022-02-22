@@ -1,4 +1,4 @@
-package com.wisecoders.dbschema;
+package com.wisecoders.dbschema.cassandra;
 
 import java.sql.SQLException;
 import java.sql.Time;

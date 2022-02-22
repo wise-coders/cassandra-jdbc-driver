@@ -1,4 +1,4 @@
-package com.wisecoders.dbschema;
+package com.wisecoders.dbschema.cassandra;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -22,7 +22,7 @@ public class TestMetadata {
     // THIS TESTS ARE USING A LOCAL INSTALLED CASSANDRA (I USE DOCKER)
     @Before
     public void setUp() throws ClassNotFoundException, SQLException {
-        Class.forName("com.wisecoders.dbschema.CassandraJdbcDriver");
+        Class.forName("com.wisecoders.dbschema.cassandra.JdbcDriver");
         con = DriverManager.getConnection( urlWithoutAuth, "cassandra", "cassandra");
         Statement stmt = con.createStatement();
         stmt.execute("SELECT cql_version FROM system.local");
