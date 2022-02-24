@@ -20,7 +20,7 @@ dependencies {
 jar {
     archiveName ="cassandrajdbc${version}.jar"
     manifest {
-        attributes 'Main-Class': 'com.dbschema.CassandraJdbcDriver'
+        attributes 'Main-Class': 'com.wisecoders.dbschema.cassandra.JdbcDriver'
         attributes 'Specification-Version': "$version"
         attributes 'Specification-Vendor': "Wise Coders"
         attributes 'Implementation-Vendor-Id': "dbschema.com"
