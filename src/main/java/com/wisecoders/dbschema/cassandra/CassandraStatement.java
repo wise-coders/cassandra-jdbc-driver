@@ -34,7 +34,7 @@ public class CassandraStatement extends CassandraBaseStatement {
             result = new CassandraResultSet(this, session.execute(sql));
             return result;
         } catch (SyntaxError ex) {
-            ResultSet rs = connection.executeDescrCommand( sql );
+            ResultSet rs = connection.executeDescribeCommand( sql );
             if ( rs != null ){
                 return rs;
             }

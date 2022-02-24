@@ -46,7 +46,7 @@ public class CassandraConnection implements Connection {
     private static final Pattern describeKeyspace = Pattern.compile("DESC (.*)", Pattern.CASE_INSENSITIVE );
 
 
-    public ResultSet executeDescrCommand( String sql ){
+    public ResultSet executeDescribeCommand(String sql ){
         final ArrayResultSet rs = new ArrayResultSet("KEYSPACE", "CAT", "OBJECT", "DESC");
         {
             final Matcher matcher = describeTable.matcher(sql);
@@ -116,7 +116,7 @@ public class CassandraConnection implements Connection {
         try {
             return new CassandraPreparedStatement(session, session.prepare(sql), returnNullStringsFromIntroQuery || !SELECT_COLUMNS_INTRO_QUERY.equals(sql));
         } catch ( SyntaxError error ) {
-            ResultSet rs = executeDescrCommand( sql );
+            ResultSet rs = executeDescribeCommand( sql );
             if ( rs != null ){
                 return new BlindPreparedStatement(rs );
             }

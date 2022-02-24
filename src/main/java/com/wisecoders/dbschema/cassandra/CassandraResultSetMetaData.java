@@ -221,7 +221,7 @@ public class CassandraResultSetMetaData implements ResultSetMetaData {
         int getJavaType() {
             String lower = toLowerCase(typeName);
             if (javaTypeMap.containsKey(lower)) return javaTypeMap.get(lower);
-            return Types.VARCHAR;
+            return Types.OTHER;
         }
 
         String getClassName() {
