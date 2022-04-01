@@ -2,14 +2,17 @@ package com.wisecoders.dbschema.cassandra;
 
 import com.datastax.oss.driver.api.core.cql.ColumnDefinition;
 import com.datastax.oss.driver.api.core.cql.Row;
+import com.fasterxml.jackson.databind.util.ByteBufferBackedInputStream;
 import com.wisecoders.dbschema.cassandra.types.ArrayImpl;
 import com.wisecoders.dbschema.cassandra.types.BlobImpl;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.sql.*;
 import java.time.Instant;
@@ -203,7 +206,11 @@ public class CassandraResultSet implements ResultSet {
 
     @Override
     public InputStream getAsciiStream(int columnIndex) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+        checkClosed();
+        if (currentRow != null) {
+            return new ByteArrayInputStream( currentRow.getString(columnIndex).getBytes(StandardCharsets.UTF_8));
+        }
+        throw new SQLException("Result exhausted.");
     }
 
     @Override
@@ -213,7 +220,11 @@ public class CassandraResultSet implements ResultSet {
 
     @Override
     public InputStream getBinaryStream(int columnIndex) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+        checkClosed();
+        if (currentRow != null) {
+            return new ByteBufferBackedInputStream( currentRow.getByteBuffer(columnIndex));
+        }
+        throw new SQLException("Result exhausted.");
     }
 
     @Override
@@ -229,7 +240,7 @@ public class CassandraResultSet implements ResultSet {
     public boolean getBoolean(String columnLabel) throws SQLException {
         checkClosed();
         if (currentRow != null) {
-            return currentRow.getBool(columnLabel);
+            return currentRow.getBoolean(columnLabel);
         }
         throw new SQLException("Result exhausted.");
     }
