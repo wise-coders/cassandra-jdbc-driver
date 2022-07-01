@@ -6,7 +6,10 @@ import com.datastax.oss.driver.api.core.CqlSession;
 import java.net.UnknownHostException;
 import java.sql.*;
 import java.util.Properties;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 import static com.wisecoders.dbschema.cassandra.CassandraClientURI.PREFIX;
 
@@ -27,10 +30,21 @@ import static com.wisecoders.dbschema.cassandra.CassandraClientURI.PREFIX;
 public class JdbcDriver implements Driver {
     private static final String RETURN_NULL_STRINGS_FROM_INTRO_QUERY_KEY = "cassandra.jdbc.return.null.strings.from.intro.query";
 
+    public static final Logger LOGGER = Logger.getLogger( JdbcDriver.class.getName() );
+
     static {
         try {
-            DriverManager.registerDriver(new JdbcDriver());
-        } catch (SQLException ex) {
+            DriverManager.registerDriver( new JdbcDriver());
+            LOGGER.setLevel(Level.ALL);
+            /*
+            LOGGER.addHandler(
+                    new ConsoleHandler() {
+                        {setOutputStream(System.out);}
+                    });*/
+            final FileHandler fileHandler = new FileHandler(System.getProperty("user.home") + "/.DbSchema/logs/CassandraJdbcDriver.log");
+            fileHandler.setFormatter( new SimpleFormatter());
+            LOGGER.addHandler(fileHandler);
+        } catch ( Exception ex ){
             ex.printStackTrace();
         }
     }

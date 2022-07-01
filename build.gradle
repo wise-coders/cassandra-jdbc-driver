@@ -1,3 +1,4 @@
+
 buildscript {
     repositories {
         mavenCentral()
@@ -5,6 +6,7 @@ buildscript {
         jcenter()
     }
 }
+apply plugin: 'java'
 apply plugin: 'application'
 apply plugin: 'distribution'
 
@@ -13,8 +15,8 @@ repositories {
 }
 
 dependencies {
-    compile "com.datastax.oss:java-driver-core:4.13.0"
-    testCompile 'junit:junit:4.12'
+    implementation "com.datastax.oss:java-driver-core:4.14.1"
+    testImplementation 'junit:junit:4.12'
 }
 
 jar {
@@ -32,13 +34,13 @@ jar {
 
 task zip(type: Zip, dependsOn:['clean','jar']) {
     archiveName 'CassandraJdbcDriver.zip'
-    from configurations.runtime.allArtifacts.files
-    from configurations.runtime
+    from configurations.runtimeClasspath.allArtifacts.files
+    from configurations.runtimeClasspath
 }
 
 task copyInUserHome(type: Copy,dependsOn:['clean','jar']) {
-    from configurations.runtime.allArtifacts.files
-    from configurations.runtime
+    from configurations.runtimeClasspath.allArtifacts.files
+    from configurations.runtimeClasspath
     into "${System.getProperty('user.home')}/.DbSchema/drivers/Cassandra/"
 }
 

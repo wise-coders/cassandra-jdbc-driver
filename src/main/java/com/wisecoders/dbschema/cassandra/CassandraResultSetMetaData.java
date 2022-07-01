@@ -125,7 +125,7 @@ public class CassandraResultSetMetaData implements ResultSetMetaData {
 
     @Override
     public boolean isWritable(int column) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+        return false;
     }
 
     @Override

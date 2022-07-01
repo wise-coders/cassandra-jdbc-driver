@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 
 public class CassandraClientURI {
 
-    private static final Logger logger = Logger.getLogger("CassandraClientURILogger");
+    private static final Logger LOGGER = Logger.getLogger("CassandraClientURILogger");
 
     static final String PREFIX = "jdbc:cassandra://";
 
@@ -30,48 +30,42 @@ public class CassandraClientURI {
 
     public CassandraClientURI(String uri, Properties info) {
         this.uri = uri;
+        LOGGER.info("URI: " + uri );
         if (!uri.startsWith(PREFIX))
             throw new IllegalArgumentException("URI needs to start with " + PREFIX);
 
         uri = uri.substring(PREFIX.length());
-
 
         String serverPart;
         String nsPart;
         Map<String, List<String>> options = null;
 
         {
-            int lastSlashIndex = uri.lastIndexOf("/");
-            if (lastSlashIndex < 0) {
-                if (uri.contains("?")) {
-                    throw new IllegalArgumentException("URI contains options without trailing slash");
-                }
+            int idx;
+            if ( ( idx = uri.indexOf("?")) > 0 || ( idx = uri.indexOf(";")) > 0 ){
+                options = parseOptions( uri.substring( idx+1));
+                uri = uri.substring(0, idx );
+            }
+
+            if ( ( idx = uri.indexOf("/")) > 0 ){
+                serverPart = uri.substring(0, idx);
+                nsPart = uri.substring(idx + 1);
+            } else {
                 serverPart = uri;
                 nsPart = null;
-            } else {
-                serverPart = uri.substring(0, lastSlashIndex);
-                nsPart = uri.substring(lastSlashIndex + 1);
-
-                int questionMarkIndex = nsPart.indexOf("?");
-                if (questionMarkIndex >= 0) {
-                    options = parseOptions(nsPart.substring(questionMarkIndex + 1));
-                    nsPart = nsPart.substring(0, questionMarkIndex);
-                }
             }
         }
 
         this.userName = getOption(info, options, "user");
         this.password = getOption(info, options, "password");
-        this.dataCenter = getOption(info, options, "datacenter");
+        this.dataCenter = getOption(info, options, "dc");
         String sslEnabledOption = getOption(info, options, "sslenabled");
         this.sslEnabled = Boolean.parseBoolean(sslEnabledOption);
 
 
         { // userName,password,hosts
             List<String> all = new LinkedList<>();
-
             Collections.addAll(all, serverPart.split(","));
-
             hosts = Collections.unmodifiableList(all);
         }
 
@@ -88,6 +82,8 @@ public class CassandraClientURI {
                 collection = nsPart.substring(dotIndex + 1);
             }
         }
+        LOGGER.info("hosts=" + hosts + " keyspace=" + keyspace + " collection=" + collection + " user=" + userName + " dc=" + dataCenter + " sslenabled=" + sslEnabledOption );
+
     }
 
     /**
@@ -114,15 +110,15 @@ public class CassandraClientURI {
                 host = host.substring( 0, idx ).trim();
             }
             builder.addContactPoint( new InetSocketAddress( host, port ) );
-            logger.info("sslenabled: " + sslEnabled.toString());
+            LOGGER.info("sslenabled: " + sslEnabled.toString());
             if (sslEnabled) {
                 //builder.withSSL();
             }
         }
-        builder.withLocalDatacenter(dataCenter != null ? dataCenter : "datacenter1");
-        if (userName != null && !userName.isEmpty() && password != null) {
+        if ( dataCenter != null ) builder.withLocalDatacenter( dataCenter );
+        if ( userName != null && !userName.isEmpty() && password != null ) {
             builder.withAuthCredentials(userName, password);
-            System.out.println("Using authentication as user '" + userName + "'");
+            LOGGER.info("Authenticating as user '" + userName + "'");
         }
         return builder.build();
     }
