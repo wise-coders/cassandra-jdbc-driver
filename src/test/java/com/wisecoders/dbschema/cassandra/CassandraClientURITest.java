@@ -2,6 +2,9 @@ package com.wisecoders.dbschema.cassandra;
 
 import org.junit.Test;
 
+import javax.net.ssl.SSLContext;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.Properties;
 
@@ -54,12 +57,13 @@ public class CassandraClientURITest {
 
 
     @Test
-    public void testSslEnabledOptionTrue() {
+    public void testSslEnabledOptionTrue() throws GeneralSecurityException, IOException {
         Properties properties = new Properties();
         properties.put("sslenabled", "true");
         CassandraClientURI uri = new CassandraClientURI(
                 "jdbc:cassandra://localhost:9042/?name=cassandra&password=cassandra",
                 properties);
+        assertNotNull(uri.getSslContext());
         assertTrue(uri.getSslEnabled());
     }
 
