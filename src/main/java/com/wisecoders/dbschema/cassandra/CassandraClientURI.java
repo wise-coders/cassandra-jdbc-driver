@@ -3,7 +3,16 @@ package com.wisecoders.dbschema.cassandra;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.CqlSessionBuilder;
 
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetSocketAddress;
+import java.security.GeneralSecurityException;
+import java.security.KeyStore;
+import java.security.SecureRandom;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -27,6 +36,10 @@ public class CassandraClientURI {
     private final String userName;
     private final String password;
     private final Boolean sslEnabled;
+    private final String trustStore;
+    private final String trustStorePassword;
+    private final String keyStore;
+    private final String keyStorePassword;
 
     public CassandraClientURI(String uri, Properties info) {
         this.uri = uri;
@@ -61,6 +74,15 @@ public class CassandraClientURI {
         this.dataCenter = getOption(info, options, "dc");
         String sslEnabledOption = getOption(info, options, "sslenabled");
         this.sslEnabled = Boolean.parseBoolean(sslEnabledOption);
+        String trustStore = getOption(info, options, "javax.net.ssl.truststore");
+        String trustStorePassword = getOption(info, options, "javax.net.ssl.truststorepassword");
+        String keyStore = getOption(info, options, "javax.net.ssl.keystore");
+        String keyStorePassword = getOption(info, options, "javax.net.ssl.keystorepassword");
+
+        this.trustStore = trustStore == null ? System.getProperty("javax.net.ssl.trustStore") : trustStore;
+        this.trustStorePassword = trustStorePassword == null ? System.getProperty("javax.net.ssl.trustStorePassword") : trustStorePassword;
+        this.keyStore = keyStore == null ? System.getProperty("javax.net.ssl.keyStore") : keyStore;
+        this.keyStorePassword = keyStorePassword == null ? System.getProperty("javax.net.ssl.keyStorePassword") : keyStorePassword;
 
 
         { // userName,password,hosts
@@ -100,7 +122,7 @@ public class CassandraClientURI {
         return getLastValue(options, optionName);
     }
 
-    CqlSession createCqlSession() throws java.net.UnknownHostException {
+    CqlSession createCqlSession() throws IOException, GeneralSecurityException {
         CqlSessionBuilder builder = CqlSession.builder();
         int port = 9042;
         for ( String host : hosts ){
@@ -112,7 +134,7 @@ public class CassandraClientURI {
             builder.addContactPoint( new InetSocketAddress( host, port ) );
             LOGGER.info("sslenabled: " + sslEnabled.toString());
             if (sslEnabled) {
-                //builder.withSSL();
+                builder.withSslContext(getSslContext());
             }
         }
         if ( dataCenter != null ) builder.withLocalDatacenter( dataCenter );
@@ -149,6 +171,38 @@ public class CassandraClientURI {
         }
 
         return optionsMap;
+    }
+
+    public SSLContext getSslContext()
+            throws GeneralSecurityException, IOException {
+        KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+        char[] trustStorePasswordArray = this.trustStorePassword != null ? this.trustStorePassword.toCharArray() : null;
+        try (InputStream in = new FileInputStream(this.trustStore)) {
+            trustStore.load(in, trustStorePasswordArray);
+        } catch (NullPointerException e) {
+            trustStore.load(null, null);
+        }
+        KeyManagerFactory keyManagerFactory =
+                KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+        keyManagerFactory.init(trustStore, trustStorePasswordArray);
+
+        KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+
+        try (InputStream in = new FileInputStream(this.keyStore)) {
+            keyStore.load(in, this.keyStorePassword != null ? this.trustStorePassword.toCharArray() : null);
+        } catch (NullPointerException e) {
+            keyStore.load(null, null);
+        }
+        TrustManagerFactory trustManagerFactory =
+                TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+        trustManagerFactory.init(keyStore);
+
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(
+                keyManagerFactory.getKeyManagers(),
+                trustManagerFactory.getTrustManagers(),
+                new SecureRandom());
+        return sslContext;
     }
 
 
@@ -219,6 +273,21 @@ public class CassandraClientURI {
     }
 
 
+    public String getTrustStore() {
+        return trustStore;
+    }
+
+    public String getTrustStorePassword() {
+        return trustStorePassword;
+    }
+
+    public String getKeyStore() {
+        return keyStore;
+    }
+
+    public String getKeyStorePassword() {
+        return keyStorePassword;
+    }
 
     @Override
     public String toString() {

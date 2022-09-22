@@ -3,7 +3,9 @@ package com.wisecoders.dbschema.cassandra;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 
+import java.io.IOException;
 import java.net.UnknownHostException;
+import java.security.GeneralSecurityException;
 import java.sql.*;
 import java.util.Properties;
 import java.util.logging.FileHandler;
@@ -68,6 +70,10 @@ public class JdbcDriver implements Driver {
                 boolean returnNullStringsFromIntroQuery = Boolean.parseBoolean( info.getProperty( RETURN_NULL_STRINGS_FROM_INTRO_QUERY_KEY ) );
                 return new CassandraConnection(session, this, returnNullStringsFromIntroQuery);
             } catch (UnknownHostException e) {
+                throw new SQLException(e.getMessage(), e);
+            } catch (GeneralSecurityException e) {
+                throw new SQLException(e.getMessage(), e);
+            } catch (IOException e) {
                 throw new SQLException(e.getMessage(), e);
             }
         }
