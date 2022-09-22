@@ -16,6 +16,8 @@ import java.security.SecureRandom;
 import java.util.*;
 import java.util.logging.Logger;
 
+import static com.wisecoders.dbschema.cassandra.JdbcDriver.LOGGER;
+
 /**
  * Copyright Wise Coders GmbH. The Cassandra JDBC driver is build to be used with DbSchema Database Designer https://dbschema.com
  * Free to use by everyone, code modifications allowed only to
@@ -23,8 +25,6 @@ import java.util.logging.Logger;
  */
 
 public class CassandraClientURI {
-
-    private static final Logger LOGGER = Logger.getLogger("CassandraClientURILogger");
 
     static final String PREFIX = "jdbc:cassandra://";
 
@@ -137,7 +137,7 @@ public class CassandraClientURI {
                 builder.withSslContext(getSslContext());
             }
         }
-        if ( dataCenter != null ) builder.withLocalDatacenter( dataCenter );
+        builder.withLocalDatacenter( dataCenter != null ? dataCenter : "datacenter1" );
         if ( userName != null && !userName.isEmpty() && password != null ) {
             builder.withAuthCredentials(userName, password);
             LOGGER.info("Authenticating as user '" + userName + "'");
