@@ -1,6 +1,9 @@
 package com.wisecoders.dbschema.cassandra;
 
 import org.junit.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import software.amazon.awssdk.services.secretsmanager.model.SecretsManagerException;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -84,5 +87,30 @@ public class CassandraClientURITest {
                 "jdbc:cassandra://localhost:9042/?name=cassandra&password=cassandra",
                 properties);
         assertFalse(uri.getSslEnabled());
+    }
+
+    @Test
+    public void testAwsSecretNotFound() {
+        SecretsManagerException sme = (SecretsManagerException) SecretsManagerException
+                .builder()
+                .message("Any error")
+                .build();
+
+        String region = "sa-east-1";
+        String secretName = "a_secret_name";
+
+        try (MockedStatic<AWSUtil> utilities = Mockito.mockStatic(AWSUtil.class)) {
+            utilities.when(() -> AWSUtil.getSecretValue(region, secretName)).thenThrow(sme);
+
+            try {
+                CassandraClientURI uri = new CassandraClientURI(
+                        "jdbc:cassandra://localhost:9042/?name=cassandra&password=cassandra&awsregion=sa-east-1&awssecretname=a_secret_name&anyFieldEndingWithPassword=another_pass",
+                        new Properties());
+            } catch (Exception e) {
+                assertTrue(e instanceof SecretsManagerException);
+            }
+        }
+
+
     }
 }

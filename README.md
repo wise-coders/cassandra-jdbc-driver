@@ -28,7 +28,18 @@ https://github.com/wise-coders/cassandra-jdbc-driver
 * JDBC URL: jdbc:cassandra://host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[keyspace][?options]]
 * Website: [DbSchema](https://dbschema.com/cassandra-designer-tool.html)
 
+Make sure your password don't have any ampersand character (<code>&</code>), since it is part of the parameters' delimiter.
+If it is not possible, set your password by using a Properties object.
+
 The driver we wrote on top of the native [Cassandra Java Driver](https://github.com/datastax/java-driver)
+
+### Using a File to Configure Your Driver
+
+You can configure your driver using a file by passing using the `configfile` parameter and the path to file, like this:
+
+`configfile=/path/to/file.conf`
+
+Please, refer to [DataStax Driver Configuration Reference](https://docs.datastax.com/en/developer/java-driver/4.14/manual/core/configuration/reference/) to know all possible parameters.
 
 ## Connecting using SSL
 
@@ -51,6 +62,25 @@ If you're using client authentication:
 `-Djavax.net.ssl.keyStore=/path/to/client.keystore`
 
 `-Djavax.net.ssl.keyStorePassword=password123`
+
+## Retrieving your Password from an AWS Secrets Entry
+
+You can to retrieve your password from AWS Secrets by passing these parameters:
+
+* `awsregion`: The region which your secret was stored in;
+
+* `awssecretname`: The name of the secret were is your password stored in.
+
+To authenticate in AWS, the driver uses the DefaultCredentialsProviderChain. To know
+more about it, refer to [AWS DefaultCredentialsProvider documentation](https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html).
+
+## Connecting to AWS Keyspaces
+
+You can connect to AWS Keyspaces by using this JDBC URI example:
+
+`jdbc:cassandra://<aws_keyspaces_endpoint>:9142/<default_keyspaces>?dc=<aws_region>&javax.net.ssl.trustStore=/path/to/client.truststore&javax.net.ssl.trustStorePassword=password123`
+
+Click here to know more about [AWS Keyspaces Service Endpoints](javax.net.ssl.trustStore=/path/to/client.truststore&javax.net.ssl.trustStorePassword=password123).
 
 ## How to Test the Driver
 
