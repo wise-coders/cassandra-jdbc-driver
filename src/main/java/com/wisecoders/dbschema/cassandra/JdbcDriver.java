@@ -8,10 +8,7 @@ import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
 import java.sql.*;
 import java.util.Properties;
-import java.util.logging.FileHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
+import java.util.logging.*;
 
 import static com.wisecoders.dbschema.cassandra.CassandraClientURI.PREFIX;
 
@@ -38,13 +35,14 @@ public class JdbcDriver implements Driver {
         try {
             DriverManager.registerDriver( new JdbcDriver());
             LOGGER.setLevel(Level.ALL);
-            /*
-            LOGGER.addHandler(
-                    new ConsoleHandler() {
-                        {setOutputStream(System.out);}
-                    });*/
+            final ConsoleHandler consoleHandler = new ConsoleHandler();
+            consoleHandler.setLevel(Level.ALL);
+            consoleHandler.setFormatter(new SimpleFormatter());
+            LOGGER.addHandler(consoleHandler);
+
             final FileHandler fileHandler = new FileHandler(System.getProperty("user.home") + "/.DbSchema/logs/CassandraJdbcDriver.log");
             fileHandler.setFormatter( new SimpleFormatter());
+            fileHandler.setLevel(Level.ALL);
             LOGGER.addHandler(fileHandler);
         } catch ( Exception ex ){
             ex.printStackTrace();
