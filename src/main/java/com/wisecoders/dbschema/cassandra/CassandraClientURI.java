@@ -2,10 +2,13 @@ package com.wisecoders.dbschema.cassandra;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.CqlSessionBuilder;
+import com.datastax.oss.driver.api.core.config.DriverConfigLoader;
+import software.amazon.awssdk.utils.StringUtils;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,8 +16,11 @@ import java.net.InetSocketAddress;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.SecureRandom;
+import java.time.Duration;
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.wisecoders.dbschema.cassandra.JdbcDriver.LOGGER;
 
@@ -40,10 +46,14 @@ public class CassandraClientURI {
     private final String trustStorePassword;
     private final String keyStore;
     private final String keyStorePassword;
+    private final String awsSecretName;
+    private final String awsSecretKey;
+    private final String awsRegion;
+    private final String configFile;
 
     public CassandraClientURI(String uri, Properties info) {
         this.uri = uri;
-        LOGGER.info("URI: " + uri );
+        LOGGER.info("URI: " + maskAllPassowords(uri));
         if (!uri.startsWith(PREFIX))
             throw new IllegalArgumentException("URI needs to start with " + PREFIX);
 
@@ -70,20 +80,30 @@ public class CassandraClientURI {
         }
 
         this.userName = getOption(info, options, "user");
-        this.password = getOption(info, options, "password");
+
+        this.awsRegion = getOption(info, options, "awsregion");
+        this.awsSecretName = getOption(info, options, "awssecretname");
+        this.awsSecretKey = getOption(info, options, "awssecretkey");
+        if (awsRegion != null && awsSecretName != null && awsSecretKey != null) {
+            this.password = AWSUtil.getSecretValue(this.awsRegion, this.awsSecretName, this.awsSecretKey);
+        } else {
+            this.password = getOption(info, options, "password");
+        }
+
         this.dataCenter = getOption(info, options, "dc");
         String sslEnabledOption = getOption(info, options, "sslenabled");
         this.sslEnabled = Boolean.parseBoolean(sslEnabledOption);
+
         String trustStore = getOption(info, options, "javax.net.ssl.truststore");
         String trustStorePassword = getOption(info, options, "javax.net.ssl.truststorepassword");
         String keyStore = getOption(info, options, "javax.net.ssl.keystore");
         String keyStorePassword = getOption(info, options, "javax.net.ssl.keystorepassword");
-
         this.trustStore = trustStore == null ? System.getProperty("javax.net.ssl.trustStore") : trustStore;
         this.trustStorePassword = trustStorePassword == null ? System.getProperty("javax.net.ssl.trustStorePassword") : trustStorePassword;
         this.keyStore = keyStore == null ? System.getProperty("javax.net.ssl.keyStore") : keyStore;
         this.keyStorePassword = keyStorePassword == null ? System.getProperty("javax.net.ssl.keyStorePassword") : keyStorePassword;
 
+        this.configFile = getOption(info, options, "configfile");
 
         { // userName,password,hosts
             List<String> all = new LinkedList<>();
@@ -106,6 +126,20 @@ public class CassandraClientURI {
         }
         LOGGER.info("hosts=" + hosts + " keyspace=" + keyspace + " collection=" + collection + " user=" + userName + " dc=" + dataCenter + " sslenabled=" + sslEnabledOption );
 
+    }
+
+    public String maskAllPassowords(String uri) {
+        StringBuffer uriBuffer = new StringBuffer(uri);
+        Pattern pattern = Pattern.compile("[Pp]assword=(.*?)(&|$)");
+        Matcher matcher = pattern.matcher(uri);
+        while (matcher.find()) {
+            String sensitive = matcher.group(1);
+            int start = matcher.start(1);
+            int end = matcher.end(1);
+            String mask = StringUtils.repeat("*", sensitive.length());
+            uriBuffer.replace(start, end, mask);
+        }
+        return uriBuffer.toString();
     }
 
     /**
@@ -135,6 +169,10 @@ public class CassandraClientURI {
             LOGGER.info("sslenabled: " + sslEnabled.toString());
             if (sslEnabled) {
                 builder.withSslContext(getSslContext());
+            }
+            if (getConfigFile() != null) {
+                File file = new File(this.getConfigFile());
+                builder.withConfigLoader(DriverConfigLoader.fromFile(file));
             }
         }
         builder.withLocalDatacenter( dataCenter != null ? dataCenter : "datacenter1" );
@@ -173,11 +211,30 @@ public class CassandraClientURI {
         return optionsMap;
     }
 
-    public SSLContext getSslContext()
+    public SSLContext getSslContext() throws GeneralSecurityException, IOException {
+        String trustStore = this.trustStore;
+        String trustStorePassword = this.trustStorePassword;
+        String keyStore = this.keyStore;
+        String keyStorePassword = this.keyStorePassword;
+
+        if (keyStore == null) {
+            keyStore = trustStore;
+            keyStorePassword = trustStorePassword;
+        }
+
+        if (trustStore == null) {
+            trustStore = keyStore;
+            trustStorePassword  = keyStorePassword;
+        }
+
+        return getSslContext(trustStore, trustStorePassword, keyStore, keyStorePassword);
+    }
+
+    public SSLContext getSslContext(String trustStorePath, String trustStorePassword, String keyStorePath, String keyStorePassword)
             throws GeneralSecurityException, IOException {
         KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-        char[] trustStorePasswordArray = this.trustStorePassword != null ? this.trustStorePassword.toCharArray() : null;
-        try (InputStream in = new FileInputStream(this.trustStore)) {
+        char[] trustStorePasswordArray = trustStorePassword != null ? trustStorePassword.toCharArray() : null;
+        try (InputStream in = new FileInputStream(trustStorePath)) {
             trustStore.load(in, trustStorePasswordArray);
         } catch (NullPointerException e) {
             trustStore.load(null, null);
@@ -188,8 +245,8 @@ public class CassandraClientURI {
 
         KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
 
-        try (InputStream in = new FileInputStream(this.keyStore)) {
-            keyStore.load(in, this.keyStorePassword != null ? this.trustStorePassword.toCharArray() : null);
+        try (InputStream in = new FileInputStream(keyStorePath)) {
+            keyStore.load(in, keyStorePassword != null ? keyStorePassword.toCharArray() : null);
         } catch (NullPointerException e) {
             keyStore.load(null, null);
         }
@@ -204,7 +261,6 @@ public class CassandraClientURI {
                 new SecureRandom());
         return sslContext;
     }
-
 
     // ---------------------------------
 
@@ -292,5 +348,9 @@ public class CassandraClientURI {
     @Override
     public String toString() {
         return uri;
+    }
+
+    public String getConfigFile() {
+        return configFile;
     }
 }
