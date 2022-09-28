@@ -47,6 +47,7 @@ public class CassandraClientURI {
     private final String keyStore;
     private final String keyStorePassword;
     private final String awsSecretName;
+    private final String awsSecretKey;
     private final String awsRegion;
     private final String configFile;
 
@@ -82,8 +83,9 @@ public class CassandraClientURI {
 
         this.awsRegion = getOption(info, options, "awsregion");
         this.awsSecretName = getOption(info, options, "awssecretname");
-        if (awsRegion != null && awsSecretName != null) {
-            this.password = AWSUtil.getSecretValue(this.awsRegion, this.awsSecretName);
+        this.awsSecretKey = getOption(info, options, "awssecretkey");
+        if (awsRegion != null && awsSecretName != null && awsSecretKey != null) {
+            this.password = AWSUtil.getSecretValue(this.awsRegion, this.awsSecretName, this.awsSecretKey);
         } else {
             this.password = getOption(info, options, "password");
         }
@@ -209,11 +211,30 @@ public class CassandraClientURI {
         return optionsMap;
     }
 
-    public SSLContext getSslContext()
+    public SSLContext getSslContext() throws GeneralSecurityException, IOException {
+        String trustStore = this.trustStore;
+        String trustStorePassword = this.trustStorePassword;
+        String keyStore = this.keyStore;
+        String keyStorePassword = this.keyStorePassword;
+
+        if (keyStore == null) {
+            keyStore = trustStore;
+            keyStorePassword = trustStorePassword;
+        }
+
+        if (trustStore == null) {
+            trustStore = keyStore;
+            trustStorePassword  = keyStorePassword;
+        }
+
+        return getSslContext(trustStore, trustStorePassword, keyStore, keyStorePassword);
+    }
+
+    public SSLContext getSslContext(String trustStorePath, String trustStorePassword, String keyStorePath, String keyStorePassword)
             throws GeneralSecurityException, IOException {
         KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-        char[] trustStorePasswordArray = this.trustStorePassword != null ? this.trustStorePassword.toCharArray() : null;
-        try (InputStream in = new FileInputStream(this.trustStore)) {
+        char[] trustStorePasswordArray = trustStorePassword != null ? trustStorePassword.toCharArray() : null;
+        try (InputStream in = new FileInputStream(trustStorePath)) {
             trustStore.load(in, trustStorePasswordArray);
         } catch (NullPointerException e) {
             trustStore.load(null, null);
@@ -224,8 +245,8 @@ public class CassandraClientURI {
 
         KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
 
-        try (InputStream in = new FileInputStream(this.keyStore)) {
-            keyStore.load(in, this.keyStorePassword != null ? this.trustStorePassword.toCharArray() : null);
+        try (InputStream in = new FileInputStream(keyStorePath)) {
+            keyStore.load(in, keyStorePassword != null ? keyStorePassword.toCharArray() : null);
         } catch (NullPointerException e) {
             keyStore.load(null, null);
         }

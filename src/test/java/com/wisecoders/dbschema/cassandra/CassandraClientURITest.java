@@ -98,13 +98,14 @@ public class CassandraClientURITest {
 
         String region = "sa-east-1";
         String secretName = "a_secret_name";
+        String secretKey = "a_secret_key";
 
         try (MockedStatic<AWSUtil> utilities = Mockito.mockStatic(AWSUtil.class)) {
-            utilities.when(() -> AWSUtil.getSecretValue(region, secretName)).thenThrow(sme);
+            utilities.when(() -> AWSUtil.getSecretValue(region, secretName, secretKey)).thenThrow(sme);
 
             try {
                 CassandraClientURI uri = new CassandraClientURI(
-                        "jdbc:cassandra://localhost:9042/?name=cassandra&password=cassandra&awsregion=sa-east-1&awssecretname=a_secret_name&anyFieldEndingWithPassword=another_pass",
+                        "jdbc:cassandra://localhost:9042/?name=cassandra&password=cassandra&awsregion=sa-east-1&awssecretname=a_secret_name&awssecretkey=a_secret_key&anyFieldEndingWithPassword=another_pass",
                         new Properties());
             } catch (Exception e) {
                 assertTrue(e instanceof SecretsManagerException);

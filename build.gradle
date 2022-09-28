@@ -15,8 +15,9 @@ repositories {
 }
 
 dependencies {
-    implementation "com.datastax.oss:java-driver-core:4.14.1"
-    implementation "software.amazon.awssdk:secretsmanager:2.17.280"
+    implementation 'com.datastax.oss:java-driver-core:4.14.1'
+    implementation 'software.amazon.awssdk:secretsmanager:2.17.280'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.4'
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.mockito:mockito-inline:4.8.0'
 }
