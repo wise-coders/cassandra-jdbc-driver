@@ -71,6 +71,8 @@ You can to retrieve your password from AWS Secrets by passing these parameters:
 
 * `awssecretname`: The name of the secret were is your password stored in.
 
+* `awssecretkey`: The key of the secret used to get a password from your secret.
+
 To authenticate in AWS, the driver uses the DefaultCredentialsProviderChain. To know
 more about it, refer to [AWS DefaultCredentialsProvider documentation](https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html).
 
