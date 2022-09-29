@@ -25,11 +25,13 @@ https://github.com/wise-coders/cassandra-jdbc-driver
 ## How to Configure the JDBC Driver
 
 * Java Driver Class: CassandraJdbcDriver
-* JDBC URL: jdbc:cassandra://host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[keyspace][?options]]
+* JDBC URL: jdbc:cassandra://host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[keyspace];dataCenter[&options]]
 * Website: [DbSchema](https://dbschema.com/cassandra-designer-tool.html)
 
 Make sure your password don't have any ampersand character (<code>&</code>), since it is part of the parameters' delimiter.
 If it is not possible, set your password by using a Properties object.
+
+Find the DataCenter using 'nodetool status' or 'nodetool -h ::FFFF:127.0.0.1 status'.
 
 The driver we wrote on top of the native [Cassandra Java Driver](https://github.com/datastax/java-driver)
 
