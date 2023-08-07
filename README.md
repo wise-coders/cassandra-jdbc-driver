@@ -86,6 +86,11 @@ You can connect to AWS Keyspaces by using this JDBC URI example:
 
 Click here to know more about [AWS Keyspaces Service Endpoints](javax.net.ssl.trustStore=/path/to/client.truststore&javax.net.ssl.trustStorePassword=password123).
 
+## Connect using Kerberos
+
+add the parameter __kerberos=true__ to the JDBC URL.
+This will add the (Kerberos Authentication Driver)[https://github.com/instaclustr/cassandra-java-driver-kerberos].
+
 ## How to Test the Driver
 
 The driver can be tested by simply by [downloading DbSchema](https://dbschema.com). 

@@ -14,6 +14,11 @@ import java.util.Map;
 public class ArrayImpl implements Array {
     private Object[] array;
 
+
+    /**
+     * Public constructor
+     * @param array input
+     */
     public ArrayImpl(Object[] array) {
         this.array = array;
     }

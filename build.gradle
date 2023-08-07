@@ -1,32 +1,49 @@
-
 buildscript {
     repositories {
         mavenCentral()
-        maven { url "https://plugins.gradle.org/m2/" }
-        jcenter()
     }
 }
-apply plugin: 'java'
+
+plugins{
+    id 'java-library'
+    id 'maven-publish'
+    id 'signing'
+}
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
 apply plugin: 'application'
 apply plugin: 'distribution'
+
 
 repositories {
     mavenCentral() 
 }
 
 dependencies {
-    implementation 'com.datastax.oss:java-driver-core:4.15.0'
-    implementation 'software.amazon.awssdk:secretsmanager:2.17.280'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.4'
-    testImplementation 'junit:junit:4.12'
-    testImplementation 'org.mockito:mockito-inline:4.8.0'
+    implementation 'com.datastax.oss:java-driver-core:4.17.0'
+    implementation 'software.amazon.awssdk:secretsmanager:2.20.120'
+    implementation 'com.instaclustr:cassandra-driver-kerberos:3.0.0'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.mockito:mockito-inline:5.2.0'
+}
+
+compileJava{
+    sourceCompatibility = '11'
+    targetCompatibility = '11'
+    doFirst {
+        options.compilerArgs = [
+                '--module-path', classpath.asPath,
+        ]
+    }
 }
 
 jar {
-    archiveName ="cassandrajdbc${version}.jar"
+    archiveFileName ="cassandrajdbc${driverVersion}.jar"
     manifest {
         attributes 'Main-Class': 'com.wisecoders.dbschema.cassandra.JdbcDriver'
-        attributes 'Specification-Version': "$version"
+        attributes 'Class-Path': configurations.runtimeClasspath.files.collect { it.getName() }.join(' ')
+        attributes 'Specification-Version': "$driverVersion"
         attributes 'Specification-Vendor': "Wise Coders"
         attributes 'Implementation-Vendor-Id': "dbschema.com"
         attributes 'Implementation-Vendor': "Wise Coders"
@@ -36,16 +53,92 @@ jar {
 
 
 task zip(type: Zip, dependsOn:['clean','jar']) {
-    archiveName 'CassandraJdbcDriver.zip'
+    archiveFileName.set 'CassandraJdbcDriver.zip'
     from configurations.runtimeClasspath.allArtifacts.files
     from configurations.runtimeClasspath
+    from "build/libs" include "*.jar"
 }
 
 task copyInUserHome(type: Copy,dependsOn:['clean','jar']) {
     from configurations.runtimeClasspath.allArtifacts.files
     from configurations.runtimeClasspath
+    from "build/libs" include "*.jar"
     into "${System.getProperty('user.home')}/.DbSchema/drivers/Cassandra/"
 }
 
+
+
+group = "com.wisecoders"
+archivesBaseName = "cassandra-jdbc-drvier"
+version = "2.3.1"
+
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+javadoc {
+    options.addBooleanOption('html5', true)
+}
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = 'cassandra-jdbc-driver'
+            from components.java
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionOf('runtimeClasspath')
+                }
+                usage('java-runtime') {
+                    fromResolutionResult()
+                }
+            }
+            pom {
+                name = 'Cassandra-JDBC-Driver'
+                description = 'Cassandra JDBC Driver'
+                url = 'https://dbschema.com/jdbc-driver/Cassandra.html'
+                properties = [
+                        myProp: "value",
+                        "prop.with.dots": "anotherValue"
+                ]
+                licenses {
+                    license {
+                        name = 'GPL-3Plus dual license. Contributions only to https://github.com/wise-coders/dbf-jdbc-driver'
+                        url = 'https://github.com/wise-coders/dbf-jdbc-driver'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'wisecoders'
+                        name = 'Wise Coders GmbH'
+                        email = 'support@wisecoders.com'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/wise-coders/cassandra-jdbc-driver'
+                    developerConnection = 'scm:git:ssh://github.com/wise-coders/cassandra-jdbc-driver'
+                    url = 'https://github.com/wise-coders/cassandra-jdbc-driver'
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = "OSSRH"
+            url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+            credentials {
+                username = project.properties["sonatypeUsername"]
+                password = project.properties["sonatypePassword"]
+            }
+        }
+    }
+}
+signing {
+    sign publishing.publications.mavenJava
+}
 
 

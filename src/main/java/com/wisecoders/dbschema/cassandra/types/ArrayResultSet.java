@@ -31,6 +31,9 @@ public class ArrayResultSet implements ResultSet
 
 	private CassandraPreparedStatement statement = null;
 
+	/**
+	 * Public Constructor
+	 */
 	public ArrayResultSet()	{}
 
 	public ArrayResultSet(String... columnNames)	{
@@ -53,14 +56,26 @@ public class ArrayResultSet implements ResultSet
 		this.columnNames = columnNames;
 	}
 
+	/**
+	 * Set the Result Set column names.
+	 * @param columnNames
+	 */
 	public void setColumnNames(String[] columnNames) {
 		this.columnNames = Arrays.copyOf(columnNames, columnNames.length);
 	}
 
+	/**
+	 * Set the table used by this Result Set.
+	 * @param tableName
+	 */
 	public void setTableName(String tableName) {
 		this.tableName = tableName;
 	}
 
+	/**
+	 * Set the current statement used to generate this result set.
+	 * @param statement used
+	 */
 	public void setStatement(CassandraPreparedStatement statement) {
 		this.statement = statement;
 	}
@@ -91,6 +106,10 @@ public class ArrayResultSet implements ResultSet
 		}
 	}
 
+	/**
+	 * Add row to result set.
+	 * @param columnValues
+	 */
 	public void addRow(Object[] columnValues)
 	{
 		if (data == null) {
@@ -108,6 +127,9 @@ public class ArrayResultSet implements ResultSet
 		}
 	}
 
+	/**
+	 * @return number of rows
+	 */
 	public int getRowCount() {
 		if (data == null) {
 			return 0;

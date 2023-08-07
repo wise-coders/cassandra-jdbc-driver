@@ -7,6 +7,9 @@ import java.net.URL;
 import java.sql.*;
 import java.util.Calendar;
 
+/**
+ * An empty Prepared Statement.
+ */
 public class BlindPreparedStatement implements PreparedStatement {
 
     private final ResultSet resultSet;

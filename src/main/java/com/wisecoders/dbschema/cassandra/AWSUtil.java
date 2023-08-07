@@ -12,6 +12,13 @@ import java.util.Map;
 
 public class AWSUtil {
 
+    /**
+     * Get the Secret Value
+     * @param regionName
+     * @param secretName
+     * @param secretKey
+     * @return
+     */
     public static String getSecretValue(String regionName, String secretName, String secretKey) {
         Region region = Region.of(regionName);
         SecretsManagerClient secretsClient = SecretsManagerClient.builder()
