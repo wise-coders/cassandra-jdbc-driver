@@ -95,7 +95,7 @@ public class CassandraClientURI {
         String sslEnabledOption = getOption(info, options, "sslenabled");
         this.sslEnabled = Boolean.parseBoolean(sslEnabledOption);
         String useKerberosOption = getOption(info, options, "kerberos");
-        this.useKerberos = Boolean.parseBoolean(sslEnabledOption);
+        this.useKerberos = Boolean.parseBoolean(useKerberosOption);
 
         String trustStore = getOption(info, options, "javax.net.ssl.truststore");
         String trustStorePassword = getOption(info, options, "javax.net.ssl.truststorepassword");
