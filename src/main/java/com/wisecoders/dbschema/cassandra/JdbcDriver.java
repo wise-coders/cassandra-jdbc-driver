@@ -20,9 +20,8 @@ import static com.wisecoders.dbschema.cassandra.CassandraClientURI.PREFIX;
  * jdbc:cassandra://host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[keyspace][?options]]
  * The URL excepting the jdbc: prefix is passed as it is to the Cassandra native Java driver.
  *
- * Copyright Wise Coders GmbH. The Cassandra JDBC driver is build to be used with <a href="https://dbschema.com">DbSchema Database Designer</a>
- * Free to use by everyone, code modifications allowed only to
- * the  <a href="https://github.com/wise-coders/cassandra-jdbc-driver">public repository</a>
+ * Licensed under <a href="https://creativecommons.org/licenses/by-nd/4.0/">CC BY-ND 4.0 DEED</a>, copyright <a href="https://wisecoders.com">Wise Coders GmbH</a>, used by <a href="https://dbschema.com">DbSchema Database Designer</a>.
+ * Code modifications allowed only as pull requests to the <a href="https://github.com/wise-coders/cassandra-jdbc-driver">public GIT repository</a>.
  */
 
 

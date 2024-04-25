@@ -21,9 +21,9 @@ repositories {
 
 dependencies {
     implementation 'com.datastax.oss:java-driver-core:4.17.0'
-    implementation 'software.amazon.awssdk:secretsmanager:2.20.120'
+    implementation 'software.amazon.awssdk:secretsmanager:2.22.9'
     implementation 'com.instaclustr:cassandra-driver-kerberos:3.0.0'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.1'
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.mockito:mockito-inline:5.2.0'
 }

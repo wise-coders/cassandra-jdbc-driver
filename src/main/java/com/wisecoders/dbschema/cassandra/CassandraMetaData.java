@@ -11,13 +11,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static com.wisecoders.dbschema.cassandra.JdbcDriver.LOGGER;
 /**
- * Cassandra databases are equivalent to catalogs for this driver. Schemas aren't used. Cassandra collections are
- * equivalent to tables, in that each collection is a table.
+ * A Cassandra database is used as a catalogs by this driver. Schemas aren't used. A Cassandra collection is equivalent to a tables, in that each collection is a table.
  *
- * Copyright Wise Coders GmbH. The Cassandra JDBC driver is build to be used with DbSchema Database Designer https://dbschema.com
- * Free to use by everyone, code modifications allowed only to
- * the public repository https://github.com/wise-coders/cassandra-jdbc-driver
+ * Licensed under <a href="https://creativecommons.org/licenses/by-nd/4.0/">CC BY-ND 4.0 DEED</a>, copyright <a href="https://wisecoders.com">Wise Coders GmbH</a>, used by <a href="https://dbschema.com">DbSchema Database Designer</a>.
+ * Code modifications allowed only as pull requests to the <a href="https://github.com/wise-coders/cassandra-jdbc-driver">public GIT repository</a>.
  */
 
 public class CassandraMetaData implements DatabaseMetaData {
@@ -41,11 +40,21 @@ public class CassandraMetaData implements DatabaseMetaData {
     @Override
     public ResultSet getCatalogs()
     {
-        ArrayResultSet retVal = new ArrayResultSet();
+        final List<String> loadedKeyspaces = new ArrayList<>();
+        final ArrayResultSet retVal = new ArrayResultSet();
         retVal.setColumnNames(new String[]{"TABLE_CAT"});
         for ( CqlIdentifier identifier : connection.getSession().getMetadata().getKeyspaces().keySet() ){
             retVal.addRow(new String[] { identifier.toString() });
+            loadedKeyspaces.add( identifier.toString());
         }
+        try ( ResultSet rs = connection.prepareStatement("SELECT keyspace_name FROM system_schema.keyspaces").executeQuery() ){
+            while( rs.next() ) {
+                if ( !loadedKeyspaces.contains( rs.getString(1 ))) {
+                    retVal.addRow(new String[]{rs.getString(1)});
+                    loadedKeyspaces.add( rs.getString(1 ));
+                }
+            }
+        } catch ( SQLException ex ){ LOGGER.warning( "Error loading keyspaces using query 'SELECT keyspace_name FROM system_schema.keyspaces': " + ex );}
         return retVal;
     }
 
@@ -218,7 +227,7 @@ public class CassandraMetaData implements DatabaseMetaData {
                             "" // "FILTER_CONDITION",
                     });
                 }
-        });
+            });
         });
         return result;
     }
