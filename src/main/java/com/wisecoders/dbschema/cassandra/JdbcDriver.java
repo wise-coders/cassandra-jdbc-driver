@@ -3,6 +3,7 @@ package com.wisecoders.dbschema.cassandra;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
@@ -32,6 +33,11 @@ public class JdbcDriver implements Driver {
 
     static {
         try {
+            final File logsFile = new File("~/.DbSchema/logs/");
+            if ( !logsFile.exists()) {
+                logsFile.mkdirs();
+            }
+
             DriverManager.registerDriver( new JdbcDriver());
             LOGGER.setLevel(Level.ALL);
             final ConsoleHandler consoleHandler = new ConsoleHandler();
